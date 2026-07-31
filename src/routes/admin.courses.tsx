@@ -16,6 +16,7 @@ import {
   Wand2,
   Link2,
   Info,
+  Upload,
 } from "lucide-react";
 import {
   loadActivities,
@@ -23,6 +24,7 @@ import {
 } from "@/lib/activities-store";
 import {
   ActivityModal,
+  BulkUploadModal,
   Field,
   ModalFooter,
   ModalShell,
@@ -59,6 +61,7 @@ function Page() {
   const [unitModal, setUnitModal] = useState<{ mode: "create" | "edit"; unit?: CourseUnit } | null>(null);
   const [actModalUnit, setActModalUnit] = useState<{ unitId: string; unitTitle: string } | null>(null);
   const [activityRev, setActivityRev] = useState(0);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     setCourses(loadCourses());
@@ -66,6 +69,10 @@ function Page() {
   }, []);
 
   const allActivities = useMemo(() => loadActivities(), [activityRev]);
+  const allUnits = useMemo(
+    () => courses.flatMap((c) => c.levels.flatMap((l) => l.units.map((u) => ({ id: u.id, title: u.title })))),
+    [courses],
+  );
 
   const product = productId ? courses.find((c) => c.product === productId) ?? null : null;
   const level = product && levelId ? product.levels.find((l) => l.id === levelId) ?? null : null;
@@ -230,6 +237,9 @@ function Page() {
           <GhostButton onClick={() => setUnitModal({ mode: "create" })}>
             <Plus className="h-3.5 w-3.5" /> Add unit
           </GhostButton>
+          <GhostButton onClick={() => setBulkOpen(true)}>
+            <Upload className="h-3.5 w-3.5" /> Bulk Upload
+          </GhostButton>
         </div>
       </div>
 
@@ -294,6 +304,13 @@ function Page() {
           unitId={actModalUnit.unitId}
           unitTitle={actModalUnit.unitTitle}
           onClose={() => { setActModalUnit(null); setActivityRev((r) => r + 1); }}
+        />
+      )}
+      {bulkOpen && (
+        <BulkUploadModal
+          allUnits={allUnits}
+          onClose={() => setBulkOpen(false)}
+          onImported={() => setActivityRev((r) => r + 1)}
         />
       )}
     </div>

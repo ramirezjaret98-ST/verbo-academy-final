@@ -1583,7 +1583,7 @@ export function ActivityRunner({
                   </span>
                   <div>
                     <div className="text-sm font-semibold">{feedback.ok ? "Correct!" : "Not quite"}</div>
-                    <div className="text-xs opacity-80">{feedback.ok ? "Nice work — moving on." : "Try again next round — your best score is kept."}</div>
+                    <div className="text-xs opacity-80">{feedback.ok ? "Nice work — moving on." : (current.feedback?.trim() || "Try again next round — your best score is kept.")}</div>
                   </div>
                 </div>
                 <button

@@ -5,7 +5,7 @@
 import { useMemo, useState } from "react";
 import {
   Plus, Trash2, X, Info, Headphones, GripVertical, Mic, AlignLeft,
-  Shuffle, BookOpen, ListChecks,
+  Shuffle, BookOpen, ListChecks, Upload,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GhostButton, PrimaryButton, Pill, AccentModal } from "./ui";
@@ -23,6 +23,9 @@ import {
   addActivity,
   removeActivity,
   phaseOf,
+  saveActivities,
+  loadActivities,
+  validateBulkActivities,
 } from "@/lib/activities-store";
 
 export const inputCls =
@@ -105,6 +108,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctIndex, setCorrectIndex] = useState(0);
+  const [feedback, setFeedback] = useState("");
   const [rev, setRev] = useState(0);
 
   const existing = useMemo(() => activitiesForUnit(unitId), [unitId, rev]);
@@ -118,7 +122,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
     setName(""); setParagraph(""); setAnswer("");
     setItems([{ text: "", key: "" }, { text: "", key: "" }]);
     setPrompt(""); setAudioName(""); setAudioDurationSec(undefined); setQuestion("");
-    setOptions(["", "", "", ""]); setCorrectIndex(0);
+    setOptions(["", "", "", ""]); setCorrectIndex(0); setFeedback("");
   };
 
   /** Reads the audio duration straight from the file — admins never type it. */
@@ -139,7 +143,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
   const save = () => {
     if (!name.trim()) { alert("Please give the activity a name."); return; }
     const finalCategory = (useCustomCategory ? customCategory.trim().toLowerCase() : category) || "vocabulary";
-    const base: Activity = { id: `act-${Date.now()}`, unit_id: unitId, name: name.trim(), type, category: finalCategory, session_phase: phase };
+    const base: Activity = { id: `act-${Date.now()}`, unit_id: unitId, name: name.trim(), type, category: finalCategory, session_phase: phase, feedback: feedback.trim() || undefined };
     let payload: Activity = base;
     if (type === "fill_gaps" || type === "read_complete") {
       if (!paragraph.trim() || !answer.trim()) { alert("Provide a paragraph and the correct answer."); return; }
@@ -299,6 +303,19 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
             </Field>
           )}
 
+          <Field
+            label="Feedback for incorrect answers (optional)"
+            hint="Explain WHY the answer is wrong — shown to the student instead of the generic message."
+          >
+            <textarea
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              className={textareaCls}
+              placeholder={`e.g. "Good evening" is used to greet someone, while "Good night" is used to say goodbye.`}
+            />
+          </Field>
+
+
           <div className="flex items-center justify-end gap-3 pt-2">
             <GhostButton onClick={onClose}>Done</GhostButton>
             <PrimaryButton onClick={save}><Plus className="h-3.5 w-3.5" /> Save {phase === "post" ? "Post-Session" : "Pre-Session"} Activity</PrimaryButton>
@@ -351,5 +368,108 @@ function PhaseGroup({ label, list, onRemove, showTag }: {
         </ul>
       )}
     </div>
+  );
+}
+export function BulkUploadModal({ allUnits, onClose, onImported }: {
+  allUnits: { id: string; title: string }[];
+  onClose: () => void;
+  onImported: () => void;
+}) {
+  const [fileName, setFileName] = useState("");
+  const [parsed, setParsed] = useState<Activity[]>([]);
+  const [errors, setErrors] = useState<string[]>([]);
+  const [imported, setImported] = useState(false);
+
+  const handleFile = (file?: File) => {
+    if (!file) return;
+    setFileName(file.name);
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(String(reader.result));
+        if (!Array.isArray(data)) throw new Error("not an array");
+        const { valid, errs } = validateBulkActivities(data);
+        setParsed(valid);
+        setErrors(errs);
+      } catch {
+        setParsed([]);
+        setErrors(["El archivo no es JSON válido, debe ser un arreglo de actividades."]);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const grouped = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const a of parsed) m.set(a.unit_id, (m.get(a.unit_id) ?? 0) + 1);
+    return [...m.entries()];
+  }, [parsed]);
+
+  const doImport = () => {
+    saveActivities([...loadActivities(), ...parsed]);
+    setImported(true);
+    onImported();
+  };
+
+  return (
+    <ModalShell
+      title="Bulk Upload Activities"
+      subtitle="Upload a .json file with an array of activities — they can belong to one or several units at once."
+      onClose={onClose}
+      width="max-w-2xl"
+    >
+      {imported ? (
+        <div className="p-6">
+          <div className="rounded-lg border border-dashed border-emerald-500/60 bg-emerald-500/10 p-6 text-center text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+            {parsed.length} activities imported successfully.
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4 p-6">
+          <Field label="Activities file (.json)">
+            <label className="flex h-24 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-secondary/40 text-sm text-muted-foreground transition-colors hover:bg-secondary">
+              <Upload className="h-4 w-4" />
+              {fileName || "Click to upload a .json file"}
+              <input
+                type="file"
+                accept="application/json,.json"
+                className="sr-only"
+                onChange={(e) => handleFile(e.target.files?.[0])}
+              />
+            </label>
+          </Field>
+
+          {errors.length > 0 && (
+            <div className="space-y-1 rounded-lg border border-dashed border-destructive/60 bg-destructive/5 p-3 text-[11px] leading-relaxed text-destructive">
+              <div className="font-semibold">{errors.length} item(s) with errors — they will not be imported.</div>
+              {errors.slice(0, 20).map((e, i) => <div key={i}>{e}</div>)}
+            </div>
+          )}
+
+          {parsed.length > 0 && (
+            <div className="space-y-2 rounded-lg border border-border bg-secondary/30 p-3">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Ready to import</div>
+              {grouped.map(([unitId, count]) => (
+                <div key={unitId} className="flex items-center justify-between gap-2 rounded-lg bg-background px-3 py-2">
+                  <span className="truncate text-xs font-medium text-foreground">
+                    {allUnits.find((u) => u.id === unitId)?.title ?? unitId}
+                  </span>
+                  <Pill tone="default">{count}</Pill>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <ModalFooter>
+        <GhostButton onClick={onClose}>{imported ? "Close" : "Cancel"}</GhostButton>
+        {!imported && (
+          <PrimaryButton accentColor="#5fca16" onClick={doImport} disabled={parsed.length === 0}>
+            Import {parsed.length} Activities
+          </PrimaryButton>
+        )}
+      </ModalFooter>
+    </ModalShell>
   );
 }
