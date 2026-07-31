@@ -43,7 +43,7 @@ const RED = "#dc2626";
 const GOLD = "#d97706";
 const TEAL = "#3ebbad";
 const ORCHID = "#a34ac0";
-const NAVY = "#01304a";
+const NAVY_DEEP = "#01304a";
 const EIGHT_H = 8 * 60 * 60 * 1000;
 
 /** Same time-intensity ladder Session Report uses on the Teacher Dashboard. */
