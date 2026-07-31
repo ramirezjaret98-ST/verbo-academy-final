@@ -414,7 +414,7 @@ function ConnectButton({
 }: { enabled: boolean; onClick: () => void; className?: string }) {
   if (enabled) {
     return (
-      <PrimaryButton className={`verbo-btn-glow ${className ?? ""}`} onClick={onClick}>
+      <PrimaryButton className={`verbo-btn-glow ${className ?? ""}`} accentColor="#5fca16" onClick={onClick}>
         <Video className="h-4 w-4" /> Connect
       </PrimaryButton>
     );
@@ -637,10 +637,9 @@ function EventDetailsModal({
                   <button
                     type="button"
                     onClick={() => session && onCantAttend(session)}
-                    className="group inline-flex h-8 shrink-0 items-center gap-1.5 self-center overflow-hidden whitespace-nowrap rounded-full border border-destructive/40 bg-destructive/10 px-2 text-xs font-medium text-destructive transition-all duration-200 hover:border-destructive hover:bg-destructive hover:px-3 hover:text-destructive-foreground"
+                    className="inline-flex flex-1 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground shadow-sm transition-opacity hover:opacity-90 active:scale-[0.97]"
                   >
-                    <X className="h-3.5 w-3.5 shrink-0" />
-                    <span className="max-w-0 overflow-hidden transition-all duration-200 group-hover:max-w-[60px]">Cancel</span>
+                    <X className="h-4 w-4" /> Cancel
                   </button>
                 </div>
               </>
