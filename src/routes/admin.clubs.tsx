@@ -218,7 +218,20 @@ function ListView({ clubs, onEdit, onDelete }: { clubs: Club[]; onEdit: (c: Club
                     {assignment === "assigned" ? "Assigned" : "Created"}
                   </span>
                 </td>
-                <td className="px-6 py-4"><Pill tone={STATUS_TONE[c.status]}>{c.status}</Pill></td>
+                <td className="px-6 py-4">
+                  <Pill
+                    tone={STATUS_TONE[c.status]}
+                    style={
+                      c.status === "live"
+                        ? { background: "#5fca16", color: "#fff" }
+                        : c.status === "cancelled"
+                          ? { background: "#ef4444", color: "#fff" }
+                          : undefined
+                    }
+                  >
+                    {c.status}
+                  </Pill>
+                </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-end gap-1">
                     <button onClick={() => onEdit(c)} aria-label="Edit" className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
