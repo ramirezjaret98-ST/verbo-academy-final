@@ -834,13 +834,13 @@ function StudentFormModal({
                       key={opt.id}
                       type="button"
                       onClick={() => pickProductType(opt.id)}
-                      className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition-all ${active ? "border-accent bg-accent/10" : "border-border bg-background hover:border-accent/40"}`}
+                      className={`flex flex-col items-center gap-2 rounded-2xl border-2 px-3 py-2.5 text-center transition-all ${active ? "border-[#01304a] bg-[#01304a]" : "border-border bg-background hover:border-[#01304a]/40 hover:bg-secondary/40"}`}
                     >
-                      <span className={`flex h-12 w-12 items-center justify-center rounded-full ${active ? "bg-accent text-accent-foreground" : "bg-secondary text-muted-foreground"}`}>
-                        <Icon className="h-5 w-5" />
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-full ${active ? "bg-white/15 text-white" : "bg-secondary text-muted-foreground"}`}>
+                        <Icon className="h-4 w-4" />
                       </span>
-                      <span className={`text-sm font-semibold ${active ? "text-accent" : "text-foreground"}`}>{opt.name}</span>
-                      <span className="text-[10.5px] leading-tight text-muted-foreground">{opt.blurb}</span>
+                      <span className={`text-sm font-semibold ${active ? "text-white" : "text-foreground"}`}>{opt.name}</span>
+                      <span className={`text-[10.5px] leading-tight ${active ? "text-white/80" : "text-muted-foreground"}`}>{opt.blurb}</span>
                     </button>
                   );
                 })}
@@ -882,13 +882,13 @@ function StudentFormModal({
                           key={p.id}
                           type="button"
                           onClick={() => pickProduct(p.id)}
-                          className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition-all ${active ? "border-accent bg-accent/10" : "border-border bg-background hover:border-accent/40"}`}
+                          className={`flex flex-col items-center gap-2 rounded-2xl border-2 px-3 py-2.5 text-center transition-all ${active ? "border-[#01304a] bg-[#01304a]" : "border-border bg-background hover:border-[#01304a]/40 hover:bg-secondary/40"}`}
                         >
-                          <span className={`flex h-12 w-12 items-center justify-center rounded-full ${active ? "bg-accent text-accent-foreground" : "bg-secondary text-muted-foreground"}`}>
-                            <Icon className="h-5 w-5" />
+                          <span className={`flex h-8 w-8 items-center justify-center rounded-full ${active ? "bg-white/15 text-white" : "bg-secondary text-muted-foreground"}`}>
+                            <Icon className="h-4 w-4" />
                           </span>
-                          <span className={`text-sm font-semibold ${active ? "text-accent" : "text-foreground"}`}>{p.name}</span>
-                          <span className="text-[10.5px] leading-tight text-muted-foreground">{p.blurb}</span>
+                          <span className={`text-sm font-semibold ${active ? "text-white" : "text-foreground"}`}>{p.name}</span>
+                          <span className={`text-[10.5px] leading-tight ${active ? "text-white/80" : "text-muted-foreground"}`}>{p.blurb}</span>
                         </button>
                       );
                     })}
@@ -913,7 +913,7 @@ function StudentFormModal({
                             key={focus.id}
                             type="button"
                             onClick={() => pickFocus(focus.name)}
-                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-accent bg-accent/10 text-accent" : "border-border bg-background text-foreground hover:border-accent/40"}`}
+                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-[#01304a] bg-[#01304a] text-white" : "border-border bg-background text-foreground hover:border-[#01304a]/40"}`}
                           >
                             {focus.name}
                           </button>
@@ -933,9 +933,9 @@ function StudentFormModal({
                             key={lvl}
                             type="button"
                             onClick={() => toggleLevel(lvl)}
-                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-foreground hover:border-primary/40"}`}
+                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-[#01304a] bg-[#01304a] text-white" : "border-border bg-background text-foreground hover:border-[#01304a]/40"}`}
                           >
-                            {active && <Check className="mr-1 inline h-3.5 w-3.5" />}{lvl}
+                            {active && <Check className="mr-1 inline h-3.5 w-3.5 text-white" />}{lvl}
                           </button>
                         );
                       })}
@@ -954,7 +954,7 @@ function StudentFormModal({
                             key={id}
                             type="button"
                             onClick={() => pickAccessPlan(id)}
-                            className={`rounded-lg border-2 px-3 py-2.5 text-sm font-semibold transition-all ${active ? "border-accent bg-accent/10 text-accent" : "border-border bg-background text-foreground hover:border-accent/40"}`}
+                            className={`rounded-lg border-2 px-3 py-2.5 text-sm font-semibold transition-all ${active ? "border-[#01304a] bg-[#01304a] text-white" : "border-border bg-background text-foreground hover:border-[#01304a]/40"}`}
                           >
                             {id}
                           </button>
@@ -1060,8 +1060,8 @@ function StudentFormModal({
                   <Layers className="h-3.5 w-3.5" /> Workshops
                 </label>
                 <div className="inline-flex rounded-lg border border-border bg-secondary/40 p-1">
-                  <button type="button" onClick={() => set("addon_workshops_enabled", true)} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${f.addon_workshops_enabled ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>Yes</button>
-                  <button type="button" onClick={() => { set("addon_workshops_enabled", false); set("selected_cohort_ids", []); }} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${!f.addon_workshops_enabled ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>No</button>
+                  <button type="button" onClick={() => set("addon_workshops_enabled", true)} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${f.addon_workshops_enabled ? "bg-[#01304a] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>Yes</button>
+                  <button type="button" onClick={() => { set("addon_workshops_enabled", false); set("selected_cohort_ids", []); }} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${!f.addon_workshops_enabled ? "bg-[#01304a] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>No</button>
                 </div>
                 {f.addon_workshops_enabled && (
                   <div className="mt-3">
