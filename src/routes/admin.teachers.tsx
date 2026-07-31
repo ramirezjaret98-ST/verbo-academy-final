@@ -31,6 +31,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { getAdminType } from "@/lib/admin-roles";
+import { KpiOverrideModal } from "@/components/verbo/KpiOverrideModal";
+import type { KpiMetric } from "@/lib/teacher-kpi-overrides-store";
 
 export const Route = createFileRoute("/admin/teachers")({
   component: Page,
