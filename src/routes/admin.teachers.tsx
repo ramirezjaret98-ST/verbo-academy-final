@@ -1098,7 +1098,7 @@ function FlaggedRow({
           </div>
           <div className="text-[11px] text-muted-foreground">{new Date(s.date_time).toLocaleDateString()}</div>
         </div>
-        <Tag className={tagCls}>{tagLabel}</Tag>
+        {tag}
       </div>
       {s.student_comment && <p className="mt-2 text-sm text-foreground">“{s.student_comment}”</p>}
       {resolved && s.review_note && (
