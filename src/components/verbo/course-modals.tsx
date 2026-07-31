@@ -42,9 +42,9 @@ export const DEFAULT_MODAL_ACCENT: ModalAccent = {
   eyebrow: "Course Builder",
 };
 
-export function ModalShell({ title, subtitle, onClose, children, width = "max-w-xl", accent }: {
+export function ModalShell({ title, subtitle, onClose, children, width = "max-w-xl", accent, zClass }: {
   title: string; subtitle?: string; onClose: () => void; children: React.ReactNode; width?: string;
-  accent?: ModalAccent;
+  accent?: ModalAccent; zClass?: string;
 }) {
   const a = accent ?? DEFAULT_MODAL_ACCENT;
   return (
@@ -62,6 +62,7 @@ export function ModalShell({ title, subtitle, onClose, children, width = "max-w-
       }
       watermark={{ type: "icon", icon: a.icon }}
       onClose={onClose}
+      zClass={zClass}
     >
       {children}
     </AccentModal>
@@ -93,6 +94,7 @@ const TYPE_OPTIONS: { value: ExerciseType; icon: React.ComponentType<{ className
 ];
 
 export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: string; unitTitle: string; onClose: () => void; accent?: ModalAccent }) {
+  const [bulkOpen, setBulkOpen] = useState(false);
   const [phase, setPhase] = useState<SessionPhase>("pre");
   const [name, setName] = useState("");
   const [type, setType] = useState<ExerciseType>("fill_gaps");
@@ -166,6 +168,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
 
 
   return (
+    <>
     <ModalShell title="Activities" subtitle={unitTitle} onClose={onClose} width="max-w-4xl" accent={accent}>
       <div className="grid gap-0 md:grid-cols-[1fr_320px]">
         <div className="space-y-5 border-b border-border p-6 md:border-b-0 md:border-r">
@@ -323,12 +326,27 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
         </div>
 
         <aside className="bg-secondary/30 p-6">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Activities in this unit</div>
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Activities in this unit</div>
+            <GhostButton onClick={() => setBulkOpen(true)}>
+              <Upload className="h-3.5 w-3.5" /> Bulk Upload
+            </GhostButton>
+          </div>
           <PhaseGroup label="Pre-Session" list={preList} onRemove={(id) => { removeActivity(id); setRev((r) => r + 1); }} />
           <PhaseGroup label="Post-Session" list={postList} onRemove={(id) => { removeActivity(id); setRev((r) => r + 1); }} showTag />
         </aside>
       </div>
     </ModalShell>
+    {bulkOpen && (
+      <BulkUploadModal
+        unitId={unitId}
+        unitTitle={unitTitle}
+        onClose={() => setBulkOpen(false)}
+        onImported={() => setRev((r) => r + 1)}
+        zClass="z-[60]"
+      />
+    )}
+    </>
   );
 }
 
@@ -370,10 +388,12 @@ function PhaseGroup({ label, list, onRemove, showTag }: {
     </div>
   );
 }
-export function BulkUploadModal({ allUnits, onClose, onImported }: {
-  allUnits: { id: string; title: string }[];
+export function BulkUploadModal({ unitId, unitTitle, onClose, onImported, zClass }: {
+  unitId: string;
+  unitTitle: string;
   onClose: () => void;
   onImported: () => void;
+  zClass?: string;
 }) {
   const [fileName, setFileName] = useState("");
   const [parsed, setParsed] = useState<Activity[]>([]);
@@ -388,7 +408,7 @@ export function BulkUploadModal({ allUnits, onClose, onImported }: {
       try {
         const data = JSON.parse(String(reader.result));
         if (!Array.isArray(data)) throw new Error("not an array");
-        const { valid, errs } = validateBulkActivities(data);
+        const { valid, errs } = validateBulkActivities(data, unitId);
         setParsed(valid);
         setErrors(errs);
       } catch {
@@ -401,7 +421,7 @@ export function BulkUploadModal({ allUnits, onClose, onImported }: {
 
   const grouped = useMemo(() => {
     const m = new Map<string, number>();
-    for (const a of parsed) m.set(a.unit_id, (m.get(a.unit_id) ?? 0) + 1);
+    for (const a of parsed) m.set(a.type, (m.get(a.type) ?? 0) + 1);
     return [...m.entries()];
   }, [parsed]);
 
@@ -414,9 +434,10 @@ export function BulkUploadModal({ allUnits, onClose, onImported }: {
   return (
     <ModalShell
       title="Bulk Upload Activities"
-      subtitle="Upload a .json file with an array of activities — they can belong to one or several units at once."
+      subtitle={`Upload a .json file with activities for "${unitTitle}" — one array of activity objects. No unit_id needed, it\u2019s added automatically.`}
       onClose={onClose}
       width="max-w-2xl"
+      zClass={zClass}
     >
       {imported ? (
         <div className="p-6">
@@ -449,10 +470,10 @@ export function BulkUploadModal({ allUnits, onClose, onImported }: {
           {parsed.length > 0 && (
             <div className="space-y-2 rounded-lg border border-border bg-secondary/30 p-3">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Ready to import</div>
-              {grouped.map(([unitId, count]) => (
-                <div key={unitId} className="flex items-center justify-between gap-2 rounded-lg bg-background px-3 py-2">
+              {grouped.map(([type, count]) => (
+                <div key={type} className="flex items-center justify-between gap-2 rounded-lg bg-background px-3 py-2">
                   <span className="truncate text-xs font-medium text-foreground">
-                    {allUnits.find((u) => u.id === unitId)?.title ?? unitId}
+                    {EXERCISE_LABELS[type as ExerciseType] ?? type}
                   </span>
                   <Pill tone="default">{count}</Pill>
                 </div>

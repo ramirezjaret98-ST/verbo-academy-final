@@ -87,7 +87,7 @@ const EXERCISE_TYPES: ExerciseType[] = [
  * NOTE: audioName / audioDurationSec are intentionally ignored — audio is
  * always attached manually in Admin after the import.
  */
-export function validateBulkActivities(raw: unknown[]): { valid: Activity[]; errs: string[] } {
+export function validateBulkActivities(raw: unknown[], unitId: string): { valid: Activity[]; errs: string[] } {
   const valid: Activity[] = [];
   const errs: string[] = [];
   const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
@@ -99,10 +99,8 @@ export function validateBulkActivities(raw: unknown[]): { valid: Activity[]; err
       return;
     }
     const o = item as Record<string, unknown>;
-    const unitId = str(o.unit_id);
     const name = str(o.name);
     const type = str(o.type) as ExerciseType;
-    if (!unitId) { errs.push(`${tag}: falta unit_id.`); return; }
     if (!name) { errs.push(`${tag}: falta name.`); return; }
     if (!type) { errs.push(`${tag}: falta type.`); return; }
     if (!EXERCISE_TYPES.includes(type)) { errs.push(`${tag}: type inválido "${type}".`); return; }
