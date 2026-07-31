@@ -552,7 +552,7 @@ function TeacherDetailModal({
                               <div className="truncate text-sm font-medium text-foreground">{s.name}</div>
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">{prod && <Tag className="bg-primary/10 text-primary">{prod.name}</Tag>}{(s.status ?? "active") === "suspended" && <Tag className="bg-muted text-muted-foreground">Suspended</Tag>}</div>
                             </div>
-                            <GhostBtn onClick={() => setReassignFor(reassignFor === s.id ? null : s.id)}><Users className="h-3.5 w-3.5" /> Reassign</GhostBtn>
+                            <button onClick={() => setReassignFor(reassignFor === s.id ? null : s.id)} className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0f766e] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90"><Users className="h-3.5 w-3.5" /> Reassign</button>
                           </div>
                           {reassignFor === s.id && (
                             <div className="mt-2 flex items-end gap-2 border-t border-border pt-2">
