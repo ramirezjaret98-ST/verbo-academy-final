@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Card, GhostButton, PrimaryButton, Pill } from "@/components/verbo/ui";
+import { Card, GhostButton, PrimaryButton, Pill, AccentModal, AccentModalFooter } from "@/components/verbo/ui";
 import { Plus, Trash2, X, Pencil, Link2, Lock, Zap, Package, Gift, Sparkles } from "lucide-react";
 import {
   type FlashChallenge,
@@ -70,20 +70,21 @@ function Page() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-border">
+      <div className="flex flex-wrap gap-2">
         {[
-          { id: "mystery_box" as SubTab, label: "Mystery Box" },
-          { id: "lightning" as SubTab, label: "Lightning" },
-          { id: "season" as SubTab, label: "Season" },
+          { id: "mystery_box" as SubTab, label: "Mystery Box", color: "#7e22ce" },
+          { id: "lightning" as SubTab, label: "Lightning", color: "#0284c7" },
+          { id: "season" as SubTab, label: "Season", color: "#01304a" },
         ].map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm transition-colors ${
+            className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
               tab === t.id
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "text-white"
+                : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
+            style={tab === t.id ? { background: t.color } : undefined}
           >
             {t.label}
           </button>
@@ -182,7 +183,7 @@ function MysteryBoxTab() {
                 placeholder="https://... (image or .gif)"
                 className={inputCls}
               />
-              <PrimaryButton onClick={saveBoxArt}>Save</PrimaryButton>
+              <PrimaryButton accentColor="#5fca16" onClick={saveBoxArt}>Save</PrimaryButton>
             </div>
           </div>
         </div>
@@ -214,9 +215,10 @@ function MysteryBoxTab() {
             onClick={() => setProduct(p)}
             className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
               product === p
-                ? "border-[#7e22ce] bg-[#7e22ce]/10 text-[#7e22ce]"
+                ? "border-[#7e22ce] text-white"
                 : "border-border bg-background text-muted-foreground hover:bg-secondary"
             }`}
+            style={product === p ? { background: "#7e22ce" } : undefined}
           >
             {FLASH_PRODUCT_LABEL[p]}
           </button>
@@ -242,7 +244,12 @@ function MysteryBoxTab() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((c) => (
-            <div key={c.id} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div
+              key={c.id}
+              className={`flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-md transition-shadow duration-200 hover:shadow-lg ${
+                c.premium ? "border-l-[3px] border-l-[#d97706]" : ""
+              }`}
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
                   {c.category ? (
@@ -253,9 +260,9 @@ function MysteryBoxTab() {
                     <Pill tone="muted">No category</Pill>
                   )}
                   {c.premium && (
-                    <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
+                    <Pill tone="warning" style={{ background: "#d97706", color: "#fff" }}>
                       Premium
-                    </span>
+                    </Pill>
                   )}
                 </div>
               </div>
@@ -426,31 +433,35 @@ function FlashModal({
     titleOverride ??
     `${isEdit ? "Edit" : "New"} ${format === "lightning" ? "Lightning" : "Mystery Box"} Challenge`;
 
+  const modalBackground =
+    format === "lightning"
+      ? "linear-gradient(135deg, #1e3a8a, #0284c7, #facc15)"
+      : headerBackground
+        ? headerBackground
+        : "linear-gradient(135deg, #4a044e, #7e22ce, #a855f7)";
+  const modalIcon = format === "lightning" ? Zap : format === "season" ? Sparkles : Gift;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-card shadow-elevated" onClick={(e) => e.stopPropagation()}>
-        <div
-          className={`flex items-start justify-between gap-4 p-6 text-white ${
-            headerBackground
-              ? ""
-              : format === "lightning"
-                ? "bg-gradient-to-br from-[#1e3a8a] via-[#0284c7] to-[#facc15]"
-                : "bg-gradient-to-br from-[#4a044e] via-[#7e22ce] to-[#a855f7]"
-          }`}
-          style={headerBackground ? { background: headerBackground } : undefined}
-        >
-          <div>
-            <div className="text-base font-semibold tracking-tight">{headerTitle}</div>
-            <div className="mt-0.5 text-xs text-white/70">{FLASH_PRODUCT_LABEL[product]}</div>
-            {editing?.synced_group_id && (
-              <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white/90">
-                🔗 Synced across products
-              </div>
-            )}
-          </div>
-          <button onClick={onClose} className="rounded-md p-1 text-white/80 hover:bg-white/10 hover:text-white"><X className="h-4 w-4" /></button>
-        </div>
+    <AccentModal
+      maxWidth="max-w-xl"
+      background={modalBackground}
+      iconTint="#ffffff"
+      icon={modalIcon}
+      eyebrow={FLASH_PRODUCT_LABEL[product]}
+      title={headerTitle}
+      watermark={
+        format === "season"
+          ? { type: "icon", icon: Sparkles }
+          : { type: "text", value: format === "lightning" ? "FLASH" : "BOX" }
+      }
+      onClose={onClose}
+    >
         <div className="space-y-4 p-6">
+          {editing?.synced_group_id && (
+            <div className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+              🔗 Synced across products
+            </div>
+          )}
           <Field label="Category">
             {creatingCat ? (
               <div className="flex items-center gap-2">
@@ -577,12 +588,11 @@ function FlashModal({
             </div>
           </Field>
         </div>
-        <div className="flex items-center justify-end gap-3 border-t border-border bg-secondary/30 p-4">
-          <GhostButton onClick={onClose}>Cancel</GhostButton>
-          <PrimaryButton disabled={!title.trim()} onClick={handleSave}>{isEdit ? "Save Changes" : "Create Challenge"}</PrimaryButton>
-        </div>
-      </div>
-    </div>
+      <AccentModalFooter accent="#5fca16">
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton accentColor="#5fca16" disabled={!title.trim()} onClick={handleSave}>{isEdit ? "Save Changes" : "Create Challenge"}</PrimaryButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }
 
