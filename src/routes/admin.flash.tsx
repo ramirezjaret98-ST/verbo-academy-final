@@ -244,7 +244,12 @@ function MysteryBoxTab() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((c) => (
-            <div key={c.id} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div
+              key={c.id}
+              className={`flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-md transition-shadow duration-200 hover:shadow-lg ${
+                c.premium ? "border-l-[3px] border-l-[#d97706]" : ""
+              }`}
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-1.5">
                   {c.category ? (
@@ -255,9 +260,9 @@ function MysteryBoxTab() {
                     <Pill tone="muted">No category</Pill>
                   )}
                   {c.premium && (
-                    <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
+                    <Pill tone="warning" style={{ background: "#d97706", color: "#fff" }}>
                       Premium
-                    </span>
+                    </Pill>
                   )}
                 </div>
               </div>
