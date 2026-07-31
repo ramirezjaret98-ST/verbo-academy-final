@@ -21,6 +21,7 @@ import {
   EVENT_KIND_META,
   eventPillDisplay,
   isClubFull,
+  isMissedClubEvent,
   type CalendarEvent,
   type CalendarEventKind,
 } from "@/lib/calendar-events";
