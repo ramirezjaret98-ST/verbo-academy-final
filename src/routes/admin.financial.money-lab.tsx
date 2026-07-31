@@ -1,7 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, CreditCard, ExternalLink } from "lucide-react";
-import { Card, SectionTitle, MetricCard, Pill } from "@/components/verbo/ui";
+import {
+  ChevronLeft, ChevronRight, CreditCard, ExternalLink,
+  Wallet, CircleDollarSign, Clock, TrendingUp, type LucideIcon,
+} from "lucide-react";
+import {
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+} from "recharts";
+import { Card, SectionTitle, HeroStatCard, Pill } from "@/components/verbo/ui";
 import { USERS, type User } from "@/lib/mock-data";
 import { hydrateStudents } from "@/lib/students-store";
 import {
