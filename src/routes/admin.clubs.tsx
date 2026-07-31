@@ -319,8 +319,9 @@ function CalendarView({ clubs, onEdit }: { clubs: Club[]; onEdit: (c: Club) => v
                           onClick={() => onEdit(c)}
                           title={`${c.title} · ${assigned ? "Assigned" : "Created"}`}
                           className={`flex w-full items-center gap-1 truncate rounded-md px-2 py-1 text-left text-[11px] font-medium transition-opacity hover:opacity-80 ${
-                            assigned ? "bg-success/15 text-success" : "bg-warning/20 text-foreground"
+                            assigned ? "" : "bg-warning text-warning-foreground"
                           }`}
+                          style={assigned ? { background: "#5fca16", color: "#fff" } : undefined}
                         >
                           {c.type === "insight" ? <Sparkles className="h-3 w-3 shrink-0" /> : <BookOpen className="h-3 w-3 shrink-0" />}
                           <span className="truncate">{c.title}</span>
