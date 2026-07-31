@@ -1304,6 +1304,40 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
+function KpiHeroStat({
+  label, value, icon: Icon, color, onAdjust,
+}: {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number }>;
+  color: string;
+  onAdjust?: () => void;
+}) {
+  return (
+    <HeroStatCard className="!min-h-[132px] !items-start border border-border bg-card" style={{ boxShadow: `0 0 24px -8px ${color}66` }}>
+      <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-xl">
+        <Icon className="h-7 w-7" style={{ color }} strokeWidth={1.75} />
+      </div>
+      <div className="relative w-full">
+        <div className="flex items-center gap-1.5">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
+          {onAdjust && (
+            <button
+              onClick={onAdjust}
+              title="Manual KPI override"
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        <div className="mt-2 text-4xl font-bold leading-none text-foreground">{value}</div>
+      </div>
+    </HeroStatCard>
+  );
+}
+
+
 function BigStat({ label, value, onAdjust }: { label: string; value: string; onAdjust?: () => void }) {
   return (
     <div className="relative rounded-xl border border-border bg-background p-4 text-center">
