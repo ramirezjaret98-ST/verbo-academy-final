@@ -1095,9 +1095,9 @@ function SeasonChallengesModal({ season, onClose }: { season: FlashSeason; onClo
                       <Pill tone="muted">No category</Pill>
                     )}
                     {c.premium && (
-                      <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
+                      <Pill tone="warning" style={{ background: "#d97706", color: "#fff" }}>
                         Premium
-                      </span>
+                      </Pill>
                     )}
                   </div>
                   <div>
