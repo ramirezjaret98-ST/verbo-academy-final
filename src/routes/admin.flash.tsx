@@ -70,20 +70,21 @@ function Page() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b border-border">
+      <div className="flex flex-wrap gap-2">
         {[
-          { id: "mystery_box" as SubTab, label: "Mystery Box" },
-          { id: "lightning" as SubTab, label: "Lightning" },
-          { id: "season" as SubTab, label: "Season" },
+          { id: "mystery_box" as SubTab, label: "Mystery Box", color: "#7e22ce" },
+          { id: "lightning" as SubTab, label: "Lightning", color: "#0284c7" },
+          { id: "season" as SubTab, label: "Season", color: "#01304a" },
         ].map((t) => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`-mb-px border-b-2 px-3 py-2 text-sm transition-colors ${
+            className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
               tab === t.id
-                ? "border-foreground text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+                ? "text-white"
+                : "bg-secondary text-muted-foreground hover:text-foreground"
             }`}
+            style={tab === t.id ? { background: t.color } : undefined}
           >
             {t.label}
           </button>
