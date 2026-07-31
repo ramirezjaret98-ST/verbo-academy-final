@@ -1379,10 +1379,13 @@ function StrikesSection({ teacherId }: { teacherId: string }) {
                   <div className="text-sm font-medium text-foreground">
                     {CANCEL_REASON_LABEL[s.reason]}
                     {s.needs_substitute && !s.substitute_found && (
-                      <span className="ml-2 rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">Needs Substitute</span>
+                      <span className="ml-2 rounded-full bg-warning/15 px-1.5 py-0.5 text-[10px] font-semibold text-foreground">Needs Substitute</span>
                     )}
                     {s.justified && s.justification_cause && (
-                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-success/15 px-1.5 py-0.5 text-[10px] font-semibold text-success">
+                      <span
+                        className="ml-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+                        style={{ backgroundColor: "rgba(95,202,22,0.15)", color: "#3f7d0a" }}
+                      >
                         <ShieldCheck className="h-3 w-3" /> {JUSTIFICATION_LABEL[s.justification_cause]}
                       </span>
                     )}
