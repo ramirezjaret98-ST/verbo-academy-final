@@ -61,6 +61,7 @@ function Page() {
   const [unitModal, setUnitModal] = useState<{ mode: "create" | "edit"; unit?: CourseUnit } | null>(null);
   const [actModalUnit, setActModalUnit] = useState<{ unitId: string; unitTitle: string } | null>(null);
   const [activityRev, setActivityRev] = useState(0);
+  const [bulkOpen, setBulkOpen] = useState(false);
 
   useEffect(() => {
     setCourses(loadCourses());
@@ -68,6 +69,10 @@ function Page() {
   }, []);
 
   const allActivities = useMemo(() => loadActivities(), [activityRev]);
+  const allUnits = useMemo(
+    () => courses.flatMap((c) => c.levels.flatMap((l) => l.units.map((u) => ({ id: u.id, title: u.title })))),
+    [courses],
+  );
 
   const product = productId ? courses.find((c) => c.product === productId) ?? null : null;
   const level = product && levelId ? product.levels.find((l) => l.id === levelId) ?? null : null;
