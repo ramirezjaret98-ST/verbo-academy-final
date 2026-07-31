@@ -122,7 +122,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
     setName(""); setParagraph(""); setAnswer("");
     setItems([{ text: "", key: "" }, { text: "", key: "" }]);
     setPrompt(""); setAudioName(""); setAudioDurationSec(undefined); setQuestion("");
-    setOptions(["", "", "", ""]); setCorrectIndex(0);
+    setOptions(["", "", "", ""]); setCorrectIndex(0); setFeedback("");
   };
 
   /** Reads the audio duration straight from the file — admins never type it. */
