@@ -1070,12 +1070,11 @@ function FlaggedRow({
   const rowCls = resolved
     ? "border-border bg-background"
     : "border-destructive/30 bg-destructive/5";
-  const tagCls = reviewed
-    ? "bg-success/10 text-success"
+  const tag = reviewed
+    ? <Pill style={{ backgroundColor: "rgba(95,202,22,0.15)", color: "#3f7d0a" }}>Reviewed</Pill>
     : discarded
-      ? "bg-muted text-muted-foreground"
-      : "bg-destructive/10 text-destructive";
-  const tagLabel = reviewed ? "Reviewed" : discarded ? "Discarded" : "Pending Review";
+      ? <Pill tone="muted">Discarded</Pill>
+      : <Pill tone="danger">Pending Review</Pill>;
 
   const submit = () => {
     if (!note.trim()) return;
