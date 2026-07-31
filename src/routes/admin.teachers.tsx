@@ -1051,7 +1051,7 @@ function AddAdjustmentModal({ onClose, onSave }: { onClose: () => void; onSave: 
   );
 }
 
-function FlaggedRow({
+export function FlaggedRow({
   session: s, onMarkReviewed, onDiscardReview, canDiscard,
 }: {
   session: Session;
