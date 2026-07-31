@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Plus, X, Users as UsersIcon, Building2, CreditCard, Trash2, RotateCcw,
   ArrowRightLeft, Archive, ChevronRight, ShieldAlert, CalendarClock,
+  GraduationCap, Sparkles,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { USERS, ASSIGNMENTS, userById, type User } from "@/lib/mock-data";
 import {
