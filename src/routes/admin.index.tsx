@@ -5,7 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import { USERS, SESSIONS, type User, type Session } from "@/lib/mock-data";
-import { MetricCard, Card, PrimaryButton, GhostButton } from "@/components/verbo/ui";
+import { Card, PrimaryButton, GhostButton, HeroStatCard, AnimatedNumber } from "@/components/verbo/ui";
 import { hydrateStudents } from "@/lib/students-store";
 import { nextPaymentDate, daysUntil, MAX_INSIGHT_STRIKES, getProduct } from "@/lib/student-model";
 import { computeTeacherKpis } from "@/lib/teacher-kpis";
@@ -19,6 +19,7 @@ import {
 import {
   UserPlus, CalendarPlus, Sparkles, BarChart3, X, CreditCard, Lock,
   Star, TrendingDown, Users2, Megaphone, ChevronRight, CheckCircle2,
+  GraduationCap, CalendarClock, Layers, TrendingUp,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({ component: Overview });
