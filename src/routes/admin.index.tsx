@@ -5,7 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import { USERS, SESSIONS, type User, type Session } from "@/lib/mock-data";
-import { MetricCard, Card, PrimaryButton, GhostButton } from "@/components/verbo/ui";
+import { Card, PrimaryButton, GhostButton, HeroStatCard, AnimatedNumber } from "@/components/verbo/ui";
 import { hydrateStudents } from "@/lib/students-store";
 import { nextPaymentDate, daysUntil, MAX_INSIGHT_STRIKES, getProduct } from "@/lib/student-model";
 import { computeTeacherKpis } from "@/lib/teacher-kpis";
@@ -19,6 +19,7 @@ import {
 import {
   UserPlus, CalendarPlus, Sparkles, BarChart3, X, CreditCard, Lock,
   Star, TrendingDown, Users2, Megaphone, ChevronRight, CheckCircle2,
+  GraduationCap, CalendarClock, Layers, TrendingUp,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({ component: Overview });
@@ -101,28 +102,81 @@ function Overview() {
 
       {/* 1 — Quick Actions */}
       <div className="flex flex-wrap gap-3">
-        <PrimaryButton onClick={() => navigate({ to: "/admin/students", search: { new: true } })}>
+        <PrimaryButton accentColor="#3ebbad" onClick={() => navigate({ to: "/admin/students", search: { new: true } })}>
           <UserPlus className="h-4 w-4" /> Register Student
         </PrimaryButton>
-        <PrimaryButton onClick={() => navigate({ to: "/admin/sessions" })}>
+        <PrimaryButton accentColor="#a34ac0" onClick={() => navigate({ to: "/admin/teachers" })}>
+          <GraduationCap className="h-4 w-4" /> Register Teacher
+        </PrimaryButton>
+        <PrimaryButton accentColor="#01304a" onClick={() => navigate({ to: "/admin/sessions" })}>
           <CalendarPlus className="h-4 w-4" /> Schedule Sessions
         </PrimaryButton>
-        <PrimaryButton onClick={() => navigate({ to: "/admin/clubs", search: { new: true } })}>
+        <PrimaryButton accentColor="#d97706" onClick={() => navigate({ to: "/admin/clubs", search: { new: true } })}>
           <Sparkles className="h-4 w-4" /> Create Club Event
         </PrimaryButton>
-        <GhostButton onClick={() => setMetricsOpen(true)}>
+        <PrimaryButton accentColor="#5fca16" onClick={() => setMetricsOpen(true)}>
           <BarChart3 className="h-4 w-4" /> View Metrics
-        </GhostButton>
+        </PrimaryButton>
       </div>
 
       {/* 2 — Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <MetricCard label="Students" value={String(students.length)} />
-        <MetricCard label="Teachers" value={String(teachers.length)} />
-        <MetricCard label="Sessions scheduled" value={String(scheduled)} />
-        <MetricCard label="Active levels" value={String(new Set(students.flatMap((s) => s.contracted_levels ?? [])).size)} />
-        <MetricCard label="Avg composite score" value={`${avgComposite}%`} />
+        {([
+          { label: "Students", value: students.length, icon: Users2, color: "#3ebbad" },
+          { label: "Teachers", value: teachers.length, icon: GraduationCap, color: "#a34ac0" },
+          { label: "Sessions scheduled", value: scheduled, icon: CalendarClock, color: "#01304a" },
+          {
+            label: "Active levels",
+            value: new Set(students.flatMap((s) => s.contracted_levels ?? [])).size,
+            icon: Layers,
+            color: "#d97706",
+          },
+        ] as const).map((m) => {
+          const Icon = m.icon;
+          return (
+            <HeroStatCard
+              key={m.label}
+              className="!min-h-[132px] !items-start border border-border bg-card"
+              style={{ boxShadow: `0 0 24px -8px ${m.color}66` }}
+            >
+              <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-xl">
+                <Icon className="h-7 w-7" style={{ color: m.color }} strokeWidth={1.75} />
+              </div>
+              <div className="relative w-full">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{m.label}</div>
+                <div className="mt-2 text-5xl font-bold leading-none text-foreground">
+                  <AnimatedNumber value={m.value} />
+                </div>
+              </div>
+            </HeroStatCard>
+          );
+        })}
+        <HeroStatCard
+          className={`!min-h-[132px] !items-start border border-border bg-card${
+            avgComposite < ALERT_COMPOSITE ? " verbo-focus-pulse" : ""
+          }`}
+          style={
+            avgComposite < ALERT_COMPOSITE
+              ? ({ ["--verbo-focus-pulse-color" as any]: avgComposite < 60 ? "#dc2626" : "#d97706" } as React.CSSProperties)
+              : undefined
+          }
+        >
+          <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-xl">
+            <TrendingUp
+              className="h-7 w-7"
+              style={{ color: avgComposite < 60 ? "#dc2626" : avgComposite < ALERT_COMPOSITE ? "#d97706" : "#94a3b8" }}
+              strokeWidth={1.75}
+            />
+          </div>
+          <div className="relative w-full">
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Avg composite score</div>
+            <div className="mt-2 text-5xl font-bold leading-none text-foreground">
+              <AnimatedNumber value={avgComposite} suffix="%" />
+            </div>
+          </div>
+        </HeroStatCard>
       </div>
+
 
       {/* 3 — Snapshots 50/50 */}
       <div className="grid gap-6 lg:grid-cols-2">
