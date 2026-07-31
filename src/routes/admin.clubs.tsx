@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Card, GhostButton, Pill, PrimaryButton, SectionTitle } from "@/components/verbo/ui";
+import { AccentModal, Card, GhostButton, Pill, PrimaryButton, SectionTitle } from "@/components/verbo/ui";
 import { USERS } from "@/lib/mock-data";
 import { appendTeacherAdjustment } from "@/lib/teacher-tiers";
 import {
@@ -139,6 +139,7 @@ function Page() {
           <Plus className="h-4 w-4" /> Create New Club Event
         </PrimaryButton>
       </div>
+      <ReleaseRequestsPanel requests={requests} clubs={clubs} />
 
       {/* View switcher */}
       <div className="inline-flex rounded-lg border border-border bg-secondary/40 p-1">
@@ -163,7 +164,6 @@ function Page() {
       {view === "calendar" && <CalendarView clubs={clubs} onEdit={onEdit} />}
       {view === "history" && <TopicHistory clubs={clubs} />}
 
-      <ReleaseRequestsPanel requests={requests} clubs={clubs} />
 
       {open && <ClubFormPanel initial={editing} clubs={clubs} onClose={() => setOpen(false)} onSave={onSave} />}
     </div>
@@ -662,13 +662,15 @@ function ReleaseRequestsPanel({ requests, clubs }: { requests: ClubReleaseReques
     return { r, club, teacher };
   }), [requests, clubs]);
 
+  const urgent = requests.length > 0;
+
   return (
-    <Card className="!p-0">
-      <div className="flex items-center justify-between border-b border-border px-6 py-4">
+    <Card className={`!p-0 ${urgent ? "card-gradient-crimson verbo-focus-pulse [--verbo-focus-pulse-color:#b52904] !border-transparent" : ""}`}>
+      <div className={`flex items-center justify-between px-6 py-4 ${urgent ? "" : "border-b border-border"}`}>
         <SectionTitle>
-          <span className="inline-flex items-center gap-2">
+          <span className={`inline-flex items-center gap-2 ${urgent ? "text-white" : ""}`}>
             <Inbox className="h-4 w-4" /> Release Requests
-            <span className="ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-warning/20 px-1.5 text-[11px] font-semibold text-warning-foreground">
+            <span className={`ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold ${urgent ? "bg-white text-[#b52904]" : "bg-warning/20 text-warning-foreground"}`}>
               {requests.length}
             </span>
           </span>
@@ -677,6 +679,7 @@ function ReleaseRequestsPanel({ requests, clubs }: { requests: ClubReleaseReques
       {rows.length === 0 ? (
         <div className="px-6 py-8 text-center text-sm text-muted-foreground">No pending release requests.</div>
       ) : (
+        <div className="mx-4 mb-4 overflow-hidden rounded-xl bg-white/95">
         <table className="w-full text-sm">
           <thead className="text-left text-xs uppercase tracking-wider text-muted-foreground">
             <tr className="border-b border-border">
@@ -694,7 +697,7 @@ function ReleaseRequestsPanel({ requests, clubs }: { requests: ClubReleaseReques
                   {club ? (
                     <>
                       <div className="font-medium text-foreground">
-                        <span className={`mr-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${club.type === "insight" ? "bg-accent/15 text-accent" : "bg-primary/10 text-primary"}`}>
+                        <span className={`mr-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white ${club.type === "insight" ? "bg-[#f38934]" : "bg-[#01304a]"}`}>
                           {club.type === "insight" ? <Sparkles className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
                           {club.type === "insight" ? "Insight" : "Book Club"}
                         </span>
@@ -710,7 +713,7 @@ function ReleaseRequestsPanel({ requests, clubs }: { requests: ClubReleaseReques
                     <GhostButton onClick={() => removeReleaseRequest(r.id)}>
                       <X className="h-3.5 w-3.5" /> Reject
                     </GhostButton>
-                    <PrimaryButton onClick={() => setApproving(r)}>
+                    <PrimaryButton accentColor="#5fca16" onClick={() => setApproving(r)}>
                       <Check className="h-3.5 w-3.5" /> Approve
                     </PrimaryButton>
                   </div>
@@ -719,7 +722,9 @@ function ReleaseRequestsPanel({ requests, clubs }: { requests: ClubReleaseReques
             ))}
           </tbody>
         </table>
+        </div>
       )}
+
 
       {approving && (
         <ApproveReleaseModal
@@ -761,41 +766,44 @@ function ApproveReleaseModal({
   const valid = amount.trim() !== "" && !isNaN(parseFloat(amount)) && parseFloat(amount) >= 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-2xl bg-background shadow-2xl">
-        <div className="border-b border-border px-6 py-4">
-          <h2 className="text-base font-semibold text-foreground">Approve release</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            The club will return to “Created” and a negative adjustment will be recorded in the teacher’s Financial tab.
-          </p>
-        </div>
-        <div className="space-y-4 px-6 py-5">
-          {club && (
-            <div className="rounded-lg bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
-              <div className="font-medium text-foreground">{club.title}</div>
-              <div>{club.type === "insight" ? "Insight" : "Book Club"} · {formatDate(club.date)}</div>
-            </div>
-          )}
-          <Field label="Penalty amount (MXN)" help={club?.teacher_payment == null ? "This club has no Teacher Payment configured — enter the amount manually." : "Pre-filled from the club’s Teacher Payment. Adjust if needed."}>
-            <input
-              type="number"
-              min={0}
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="e.g. 350"
-              className={fieldCls}
-              autoFocus
-            />
-          </Field>
-        </div>
-        <div className="flex justify-end gap-2 border-t border-border bg-secondary/30 px-6 py-4">
-          <GhostButton onClick={onClose}>Cancel</GhostButton>
-          <PrimaryButton disabled={!valid} onClick={() => onConfirm(parseFloat(amount))}>
-            Confirm approval
-          </PrimaryButton>
-        </div>
+    <AccentModal
+      background="linear-gradient(150deg, #c2410c 0%, #b52904 55%, #760137 100%)"
+      iconTint="#b52904"
+      icon={AlertTriangle}
+      eyebrow="Release Request"
+      title="Approve release"
+      onClose={onClose}
+    >
+      <div className="space-y-4 px-6 py-5">
+        <p className="text-xs text-muted-foreground">
+          The club will return to “Created” and a negative adjustment will be recorded in the teacher’s Financial tab.
+        </p>
+        {club && (
+          <div className="rounded-lg bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
+            <div className="font-medium text-foreground">{club.title}</div>
+            <div>{club.type === "insight" ? "Insight" : "Book Club"} · {formatDate(club.date)}</div>
+          </div>
+        )}
+        <Field label="Penalty amount (MXN)" help={club?.teacher_payment == null ? "This club has no Teacher Payment configured — enter the amount manually." : "Pre-filled from the club’s Teacher Payment. Adjust if needed."}>
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="e.g. 350"
+            className={fieldCls}
+            autoFocus
+          />
+        </Field>
       </div>
-    </div>
+      <div className="flex justify-end gap-2 border-t border-border bg-secondary/30 px-6 py-4">
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton accentColor="#5fca16" disabled={!valid} onClick={() => onConfirm(parseFloat(amount))}>
+          Confirm approval
+        </PrimaryButton>
+      </div>
+    </AccentModal>
   );
+
 }
