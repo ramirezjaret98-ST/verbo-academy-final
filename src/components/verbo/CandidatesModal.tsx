@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { X, UserCheck } from "lucide-react";
-import { GhostButton, PrimaryButton } from "./ui";
+import { UserCheck } from "lucide-react";
+import { AccentModal, AccentModalFooter, GhostButton, PrimaryButton } from "./ui";
 import { findCandidates } from "@/lib/substitute-engine";
 import { updateSession, getSessionsSnapshot, type ExtSession } from "@/lib/sessions-store";
+
+const HEADER_BG = "linear-gradient(135deg, #01304a 0%, #02466b 100%)";
 
 export function CandidatesModal({
   sessionId,
@@ -29,19 +31,18 @@ export function CandidatesModal({
     onClose();
   };
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-lg rounded-2xl bg-card p-6 shadow-floating"
-      >
-        <button onClick={onClose} className="absolute right-4 top-4 rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground" aria-label="Close">
-          <X className="h-4 w-4" />
-        </button>
-        <div className="flex items-center gap-2">
-          <UserCheck className="h-4 w-4 text-accent" />
-          <h3 className="text-base font-semibold text-foreground">Substitute Candidates</h3>
-        </div>
-        <p className="mt-1 text-xs text-muted-foreground">
+    <AccentModal
+      background={HEADER_BG}
+      iconTint="#ffffff"
+      icon={UserCheck}
+      eyebrow="Session substitution"
+      title="Substitute Candidates"
+      watermark={{ type: "icon", icon: UserCheck }}
+      maxWidth="max-w-lg"
+      onClose={onClose}
+    >
+      <div className="p-6">
+        <p className="text-xs text-muted-foreground">
           Qualified, available teachers ranked by Composite Score. Admin picks the substitute.
         </p>
 
@@ -87,11 +88,11 @@ export function CandidatesModal({
             </table>
           )}
         </div>
-
-        <div className="mt-5 flex justify-end">
-          <GhostButton onClick={onClose}>Close</GhostButton>
-        </div>
       </div>
-    </div>
+
+      <AccentModalFooter>
+        <GhostButton onClick={onClose}>Close</GhostButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }
