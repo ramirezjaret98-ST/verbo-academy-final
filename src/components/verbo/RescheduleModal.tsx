@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
-import { X, CalendarClock, AlertTriangle } from "lucide-react";
-import { GhostButton, PrimaryButton } from "./ui";
+import { CalendarClock, AlertTriangle } from "lucide-react";
+import { AccentModal, AccentModalFooter, GhostButton, PrimaryButton } from "./ui";
 import { updateSession, type ExtSession } from "@/lib/sessions-store";
 import { isTeacherAvailableAt } from "@/lib/availability-store";
+
+const HEADER_BG = "linear-gradient(135deg, #01304a 0%, #02466b 100%)";
 
 export function RescheduleModal({
   session,
@@ -39,19 +41,18 @@ export function RescheduleModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="relative w-full max-w-md rounded-2xl bg-card p-6 shadow-floating"
-      >
-        <button onClick={onClose} className="absolute right-4 top-4 rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground" aria-label="Close">
-          <X className="h-4 w-4" />
-        </button>
-        <div className="flex items-center gap-2">
-          <CalendarClock className="h-4 w-4 text-accent" />
-          <h3 className="text-base font-semibold text-foreground">Request Reschedule</h3>
-        </div>
-        <p className="mt-1 text-xs text-muted-foreground">
+    <AccentModal
+      background={HEADER_BG}
+      iconTint="#ffffff"
+      icon={CalendarClock}
+      eyebrow="Request Reschedule"
+      title="New date & time"
+      watermark={{ type: "icon", icon: CalendarClock }}
+      maxWidth="max-w-md"
+      onClose={onClose}
+    >
+      <div className="p-6">
+        <p className="text-xs text-muted-foreground">
           Filtered to slots within the assigned teacher's availability.
         </p>
 
@@ -84,12 +85,12 @@ export function RescheduleModal({
             <span>{error}</span>
           </div>
         )}
-
-        <div className="mt-5 flex justify-end gap-2">
-          <GhostButton onClick={onClose}>Cancel</GhostButton>
-          <PrimaryButton onClick={submit}>Confirm Reschedule</PrimaryButton>
-        </div>
       </div>
-    </div>
+
+      <AccentModalFooter>
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton onClick={submit} accentColor="#f38934">Confirm Reschedule</PrimaryButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }

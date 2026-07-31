@@ -6,6 +6,8 @@
 import { useMemo, useState } from "react";
 import { X, ShieldAlert } from "lucide-react";
 import type { User } from "@/lib/mock-data";
+import { AccentModal, AccentModalFooter } from "./ui";
+
 import {
   KPI_METRIC_LABELS,
   addKpiOverride,
@@ -69,31 +71,17 @@ export function KpiOverrideModal({ teacher, metric, currentValue, admin, onClose
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg overflow-hidden rounded-2xl bg-card shadow-floating"
-      >
-        <div
-          className="flex items-start justify-between border-b border-border px-6 py-5"
-          style={{ background: "linear-gradient(135deg, #01304a 0%, #02466b 100%)" }}
-        >
-          <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">
-              Manual KPI adjustment
-            </div>
-            <h2 className="mt-1 text-lg font-semibold tracking-tight text-white">
-              {teacher.name} · {KPI_METRIC_LABELS[metric]}
-            </h2>
-          </div>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="rounded-md p-1 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <AccentModal
+      background="linear-gradient(135deg, #01304a 0%, #02466b 100%)"
+      iconTint="#ffffff"
+      icon={ShieldAlert}
+      eyebrow="Manual KPI adjustment"
+      title={`${teacher.name} · ${KPI_METRIC_LABELS[metric]}`}
+      watermark={{ type: "icon", icon: ShieldAlert }}
+      maxWidth="max-w-lg"
+      onClose={onClose}
+    >
+
 
         <div className="space-y-4 px-6 py-6">
           <div className="grid grid-cols-2 gap-3">
@@ -187,24 +175,24 @@ export function KpiOverrideModal({ teacher, metric, currentValue, admin, onClose
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-2 border-t border-border bg-secondary/30 px-6 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            disabled={!canSave}
-            onClick={handleSave}
-            className="rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            Save adjustment
-          </button>
-        </div>
-      </div>
-    </div>
+      <AccentModalFooter>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          disabled={!canSave}
+          onClick={handleSave}
+          className="rounded-lg bg-foreground px-4 py-2 text-sm font-semibold text-background transition-opacity disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Save adjustment
+        </button>
+      </AccentModalFooter>
+    </AccentModal>
+
   );
 }
