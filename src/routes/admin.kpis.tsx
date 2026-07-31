@@ -414,6 +414,7 @@ function TeacherKpiCard({
       {/* Composite score — prominent */}
       <div
         className="mt-4 flex items-center gap-4 rounded-xl border border-border border-t-border/60 bg-secondary/30 p-4"
+        style={{ boxShadow: `0 0 20px -6px ${compositeColor(kpis.composite)}80` }}
         onClick={(e) => e.stopPropagation()}
       >
         <CompositeRing value={kpis.composite} />
@@ -464,6 +465,13 @@ function barColor(value: number, invert: boolean) {
   return "#ef4444";
 }
 
+/** Same thresholds CompositeRing paints with. */
+function compositeColor(value: number) {
+  return value >= 85 ? "#5fca16" : value >= 70 ? "#f59e0b" : "#ef4444";
+}
+
+
+
 function AdjustedBadge({ override }: { override: { admin_name: string; created_at: string; previous_value: number; new_value: number; justification: string } }) {
   const when = new Date(override.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   return (
@@ -489,7 +497,7 @@ function KpiTile({
   override?: { admin_name: string; created_at: string; previous_value: number; new_value: number; justification: string };
 }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-secondary/20 p-2.5">
+    <div className="rounded-xl border border-border/60 bg-secondary/20 p-2.5" style={{ boxShadow: `0 0 14px -6px ${barColor(value, invert)}66` }}>
       <div className="flex items-start justify-between gap-1.5">
         <span className="min-w-0 text-[11px] leading-tight text-muted-foreground">{label}</span>
         {metric && canOverride && onOverride && (
@@ -523,7 +531,7 @@ function CompositeRing({ value }: { value: number }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const offset = c - (value / 100) * c;
-  const color = value >= 85 ? "#22c55e" : value >= 70 ? "#f59e0b" : "#ef4444";
+  const color = compositeColor(value);
   return (
     <svg width={size} height={size} className="shrink-0 -rotate-90">
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--secondary)" strokeWidth={stroke} />
