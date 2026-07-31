@@ -923,7 +923,7 @@ function SeasonTab() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((s) => (
-            <div key={s.id} className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <div key={s.id} className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-md hover:shadow-lg transition-shadow duration-200">
               <div
                 className="relative flex h-32 items-center justify-center"
                 style={{
