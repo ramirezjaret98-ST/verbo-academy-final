@@ -6,6 +6,8 @@
 import { useMemo, useState } from "react";
 import { X, ShieldAlert } from "lucide-react";
 import type { User } from "@/lib/mock-data";
+import { AccentModal, AccentModalFooter } from "./ui";
+
 import {
   KPI_METRIC_LABELS,
   addKpiOverride,
