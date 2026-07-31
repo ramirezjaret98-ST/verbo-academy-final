@@ -33,6 +33,8 @@ export function RescheduleModal({
       return;
     }
     updateSession(session.id, { date_time: iso, status: "rescheduled" });
+    // Ping Admin on WhatsApp as part of the same confirmation click.
+    window.open("https://wa.link/pqrkgz", "_blank", "noopener,noreferrer");
     onClose();
   };
 

@@ -7,17 +7,17 @@
 // so all downstream effects (session → cancelled, strike ledger, auto-freeze
 // at 3 strikes, Needs Substitute flag when <24h) stay in one place.
 import { useMemo, useState } from "react";
-import { AlertTriangle, NotebookPen, MessageCircle } from "lucide-react";
+import { AlertTriangle, NotebookPen } from "lucide-react";
 import { GhostButton, PrimaryButton, AccentModalHeader } from "@/components/verbo/ui";
 import type { ExtSession } from "@/lib/sessions-store";
 import {
   cancelSessionByTeacher, CANCEL_REASON_LABEL, type CancelReason,
 } from "@/lib/strikes-store";
 import { getCoverageNote, setCoverageNote } from "@/lib/coverage-notes-store";
-import { userById } from "@/lib/mock-data";
 
-// Same plain wa.me pattern already used by teacher.clubs.tsx (PROPOSE_URL).
-const WA_BASE = "https://wa.me/522461152136?text=";
+// Admin is pinged on WhatsApp as part of the confirmation click itself.
+const ADMIN_WA_LINK = "https://wa.link/pqrkgz";
+
 
 export function CantAttendModal({
   session, teacherId, onClose, onDone,
@@ -27,7 +27,7 @@ export function CantAttendModal({
   onClose: () => void;
   onDone: (result: { needsSubstitute: boolean }) => void;
 }) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [reason, setReason] = useState<CancelReason | "">("");
   const [note, setNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -70,19 +70,8 @@ export function CantAttendModal({
       note: note.trim() || undefined,
       medicalNoteName: file?.name,
     });
-    if (needsSubstitute) { setStep(3); return; }
+    window.open(ADMIN_WA_LINK, "_blank", "noopener,noreferrer");
     onDone({ needsSubstitute });
-  };
-
-  const whatsappUrl = () => {
-    const name = userById(teacherId)?.name ?? "Profesor";
-    const motivo = reason ? CANCEL_REASON_LABEL[reason as CancelReason] : "";
-    const fecha = new Date(session.date_time).toLocaleString("es-MX", {
-      weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-    });
-    return WA_BASE + encodeURIComponent(
-      `Hola! Necesito un sustituto urgente. Profesor: ${name}. Motivo: ${motivo}. Sesión: ${fecha}.`,
-    );
   };
 
   return (
@@ -184,7 +173,7 @@ export function CantAttendModal({
               <PrimaryButton onClick={() => setStep(2)} disabled={!step1Valid}>Confirm</PrimaryButton>
             </div>
           </>
-        ) : step === 2 ? (
+        ) : (
           <>
             <AccentModalHeader
               background={ALERT_BG}
@@ -217,35 +206,6 @@ export function CantAttendModal({
               >
                 Confirm Cancellation
               </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <AccentModalHeader
-              background={ALERT_BG}
-              iconTint="#dc0000"
-              icon={AlertTriangle}
-              eyebrow="Substitute needed"
-              title="Notify Admin"
-              watermark={{ type: "icon", icon: AlertTriangle }}
-              onClose={() => onDone({ needsSubstitute: true })}
-            />
-            <div className="space-y-3 px-5 py-5 text-sm text-foreground">
-              <p>
-                Your cancellation was submitted and Admin was notified in-app. Since this session
-                starts soon, you can also ping Admin directly on WhatsApp.
-              </p>
-              <a
-                href={whatsappUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:opacity-90 active:scale-[0.97]"
-              >
-                <MessageCircle className="h-4 w-4" /> Notify Admin via WhatsApp
-              </a>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-border bg-secondary/30 px-5 py-3">
-              <GhostButton onClick={() => onDone({ needsSubstitute: true })}>Done</GhostButton>
             </div>
           </>
         )}
