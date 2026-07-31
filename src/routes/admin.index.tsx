@@ -148,7 +148,7 @@ function Overview() {
       const t = timeAccent(ms);
       urgentItems.push({ ...base, accent: t.color, glow: t.glow });
     } else {
-      watchItems.push({ ...base, accent: NAVY });
+      watchItems.push({ ...base, accent: NAVY_DEEP });
     }
   }
 
@@ -173,7 +173,7 @@ function Overview() {
       const t = timeAccent(ms);
       urgentItems.push({ ...base, accent: t.color, glow: t.glow });
     } else {
-      watchItems.push({ ...base, accent: NAVY });
+      watchItems.push({ ...base, accent: NAVY_DEEP });
     }
   }
 
