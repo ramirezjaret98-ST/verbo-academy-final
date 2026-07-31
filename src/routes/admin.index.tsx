@@ -587,7 +587,32 @@ function AnnouncementsSection() {
 
   return (
     <section>
-      <h2 className="mb-4 text-base font-semibold tracking-tight text-foreground">Announcements</h2>
+      <div className="relative mb-4 overflow-hidden rounded-2xl px-4 py-3 card-gradient-orange">
+        {/* Decorative blobs */}
+        <div
+          className="pointer-events-none absolute -right-10 -top-14 h-40 w-40 rounded-full blur-2xl"
+          style={{ background: "radial-gradient(circle, rgba(255,255,255,0.45), transparent 70%)" }}
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -bottom-16 -left-10 h-40 w-40 rounded-full blur-2xl"
+          style={{ background: "radial-gradient(circle, rgba(0,0,0,0.35), transparent 70%)", animationDelay: "0.1s" }}
+          aria-hidden
+        />
+        {/* Watermark */}
+        <div className="pointer-events-none absolute -right-4 -top-4 select-none" aria-hidden>
+          <Megaphone className="h-[92px] w-[92px] text-white/[0.14]" strokeWidth={1.5} />
+        </div>
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-sm">
+            <Megaphone className="h-5 w-5" style={{ color: "#f38934" }} />
+          </div>
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-white/80">Comms</div>
+            <h2 className="text-base font-semibold tracking-tight text-white">Announcements</h2>
+          </div>
+        </div>
+      </div>
       <Card className="!p-0">
         {/* Composer */}
         <div className="space-y-4 border-b border-border p-6">
