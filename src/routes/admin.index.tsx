@@ -98,8 +98,190 @@ function Overview() {
     .sort((a, b) => a.kpis.composite - b.kpis.composite);
   const createdClubs = upcomingCreatedClubs(loadClubs());
 
-  const studentsClean = paymentAlerts.length === 0 && blockedInsights.length === 0;
-  const teachersClean = needsReview.length === 0 && lowComposite.length === 0 && createdClubs.length === 0;
+  // ---- Urgency derivation (visual grouping only, no new persisted data) -----
+  const now = Date.now();
+  const nameOf = (id?: string) => USERS.find((u) => u.id === id)?.name ?? "Unknown";
+  const urgentItems: UrgencyItem[] = [];
+  const watchItems: UrgencyItem[] = [];
+
+  // 1 — Sessions needing a substitute (split by the 8h window).
+  for (const s of loadSessions().filter((x) => x.needs_substitute)) {
+    const ms = +new Date(s.date_time) - now;
+    const base = {
+      id: `sub:${s.id}`,
+      icon: UserX,
+      title: `Substitute needed — ${nameOf(s.student_id)}`,
+      meta: new Date(s.date_time).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
+      badge: countdownLabel(ms),
+      ctaLabel: "Sessions",
+      onClick: () => navigate({ to: "/admin/sessions" }),
+    };
+    if (ms <= EIGHT_H) {
+      const t = timeAccent(ms);
+      urgentItems.push({ ...base, accent: t.color, glow: t.glow });
+    } else {
+      watchItems.push({ ...base, accent: NAVY });
+    }
+  }
+
+  // 2 — Clubs at risk: no teacher assigned, or a pending release request.
+  const releaseClubIds = new Set(loadReleaseRequests().map((r) => r.club_id));
+  const allClubs = loadClubs();
+  const atRiskClubs = allClubs.filter(
+    (c) => c.status !== "completed" && c.status !== "cancelled" && (!c.teacher_id || releaseClubIds.has(c.id)),
+  );
+  for (const c of atRiskClubs) {
+    const ms = +new Date(c.date) - now;
+    const base = {
+      id: `club:${c.id}`,
+      icon: Users2,
+      title: c.title,
+      meta: `${!c.teacher_id ? "No teacher assigned" : "Release requested"} · ${new Date(c.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+      badge: countdownLabel(ms),
+      ctaLabel: "Clubs",
+      onClick: () => navigate({ to: "/admin/clubs" }),
+    };
+    if (ms <= EIGHT_H) {
+      const t = timeAccent(ms);
+      urgentItems.push({ ...base, accent: t.color, glow: t.glow });
+    } else {
+      watchItems.push({ ...base, accent: NAVY });
+    }
+  }
+
+  // 3 — Teachers auto-frozen by 3 active strikes.
+  for (const t of teachers) {
+    if (activeStrikeCount(t.id) < 3) continue;
+    urgentItems.push({
+      id: `strikes:${t.id}`,
+      icon: Snowflake,
+      accent: CRIMSON,
+      title: `${t.name} auto-frozen`,
+      meta: "3 unjustified cancellations",
+      badge: "3 strikes",
+      ctaLabel: "Teachers",
+      onClick: () => navigate({ to: "/admin/teachers", search: { teacher: t.id } }),
+    });
+  }
+
+  // 4 — Unresolved conduct reports (teacher or student targets).
+  for (const r of loadConductReports().filter((x) => x.status === "pending")) {
+    urgentItems.push({
+      id: `conduct:${r.id}`,
+      icon: ShieldAlert,
+      accent: "#b52904",
+      title: `Conduct report — ${nameOf(r.target_id)}`,
+      meta: `${nameOf(r.reporter_id)} · ${r.category}`,
+      badge: r.target_type === "teacher" ? "Teacher" : "Student",
+      ctaLabel: "Review",
+      onClick: () => navigate({ to: "/admin/conduct-reports" }),
+    });
+  }
+
+  // 5 — Unresolved technical / content issues.
+  for (const r of loadContentIssueReports()) {
+    urgentItems.push({
+      id: `issue:${r.id}`,
+      icon: Bug,
+      accent: ORCHID,
+      title: `${r.issueType} — ${r.entityTitle}`,
+      meta: `${nameOf(r.studentId)} · ${r.entityType}`,
+      badge: "Bug",
+      ctaLabel: "Issues",
+      onClick: () => navigate({ to: "/admin/content-issue-reports" }),
+    });
+  }
+
+  // ---- Worth a Look --------------------------------------------------------
+  for (const { s, next } of paymentAlerts) {
+    const d = next ? daysUntil(next) : 0;
+    watchItems.push({
+      id: `pay:${s.id}`,
+      icon: CreditCard,
+      accent: d < 0 ? RED : GOLD,
+      title: s.name,
+      meta: `Payment ${next!.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`,
+      badge: d < 0 ? `${Math.abs(d)}d overdue` : d === 0 ? "Today" : `In ${d}d`,
+      ctaLabel: "Student",
+      onClick: () => navigate({ to: "/admin/students", search: { student: s.id } }),
+    });
+  }
+  for (const s of blockedInsights) {
+    watchItems.push({
+      id: `blocked:${s.id}`,
+      icon: Lock,
+      accent: RED,
+      title: s.name,
+      meta: `Insights blocked · ${s.insights_strikes ?? 0}/${MAX_INSIGHT_STRIKES} strikes`,
+      badge: "Blocked",
+      ctaLabel: "Student",
+      onClick: () => navigate({ to: "/admin/students", search: { student: s.id } }),
+    });
+  }
+  for (const { t, pending } of needsReview) {
+    watchItems.push({
+      id: `review:${t.id}`,
+      icon: Star,
+      accent: GOLD,
+      title: t.name,
+      meta: "Low ratings needing review",
+      badge: `${pending} pending`,
+      ctaLabel: "Teacher",
+      onClick: () => navigate({ to: "/admin/teachers", search: { teacher: t.id } }),
+    });
+  }
+  for (const { t, kpis } of lowComposite) {
+    watchItems.push({
+      id: `composite:${t.id}`,
+      icon: TrendingDown,
+      accent: GOLD,
+      title: t.name,
+      meta: `Composite below ${ALERT_COMPOSITE}%`,
+      badge: `${kpis.composite}%`,
+      ctaLabel: "KPIs",
+      onClick: () => navigate({ to: "/admin/kpis", search: { teacher: t.id } }),
+    });
+  }
+  for (const r of listChangeRequests("pending")) {
+    watchItems.push({
+      id: `avail:${r.id}`,
+      icon: CalendarCheck,
+      accent: TEAL,
+      title: `${nameOf(r.teacherId)} — availability change`,
+      meta: r.reason || "Pending approval",
+      badge: "Pending",
+      ctaLabel: "Teachers",
+      onClick: () => navigate({ to: "/admin/teachers", search: { teacher: r.teacherId } }),
+    });
+  }
+  for (const i of loadFinancialIssues()) {
+    watchItems.push({
+      id: `fin:${i.id}`,
+      icon: Wallet,
+      accent: TEAL,
+      title: `${nameOf(i.teacher_id)} — financial issue`,
+      meta: i.text ? i.text.slice(0, 90) : "Reported by teacher",
+      badge: "Financial",
+      ctaLabel: "Money Lab",
+      onClick: () => navigate({ to: "/admin/financial/money-lab" }),
+    });
+  }
+  for (const st of USERS) {
+    for (const sub of st.challenge_submissions ?? []) {
+      if (sub.status !== "rejected") continue;
+      watchItems.push({
+        id: `challenge:${st.id}:${sub.challenge_id}`,
+        icon: Flag,
+        accent: ORCHID,
+        title: `${st.name} — challenge flagged`,
+        meta: sub.challenge_id,
+        badge: "Rejected",
+        ctaLabel: "Challenges",
+        onClick: () => navigate({ to: "/admin/challenges" }),
+      });
+    }
+  }
+
 
   return (
     <div className="space-y-8">
@@ -127,7 +309,65 @@ function Overview() {
         </PrimaryButton>
       </div>
 
-      {/* 2 — Summary cards */}
+      {/* 2 — Urgency cards */}
+      <div className="space-y-4">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setPanel("urgent")}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPanel("urgent"); } }}
+          className="block cursor-pointer text-left"
+        >
+          <HeroStatCard
+            className={`card-gradient-crimson !min-h-[92px] !py-4${urgentItems.length > 0 ? " verbo-focus-pulse" : ""}`}
+            style={urgentItems.length > 0 ? ({ ["--verbo-focus-pulse-color" as any]: CRIMSON } as React.CSSProperties) : undefined}
+          >
+            <div className="relative flex w-full items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.75)" }}>
+                  Action Required
+                </div>
+                <div className="mt-1 text-xl font-semibold leading-tight text-white">Needs Immediate Action</div>
+                <div className="mt-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>
+                  {urgentItems.length === 0
+                    ? "All caught up"
+                    : `${urgentItems.length} item${urgentItems.length === 1 ? "" : "s"} need immediate action`}
+                </div>
+              </div>
+              <AlertTriangle className="h-8 w-8 shrink-0 text-white/85" aria-hidden />
+            </div>
+          </HeroStatCard>
+        </div>
+
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setPanel("watch")}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setPanel("watch"); } }}
+          className="block cursor-pointer text-left"
+        >
+          <HeroStatCard
+            className="!min-h-[92px] !py-4 border border-border bg-card"
+            style={{ boxShadow: "0 0 24px -8px #d9770666" }}
+          >
+            <div className="relative flex w-full items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Secondary</div>
+                <div className="mt-1 text-xl font-semibold leading-tight text-foreground">Worth a Look</div>
+                <div className="mt-1 text-xs font-medium text-muted-foreground">
+                  {watchItems.length === 0
+                    ? "Nothing pending review"
+                    : `${watchItems.length} item${watchItems.length === 1 ? "" : "s"} to review when you can`}
+                </div>
+              </div>
+              <Eye className="h-8 w-8 shrink-0" style={{ color: "#d97706" }} aria-hidden />
+            </div>
+          </HeroStatCard>
+        </div>
+      </div>
+
+      {/* 3 — Summary cards */}
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {([
           { label: "Students", value: students.length, icon: Users2, color: "#3ebbad" },
@@ -186,107 +426,39 @@ function Overview() {
       </div>
 
 
-      {/* 3 — Snapshots 50/50 */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Students snapshot */}
-        <Card className="!p-0">
-          <div className="border-b border-border px-6 py-4"><h2 className="text-base font-semibold tracking-tight text-foreground">Students snapshot</h2></div>
-          <div className="space-y-6 p-6">
-            {studentsClean ? (
-              <EmptyState />
-            ) : (
-              <>
-                {paymentAlerts.length > 0 && (
-                  <SnapshotGroup icon={<CreditCard className="h-4 w-4" />} title="Payment due or overdue" count={paymentAlerts.length}>
-                    {paymentAlerts.map(({ s, next }) => {
-                      const d = next ? daysUntil(next) : 0;
-                      return (
-                        <SnapshotRow
-                          key={s.id}
-                          onClick={() => navigate({ to: "/admin/students", search: { student: s.id } })}
-                          title={s.name}
-                          meta={next!.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                          tone={d < 0 ? "danger" : "warning"}
-                          badge={d < 0 ? `${Math.abs(d)}d overdue` : d === 0 ? "Today" : `In ${d}d`}
-                        />
-                      );
-                    })}
-                  </SnapshotGroup>
-                )}
-                {blockedInsights.length > 0 && (
-                  <SnapshotGroup icon={<Lock className="h-4 w-4" />} title="Insights blocked — awaiting unlock" count={blockedInsights.length}>
-                    {blockedInsights.map((s) => (
-                      <SnapshotRow
-                        key={s.id}
-                        onClick={() => navigate({ to: "/admin/students", search: { student: s.id } })}
-                        title={s.name}
-                        meta={`${s.insights_strikes ?? 0}/${MAX_INSIGHT_STRIKES} strikes`}
-                        tone="danger"
-                        badge="Blocked"
-                      />
-                    ))}
-                  </SnapshotGroup>
-                )}
-              </>
-            )}
+      {/* 3 — Urgency modals */}
+      {panel === "urgent" && (
+        <AccentModal
+          background={CRIMSON_BG}
+          iconTint={CRIMSON}
+          icon={AlertTriangle}
+          eyebrow="Action Required"
+          title="Needs Immediate Action"
+          maxWidth="max-w-3xl"
+          onClose={() => setPanel(null)}
+        >
+          <div className="max-h-[65vh] overflow-y-auto p-4">
+            <UrgencyList items={urgentItems} empty="All caught up — nothing urgent right now." />
           </div>
-        </Card>
+        </AccentModal>
+      )}
 
-        {/* Teachers snapshot */}
-        <Card className="!p-0">
-          <div className="border-b border-border px-6 py-4"><h2 className="text-base font-semibold tracking-tight text-foreground">Teachers snapshot</h2></div>
-          <div className="space-y-6 p-6">
-            {teachersClean ? (
-              <EmptyState label="All caught up — no pending teacher issues." />
-            ) : (
-              <>
-                {needsReview.length > 0 && (
-                  <SnapshotGroup icon={<Star className="h-4 w-4" />} title="Low ratings needing review" count={needsReview.length}>
-                    {needsReview.map(({ t, pending }) => (
-                      <SnapshotRow
-                        key={t.id}
-                        onClick={() => navigate({ to: "/admin/teachers", search: { teacher: t.id } })}
-                        title={t.name}
-                        meta="Flagged reviews"
-                        tone="danger"
-                        badge={`${pending} pending`}
-                      />
-                    ))}
-                  </SnapshotGroup>
-                )}
-                {lowComposite.length > 0 && (
-                  <SnapshotGroup icon={<TrendingDown className="h-4 w-4" />} title={`Composite below ${ALERT_COMPOSITE}%`} count={lowComposite.length}>
-                    {lowComposite.map(({ t, kpis }) => (
-                      <SnapshotRow
-                        key={t.id}
-                        onClick={() => navigate({ to: "/admin/kpis", search: { teacher: t.id } })}
-                        title={t.name}
-                        meta="Performance alert"
-                        tone="warning"
-                        badge={`${kpis.composite}%`}
-                      />
-                    ))}
-                  </SnapshotGroup>
-                )}
-                {createdClubs.length > 0 && (
-                  <SnapshotGroup icon={<Users2 className="h-4 w-4" />} title="Clubs without teacher" count={createdClubs.length}>
-                    {createdClubs.map((c) => (
-                      <SnapshotRow
-                        key={c.id}
-                        onClick={() => navigate({ to: "/admin/clubs" })}
-                        title={c.title}
-                        meta={new Date(c.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                        tone="warning"
-                        badge="Created"
-                      />
-                    ))}
-                  </SnapshotGroup>
-                )}
-              </>
-            )}
+      {panel === "watch" && (
+        <AccentModal
+          background={AMBER_BG}
+          iconTint="#b45309"
+          icon={Eye}
+          eyebrow="Secondary"
+          title="Worth a Look"
+          maxWidth="max-w-3xl"
+          onClose={() => setPanel(null)}
+        >
+          <div className="max-h-[65vh] overflow-y-auto p-4">
+            <UrgencyList items={watchItems} empty="Nothing pending review." />
           </div>
-        </Card>
-      </div>
+        </AccentModal>
+      )}
+
 
       {/* 5 — Announcements */}
       <AnnouncementsSection />
@@ -299,51 +471,66 @@ function Overview() {
 }
 
 // ===========================================================================
-// Snapshot building blocks
+// Urgency building blocks
 // ===========================================================================
-function EmptyState({ label = "All caught up — no pending student issues." }: { label?: string }) {
-  return (
-    <div className="flex flex-col items-center justify-center py-8 text-center">
-      <CheckCircle2 className="mb-2 h-8 w-8 text-success" />
-      <p className="text-sm font-medium text-foreground">{label}</p>
-    </div>
-  );
-}
-
-function SnapshotGroup({ icon, title, count, children }: { icon: React.ReactNode; title: string; count: number; children: React.ReactNode }) {
-  return (
-    <div>
-      <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        {icon}<span>{title}</span><span className="text-muted-foreground/70">({count})</span>
-      </div>
-      <div className="space-y-1.5">{children}</div>
-    </div>
-  );
-}
-
-const TONE_CLS: Record<string, string> = {
-  danger: "bg-destructive/10 text-destructive",
-  warning: "bg-warning/20 text-foreground",
-  default: "bg-secondary text-secondary-foreground",
+export type UrgencyItem = {
+  id: string;
+  icon: LucideIcon;
+  accent: string;
+  title: string;
+  meta: string;
+  badge: string;
+  ctaLabel: string;
+  onClick: () => void;
+  /** Highest time intensity (<1h or overdue) — pulsing glow on the icon chip. */
+  glow?: boolean;
 };
 
-function SnapshotRow({ onClick, title, meta, badge, tone = "default" }: {
-  onClick: () => void; title: string; meta: string; badge: string; tone?: "danger" | "warning" | "default";
-}) {
+function UrgencyRow({ item }: { item: UrgencyItem }) {
+  const Icon = item.icon;
   return (
     <button
-      onClick={onClick}
-      className="group flex w-full items-center gap-3 rounded-lg border border-border bg-background px-3 py-2 text-left transition-colors hover:bg-secondary/50"
+      onClick={item.onClick}
+      className="group flex w-full items-stretch overflow-hidden rounded-xl border border-border bg-card text-left transition-colors hover:bg-secondary/40"
     >
-      <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-foreground">{title}</div>
-        <div className="truncate text-xs text-muted-foreground">{meta}</div>
-      </div>
-      <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${TONE_CLS[tone]}`}>{badge}</span>
-      <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+      <span className="w-1.5 shrink-0" style={{ background: item.accent }} aria-hidden />
+      <span className="flex flex-1 items-center gap-3 py-3 pl-3 pr-3">
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${item.glow ? "animate-report-glow" : ""}`}
+          style={{ background: `${item.accent}1f` }}
+        >
+          <Icon className="h-4 w-4" style={{ color: item.accent }} />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-medium text-foreground">{item.title}</span>
+          <span className="block truncate text-xs text-muted-foreground">{item.meta}</span>
+        </span>
+        <span
+          className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+          style={{ background: `${item.accent}1f`, color: item.accent }}
+        >
+          {item.badge}
+        </span>
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors group-hover:bg-secondary">
+          {item.ctaLabel} <ChevronRight className="h-3 w-3" />
+        </span>
+      </span>
     </button>
   );
 }
+
+function UrgencyList({ items, empty }: { items: UrgencyItem[]; empty: string }) {
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-10 text-center">
+        <CheckCircle2 className="mb-2 h-8 w-8 text-success" />
+        <p className="text-sm font-medium text-foreground">{empty}</p>
+      </div>
+    );
+  }
+  return <div className="space-y-2">{items.map((it) => <UrgencyRow key={it.id} item={it} />)}</div>;
+}
+
 
 // ===========================================================================
 // 5 — Announcements section
