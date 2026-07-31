@@ -933,9 +933,9 @@ function StudentFormModal({
                             key={lvl}
                             type="button"
                             onClick={() => toggleLevel(lvl)}
-                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-foreground hover:border-primary/40"}`}
+                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-[#01304a] bg-[#01304a] text-white" : "border-border bg-background text-foreground hover:border-[#01304a]/40"}`}
                           >
-                            {active && <Check className="mr-1 inline h-3.5 w-3.5" />}{lvl}
+                            {active && <Check className="mr-1 inline h-3.5 w-3.5 text-white" />}{lvl}
                           </button>
                         );
                       })}
