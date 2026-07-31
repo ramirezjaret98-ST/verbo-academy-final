@@ -1128,11 +1128,11 @@ function SeasonChallengesModal({ season, onClose }: { season: FlashSeason; onClo
             </div>
           )}
         </div>
-
-        <div className="flex items-center justify-end gap-3 border-t border-border bg-secondary/30 p-4">
-          <GhostButton onClick={onClose}>Close</GhostButton>
-        </div>
       </div>
+
+      <AccentModalFooter>
+        <GhostButton onClick={onClose}>Close</GhostButton>
+      </AccentModalFooter>
 
       {modal && (
         <FlashModal
@@ -1149,7 +1149,7 @@ function SeasonChallengesModal({ season, onClose }: { season: FlashSeason; onClo
           onSave={(cs) => { save(cs); setModal(null); }}
         />
       )}
-    </div>
+    </AccentModal>
   );
 }
 
