@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AccentModal, Card, GhostButton, Pill, PrimaryButton, SectionTitle } from "@/components/verbo/ui";
+import { AccentModal, AccentModalFooter, Card, GhostButton, Pill, PrimaryButton, SectionTitle } from "@/components/verbo/ui";
+import type { LucideIcon } from "lucide-react";
 import { USERS } from "@/lib/mock-data";
 import { appendTeacherAdjustment } from "@/lib/teacher-tiers";
 import {
