@@ -125,33 +125,35 @@ function Page() {
 
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {([
-          {
-            label: "Avg rating (all teachers)",
-            value: overallAvg,
-            icon: Star,
-            color: "#01304a",
-          },
-          {
-            label: "Sessions tracked",
-            value: SESSIONS.length,
-            icon: CalendarClock,
-            color: "#3ebbad",
-          },
-          {
-            label: "Teachers",
-            value: teachers.length,
-            icon: GraduationCap,
-            color: "#7e22ce",
-          },
-          {
-            label: "Avg composite score",
-            value: avgComposite,
-            suffix: "%",
-            icon: TrendingUp,
-            color: "#d97706",
-          },
-        ] as const).map((m) => {
+        {(
+          [
+            {
+              label: "Avg rating (all teachers)",
+              value: `${overallAvg}★`,
+              icon: Star,
+              color: "#01304a",
+            },
+            {
+              label: "Sessions tracked",
+              value: SESSIONS.length,
+              icon: CalendarClock,
+              color: "#3ebbad",
+            },
+            {
+              label: "Teachers",
+              value: teachers.length,
+              icon: GraduationCap,
+              color: "#7e22ce",
+            },
+            {
+              label: "Avg composite score",
+              value: avgComposite,
+              suffix: "%",
+              icon: TrendingUp,
+              color: "#d97706",
+            },
+          ] as { label: string; value: number | string; icon: LucideIcon; color: string; suffix?: string }[]
+        ).map((m) => {
           const Icon = m.icon;
           return (
             <HeroStatCard
@@ -165,7 +167,7 @@ function Page() {
               <div className="relative w-full">
                 <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{m.label}</div>
                 <div className="mt-2 text-5xl font-bold leading-none text-foreground">
-                  <AnimatedNumber value={m.value} suffix={m.suffix} />
+                  {typeof m.value === "number" ? <AnimatedNumber value={m.value} suffix={m.suffix} /> : m.value}
                 </div>
               </div>
             </HeroStatCard>
