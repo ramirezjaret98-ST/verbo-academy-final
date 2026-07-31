@@ -70,6 +70,7 @@ function Page() {
         <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
           Technical problems students reported from a course unit or a challenge —
           broken files, content that won't load, submissions or streaks not counted.
+          Mark each one as resolved or dismissed once you've handled it.
         </p>
       </header>
 
