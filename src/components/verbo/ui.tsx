@@ -44,7 +44,7 @@ export function AccentModalHeader({
     : "radial-gradient(circle, rgba(0,0,0,0.35), transparent 70%)";
   return (
     <div
-      className={`relative overflow-hidden px-4 py-4 ${dark ? "border-b border-border" : ""}`}
+      className={`relative overflow-hidden px-4 py-3 shrink-0 ${dark ? "border-b border-border" : ""}`}
       style={{ background }}
     >
       {/* Decorative blobs */}
