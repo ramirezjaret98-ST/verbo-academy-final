@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Plus, X, Users as UsersIcon, Building2, CreditCard, Trash2, RotateCcw,
   ArrowRightLeft, Archive, ChevronRight, ShieldAlert, CalendarClock,
+  GraduationCap, Sparkles,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import { USERS, ASSIGNMENTS, userById, type User } from "@/lib/mock-data";
 import {
@@ -19,7 +21,7 @@ import {
   moveMember, markGroupAsPaid, activeMembersOf, membersOf, pendingCountdownDays,
   groupById, sessionProgressFor, type Group, type GroupMember,
 } from "@/lib/groups-store";
-import { Card, GhostButton, PrimaryButton } from "@/components/verbo/ui";
+import { Card, GhostButton, PrimaryButton, AccentModal, AccentModalFooter } from "@/components/verbo/ui";
 import { loadSessions, addGroupSession, type ExtSession } from "@/lib/sessions-store";
 import { loadHolidays } from "@/lib/holidays-store";
 import { RescheduleModal } from "@/components/verbo/RescheduleModal";
@@ -261,10 +263,20 @@ function RegisterGroupModal({ onClose, onSaved }: { onClose: () => void; onSaved
   };
 
   return (
-    <Overlay onClose={onClose}>
-      <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-card shadow-floating">
-        <ModalHeader kicker="New registration" title="Register Group" onClose={onClose} />
-        <div className="max-h-[75vh] space-y-6 overflow-y-auto px-6 py-6">
+    <AccentModal
+      background="linear-gradient(135deg, #7cd7cb 0%, #3ebbad 100%)"
+      textTone="dark"
+      iconTint="#3ebbad"
+      icon={UsersIcon}
+      eyebrow="New registration"
+      title="Register Group"
+      watermark={{ type: "text", value: "GROUP" }}
+      maxWidth="max-w-2xl"
+      onClose={onClose}
+    >
+      <div className="max-h-[75vh] space-y-6 overflow-y-auto px-6 py-6">
+        <div className="space-y-4">
+          <GroupSectionBanner color="#01304a" textColor="#ffffff" icon={Building2} title="Group Info" />
           <div>
             <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Registration Type</div>
             <div className="inline-flex rounded-lg border border-border bg-background p-0.5">
@@ -285,39 +297,44 @@ function RegisterGroupModal({ onClose, onSaved }: { onClose: () => void; onSaved
               <input type="number" min={2} className={inputCls} value={maxCapacity} onChange={(e) => setMaxCapacity(Math.max(2, Number(e.target.value) || 2))} />
             </Field>
           </div>
+        </div>
 
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <div className="text-xs font-semibold uppercase text-muted-foreground">Group Members</div>
-              <button
-                type="button"
-                onClick={addMemberRow}
-                disabled={members.length >= maxCapacity}
-                className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-foreground disabled:opacity-40"
-              >
-                <Plus className="h-3 w-3" /> Add Member
-              </button>
-            </div>
-            <div className="space-y-3">
-              {members.map((m, i) => (
-                <div key={i} className="rounded-lg border border-border bg-background p-3">
-                  <div className="mb-2 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-foreground">Member #{i + 1}</span>
-                    {members.length > 2 && (
-                      <button onClick={() => removeMemberRow(i)} className="text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                    <input className={inputCls} placeholder="Student Name" value={m.name} onChange={(e) => setMember(i, { name: e.target.value })} />
-                    <input className={inputCls} placeholder="Email" value={m.email} onChange={(e) => setMember(i, { email: e.target.value })} />
-                    <input className={inputCls} placeholder="Initial Password" value={m.password} onChange={(e) => setMember(i, { password: e.target.value })} />
-                    <input type="date" className={inputCls} value={m.member_since} onChange={(e) => setMember(i, { member_since: e.target.value })} />
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div>
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <GroupSectionBanner color="#3ebbad" textColor="#0b2b28" icon={UsersIcon} title="Group Members" className="flex-1" />
+            <button
+              type="button"
+              onClick={addMemberRow}
+              disabled={members.length >= maxCapacity}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-foreground disabled:opacity-40"
+            >
+              <Plus className="h-3 w-3" /> Add Member
+            </button>
           </div>
+          <div className="space-y-3">
+            {members.map((m, i) => (
+              <div key={i} className="rounded-lg border border-border border-l-4 border-l-[#3ebbad] bg-background p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold" style={{ background: "#3ebbad", color: "#0b2b28" }}>
+                    Member #{i + 1}
+                  </span>
+                  {members.length > 2 && (
+                    <button onClick={() => removeMemberRow(i)} className="text-muted-foreground hover:text-destructive"><X className="h-4 w-4" /></button>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                  <input className={inputCls} placeholder="Student Name" value={m.name} onChange={(e) => setMember(i, { name: e.target.value })} />
+                  <input className={inputCls} placeholder="Email" value={m.email} onChange={(e) => setMember(i, { email: e.target.value })} />
+                  <input className={inputCls} placeholder="Initial Password" value={m.password} onChange={(e) => setMember(i, { password: e.target.value })} />
+                  <input type="date" className={inputCls} value={m.member_since} onChange={(e) => setMember(i, { member_since: e.target.value })} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
+        <div className="space-y-4">
+          <GroupSectionBanner color="#d97706" textColor="#ffffff" icon={GraduationCap} title="Program & Plan" />
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="Product">
               <select className={inputCls} value={product} onChange={(e) => setProduct(e.target.value as ProductId)}>
@@ -368,32 +385,50 @@ function RegisterGroupModal({ onClose, onSaved }: { onClose: () => void; onSaved
               </select>
             </Field>
           </div>
+        </div>
 
-          <div>
-            <div className="mb-2 text-xs font-semibold uppercase text-muted-foreground">Add-on Access (per member, per month)</div>
-            <div className="grid grid-cols-3 gap-3">
-              <Field label="Insights / month">
-                <input type="number" min={0} className={inputCls} value={addonInsights} onChange={(e) => setAddonInsights(Number(e.target.value) || 0)} />
-              </Field>
-              <Field label="Book Clubs / month">
-                <input type="number" min={0} className={inputCls} value={addonBookclubs} onChange={(e) => setAddonBookclubs(Number(e.target.value) || 0)} />
-              </Field>
-              <Field label="Spotlight / month">
-                <input type="number" min={0} className={inputCls} value={addonSpotlight} onChange={(e) => setAddonSpotlight(Number(e.target.value) || 0)} />
-              </Field>
-            </div>
+        <div className="space-y-4">
+          <GroupSectionBanner color="#7e22ce" textColor="#ffffff" icon={Sparkles} title="Add-on Access (per member, per month)" />
+          <div className="grid grid-cols-3 gap-3">
+            <Field label="Insights / month">
+              <input type="number" min={0} className={inputCls} value={addonInsights} onChange={(e) => setAddonInsights(Number(e.target.value) || 0)} />
+            </Field>
+            <Field label="Book Clubs / month">
+              <input type="number" min={0} className={inputCls} value={addonBookclubs} onChange={(e) => setAddonBookclubs(Number(e.target.value) || 0)} />
+            </Field>
+            <Field label="Spotlight / month">
+              <input type="number" min={0} className={inputCls} value={addonSpotlight} onChange={(e) => setAddonSpotlight(Number(e.target.value) || 0)} />
+            </Field>
           </div>
         </div>
-        <div className="flex items-center justify-end gap-2 border-t border-border bg-secondary/50 px-6 py-3">
-          <GhostButton onClick={onClose}>Cancel</GhostButton>
-          <PrimaryButton onClick={handleSave} disabled={!isValid} className={!isValid ? "opacity-50 cursor-not-allowed" : ""}>
-            Register Group
-          </PrimaryButton>
-        </div>
       </div>
-    </Overlay>
+
+      <AccentModalFooter>
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton
+          accentColor="#5fca16"
+          className={`hover:!bg-[#4fb010] ${!isValid ? "opacity-50 cursor-not-allowed" : ""}`}
+          onClick={handleSave}
+          disabled={!isValid}
+        >
+          Register Group
+        </PrimaryButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }
+
+function GroupSectionBanner({
+  color, textColor, icon: Icon, title, className = "",
+}: { color: string; textColor: string; icon: LucideIcon; title: string; className?: string }) {
+  return (
+    <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${className}`} style={{ background: color }}>
+      <Icon className="h-3.5 w-3.5" style={{ color: textColor }} />
+      <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: textColor }}>{title}</span>
+    </div>
+  );
+}
+
 
 function GroupRescheduleButton({ groupId }: { groupId: string }) {
   const [session, setSession] = useState<ExtSession | null>(null);
