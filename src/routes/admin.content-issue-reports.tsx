@@ -91,6 +91,8 @@ function Page() {
                 <th className="px-6 py-3 font-medium">Where</th>
                 <th className="px-6 py-3 font-medium">Issue</th>
                 <th className="px-6 py-3 font-medium">Details</th>
+                <th className="px-6 py-3 font-medium">Status</th>
+                <th className="px-6 py-3 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
