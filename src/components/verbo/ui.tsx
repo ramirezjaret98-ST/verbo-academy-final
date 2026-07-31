@@ -292,7 +292,7 @@ export function SectionTitle({ children, action }: { children: ReactNode; action
   );
 }
 
-export function Pill({ children, tone = "default" }: { children: ReactNode; tone?: "default" | "success" | "warning" | "danger" | "muted" | "elite" }) {
+export function Pill({ children, tone = "default", style }: { children: ReactNode; tone?: "default" | "success" | "warning" | "danger" | "muted" | "elite"; style?: React.CSSProperties }) {
   const tones: Record<string, string> = {
     default: "bg-secondary text-secondary-foreground",
     success: "bg-success/10 text-success",
@@ -302,7 +302,7 @@ export function Pill({ children, tone = "default" }: { children: ReactNode; tone
     elite: "bg-[var(--tier-elite-soft)] text-[var(--tier-elite)]",
   };
   return (
-    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${tones[tone]}`}>
+    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${tones[tone]}`} style={style}>
       {children}
     </span>
   );

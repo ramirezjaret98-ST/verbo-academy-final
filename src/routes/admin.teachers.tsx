@@ -27,8 +27,9 @@ import {
   Plus, X, Eye, EyeOff, Star, Users, Clock, KeyRound, Snowflake, Ban, Play,
   Pencil, Search, Filter, ArrowUpDown, Check, AlertTriangle, Mail, ShieldAlert,
   CheckCircle2, CalendarClock, ChevronRight, UserX, Wallet, FileDown, CircleDollarSign, Trophy,
-  ShieldCheck,
+  ShieldCheck, Zap,
 } from "lucide-react";
+import { HeroStatCard, Pill } from "@/components/verbo/ui";
 import { useAuth } from "@/lib/auth";
 import { getAdminType } from "@/lib/admin-roles";
 import { KpiOverrideModal } from "@/components/verbo/KpiOverrideModal";
@@ -579,22 +580,28 @@ function TeacherDetailModal({
           {tab === "kpis" && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <BigStat
+                <KpiHeroStat
                   label="Avg. rating"
                   value={avgRating(t) != null ? avgRating(t)!.toFixed(1) : "—"}
+                  icon={Star}
+                  color="#d97706"
                   onAdjust={canOverride ? () => setOverrideTarget({ metric: "ratingNormalized", currentValue: computeTeacherKpis(t).ratingNormalized }) : undefined}
                 />
-                <BigStat
+                <KpiHeroStat
                   label="Planning on time"
                   value={`${t.plan_punctuality ?? 0}%`}
+                  icon={CalendarClock}
+                  color="#01304a"
                   onAdjust={canOverride ? () => setOverrideTarget({ metric: "planningPunctuality", currentValue: computeTeacherKpis(t).planningPunctuality }) : undefined}
                 />
-                <BigStat
+                <KpiHeroStat
                   label="Responsiveness"
                   value={`${computeTeacherKpis(t).responsiveness}%`}
+                  icon={Zap}
+                  color="#3ebbad"
                   onAdjust={canOverride ? () => setOverrideTarget({ metric: "responsiveness", currentValue: computeTeacherKpis(t).responsiveness }) : undefined}
                 />
-                <BigStat label="Hours this month" value={`${t.hours_month ?? 0}h`} />
+                <KpiHeroStat label="Hours this month" value={`${t.hours_month ?? 0}h`} icon={Clock} color="#a34ac0" />
               </div>
 
               <p className="rounded-lg bg-muted px-3 py-2 text-[11px] text-muted-foreground">Full breakdown and history live in the global <span className="font-medium text-foreground">KPIs</span> page.</p>
@@ -1063,12 +1070,11 @@ function FlaggedRow({
   const rowCls = resolved
     ? "border-border bg-background"
     : "border-destructive/30 bg-destructive/5";
-  const tagCls = reviewed
-    ? "bg-success/10 text-success"
+  const tag = reviewed
+    ? <Pill style={{ backgroundColor: "rgba(95,202,22,0.15)", color: "#3f7d0a" }}>Reviewed</Pill>
     : discarded
-      ? "bg-muted text-muted-foreground"
-      : "bg-destructive/10 text-destructive";
-  const tagLabel = reviewed ? "Reviewed" : discarded ? "Discarded" : "Pending Review";
+      ? <Pill tone="muted">Discarded</Pill>
+      : <Pill tone="danger">Pending Review</Pill>;
 
   const submit = () => {
     if (!note.trim()) return;
@@ -1092,7 +1098,7 @@ function FlaggedRow({
           </div>
           <div className="text-[11px] text-muted-foreground">{new Date(s.date_time).toLocaleDateString()}</div>
         </div>
-        <Tag className={tagCls}>{tagLabel}</Tag>
+        {tag}
       </div>
       {s.student_comment && <p className="mt-2 text-sm text-foreground">“{s.student_comment}”</p>}
       {resolved && s.review_note && (
@@ -1297,6 +1303,40 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
+function KpiHeroStat({
+  label, value, icon: Icon, color, onAdjust,
+}: {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number }>;
+  color: string;
+  onAdjust?: () => void;
+}) {
+  return (
+    <HeroStatCard className="!min-h-[132px] !items-start border border-border bg-card" style={{ boxShadow: `0 0 24px -8px ${color}66` }}>
+      <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-xl">
+        <Icon className="h-7 w-7" style={{ color }} strokeWidth={1.75} />
+      </div>
+      <div className="relative w-full">
+        <div className="flex items-center gap-1.5">
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
+          {onAdjust && (
+            <button
+              onClick={onAdjust}
+              title="Manual KPI override"
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+        <div className="mt-2 text-4xl font-bold leading-none text-foreground">{value}</div>
+      </div>
+    </HeroStatCard>
+  );
+}
+
+
 function BigStat({ label, value, onAdjust }: { label: string; value: string; onAdjust?: () => void }) {
   return (
     <div className="relative rounded-xl border border-border bg-background p-4 text-center">
@@ -1339,10 +1379,13 @@ function StrikesSection({ teacherId }: { teacherId: string }) {
                   <div className="text-sm font-medium text-foreground">
                     {CANCEL_REASON_LABEL[s.reason]}
                     {s.needs_substitute && !s.substitute_found && (
-                      <span className="ml-2 rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">Needs Substitute</span>
+                      <span className="ml-2 rounded-full bg-warning/15 px-1.5 py-0.5 text-[10px] font-semibold text-foreground">Needs Substitute</span>
                     )}
                     {s.justified && s.justification_cause && (
-                      <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-success/15 px-1.5 py-0.5 text-[10px] font-semibold text-success">
+                      <span
+                        className="ml-2 inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold"
+                        style={{ backgroundColor: "rgba(95,202,22,0.15)", color: "#3f7d0a" }}
+                      >
                         <ShieldCheck className="h-3 w-3" /> {JUSTIFICATION_LABEL[s.justification_cause]}
                       </span>
                     )}
