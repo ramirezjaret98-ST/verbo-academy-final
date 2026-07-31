@@ -9,7 +9,9 @@ import {
   computeTeacherKpis, ratingBand, ratingHistory,
   getBonusThreshold, setBonusThreshold,
 } from "@/lib/teacher-kpis";
-import { MetricCard, SectionTitle, HeroStatCard, AnimatedNumber } from "@/components/verbo/ui";
+import { MetricCard, SectionTitle, HeroStatCard, AnimatedNumber, AccentModal, AccentModalFooter, GhostButton } from "@/components/verbo/ui";
+import { teacherTier } from "@/lib/teacher-tiers";
+import { FlaggedRow } from "@/routes/admin.teachers";
 import { BonusBadge } from "@/components/verbo/BonusBadge";
 import { KpiOverrideModal } from "@/components/verbo/KpiOverrideModal";
 import { useAuth } from "@/lib/auth";
@@ -19,7 +21,7 @@ import {
 } from "@/lib/teacher-kpi-overrides-store";
 import { monthKeyOf } from "@/lib/teacher-kpi-history-store";
 import {
-  Star, AlertTriangle, TrendingUp, SlidersHorizontal, Pencil, ShieldCheck, X,
+  Star, AlertTriangle, TrendingUp, ClipboardList, SlidersHorizontal, Pencil, ShieldCheck, X,
   CalendarClock, GraduationCap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -42,6 +44,21 @@ function read<T>(key: string, fallback: T): T {
   try { return JSON.parse(localStorage.getItem(key) || "null") ?? fallback; } catch { return fallback; }
 }
 
+function write(key: string, val: unknown) {
+  if (typeof window === "undefined") return;
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch { /* noop */ }
+}
+
+/** Solid pill colors per teacher tier (visual only). */
+const TIER_COLORS: Record<string, { bg: string; fg: string }> = {
+  Rising: { bg: "#01304a", fg: "#ffffff" },
+  Established: { bg: "#3ebbad", fg: "#0b2b28" },
+  Distinguished: { bg: "#7e22ce", fg: "#ffffff" },
+  Signature: { bg: "#d97706", fg: "#ffffff" },
+};
+
+const REVIEW_PULSE = "#dc2626";
+
 function Page() {
   const { teacher: focusTeacher } = Route.useSearch();
   const navigate = Route.useNavigate();
@@ -63,6 +80,25 @@ function Page() {
   const [overrideTarget, setOverrideTarget] = useState<
     { teacher: User; metric: KpiMetric; currentValue: number } | null
   >(null);
+  const [reviewTarget, setReviewTarget] = useState<User | null>(null);
+
+  const markReviewed = (sessionId: string, note: string) => {
+    const s = SESSIONS.find((x) => x.id === sessionId);
+    if (s) { s.review_status = "reviewed"; s.review_note = note; }
+    const reviews = read<Record<string, Partial<Session>>>(REVIEW_KEY, {});
+    reviews[sessionId] = { review_status: "reviewed", review_note: note };
+    write(REVIEW_KEY, reviews);
+    forceTick((n) => n + 1);
+  };
+
+  const discardReview = (sessionId: string, note: string) => {
+    const s = SESSIONS.find((x) => x.id === sessionId);
+    if (s) { s.review_status = "discarded"; s.review_note = note; }
+    const reviews = read<Record<string, Partial<Session>>>(REVIEW_KEY, {});
+    reviews[sessionId] = { review_status: "discarded", review_note: note };
+    write(REVIEW_KEY, reviews);
+    forceTick((n) => n + 1);
+  };
 
 
   useEffect(() => {
@@ -227,11 +263,22 @@ function Page() {
                   setOverrideTarget({ teacher: t, metric, currentValue })
                 }
                 onOpenChart={() => setChartFor(t)}
+                onOpenReviews={() => setReviewTarget(t)}
               />
             ))}
           </div>
         )}
       </section>
+
+      {reviewTarget && (
+        <PendingReviewsModal
+          teacher={reviewTarget}
+          canDiscard={canOverride}
+          onMarkReviewed={markReviewed}
+          onDiscardReview={discardReview}
+          onClose={() => setReviewTarget(null)}
+        />
+      )}
 
       {chartFor && <RatingChartModal teacher={chartFor} onClose={() => setChartFor(null)} />}
       {overrideTarget && (
@@ -252,12 +299,13 @@ function Page() {
 // TEACHER CARD
 // ===========================================================================
 function TeacherKpiCard({
-  teacher: t, kpis, pending, onOpenChart, canOverride, canOverrideStreak, onOverride,
+  teacher: t, kpis, pending, onOpenChart, onOpenReviews, canOverride, canOverrideStreak, onOverride,
 }: {
   teacher: User;
   kpis: ReturnType<typeof computeTeacherKpis>;
   pending: number;
   onOpenChart: () => void;
+  onOpenReviews: () => void;
   canOverride: boolean;
   canOverrideStreak: boolean;
   onOverride: (metric: KpiMetric, currentValue: number) => void;
@@ -273,23 +321,42 @@ function TeacherKpiCard({
       ? kpis.bonusStatus.streak
       : 0;
 
+  const tier = teacherTier(t);
+  const tierColor = TIER_COLORS[tier.name] ?? TIER_COLORS.Rising;
+  const needsReview = pending > 0;
+
   return (
-    <div className="flex flex-col rounded-2xl border border-border bg-card p-5 shadow-soft">
+    <div
+      className={`flex flex-col rounded-2xl border border-border bg-card p-5 shadow-soft${needsReview ? " verbo-focus-pulse cursor-pointer" : ""}`}
+      style={needsReview ? ({ ["--verbo-focus-pulse-color" as string]: REVIEW_PULSE } as React.CSSProperties) : undefined}
+      onClick={needsReview ? onOpenReviews : undefined}
+      role={needsReview ? "button" : undefined}
+      title={needsReview ? "View sessions needing review" : undefined}
+    >
       {/* Header */}
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-2 pb-3">
         <div className="min-w-0">
-          <div className="truncate font-semibold text-foreground">{t.name}</div>
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="truncate text-lg font-bold tracking-tight text-foreground">{t.name}</span>
+            <span
+              className="inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+              style={{ backgroundColor: tierColor.bg, color: tierColor.fg }}
+            >
+              {tier.name}
+            </span>
+          </div>
           <div className="truncate text-xs text-muted-foreground">{t.email}</div>
         </div>
-        {pending > 0 && (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive">
-            <AlertTriangle className="h-3 w-3" /> Needs Review ({pending})
-          </span>
+        {needsReview && (
+          <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
         )}
       </div>
 
       {/* Rating + bonus */}
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div
+        className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button
           onClick={onOpenChart}
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-transform hover:scale-105"
@@ -327,7 +394,10 @@ function TeacherKpiCard({
       </div>
 
       {/* Composite score — prominent */}
-      <div className="mt-4 flex items-center gap-4 rounded-xl border border-border bg-secondary/30 p-4">
+      <div
+        className="mt-4 flex items-center gap-4 rounded-xl border border-border border-t-border/60 bg-secondary/30 p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
         <CompositeRing value={kpis.composite} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-2">
@@ -355,7 +425,7 @@ function TeacherKpiCard({
       </div>
 
       {/* Metric bars */}
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 space-y-3 border-t border-border/60 pt-4" onClick={(e) => e.stopPropagation()}>
         <KpiBar label="Connection punctuality" value={kpis.connectionPunctuality} metric="connectionPunctuality" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.connectionPunctuality} />
         <KpiBar label="Planning punctuality" value={kpis.planningPunctuality} metric="planningPunctuality" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.planningPunctuality} />
         <KpiBar label="Session completion rate" value={kpis.completionRate} metric="completionRate" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.completionRate} />
@@ -491,5 +561,51 @@ function RatingChartModal({ teacher: t, onClose }: { teacher: User; onClose: () 
         </div>
       </div>
     </div>
+  );
+}
+
+// ===========================================================================
+// PENDING REVIEWS MODAL
+// ===========================================================================
+function PendingReviewsModal({
+  teacher, canDiscard, onMarkReviewed, onDiscardReview, onClose,
+}: {
+  teacher: User;
+  canDiscard: boolean;
+  onMarkReviewed: (id: string, note: string) => void;
+  onDiscardReview: (id: string, note: string) => void;
+  onClose: () => void;
+}) {
+  const sessions = pendingReviews(teacher.id);
+  return (
+    <AccentModal
+      background="linear-gradient(135deg, #01304a 0%, #02466b 100%)"
+      iconTint="#ffffff"
+      icon={ClipboardList}
+      eyebrow="Sessions needing review"
+      title={teacher.name}
+      watermark={{ kind: "icon", icon: ClipboardList }}
+      maxWidth="max-w-lg"
+      onClose={onClose}
+    >
+      <div className="max-h-[60vh] space-y-2.5 overflow-y-auto p-4">
+        {sessions.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">No sessions pending review.</p>
+        ) : (
+          sessions.map((s) => (
+            <FlaggedRow
+              key={s.id}
+              session={s}
+              onMarkReviewed={onMarkReviewed}
+              onDiscardReview={onDiscardReview}
+              canDiscard={canDiscard}
+            />
+          ))
+        )}
+      </div>
+      <AccentModalFooter>
+        <GhostButton onClick={onClose}>Close</GhostButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }
