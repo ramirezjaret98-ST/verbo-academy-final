@@ -31,6 +31,8 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { getAdminType } from "@/lib/admin-roles";
+import { KpiOverrideModal } from "@/components/verbo/KpiOverrideModal";
+import type { KpiMetric } from "@/lib/teacher-kpi-overrides-store";
 
 export const Route = createFileRoute("/admin/teachers")({
   component: Page,
@@ -389,6 +391,17 @@ function TeacherDetailModal({
   const [notes, setNotes] = useState(t.admin_notes ?? "");
   const [addAdjOpen, setAddAdjOpen] = useState(false);
 
+  // KPI manual override (super_admin / coordinator_ops only)
+  const { user: adminUser } = useAuth();
+  const adminType = getAdminType(adminUser);
+  const canOverride = adminType === "super_admin" || adminType === "coordinator_ops";
+  const admin = adminUser
+    ? { id: adminUser.id, name: adminUser.name, admin_type: adminType }
+    : { id: "", name: "", admin_type: null };
+  const [overrideTarget, setOverrideTarget] = useState<{ metric: KpiMetric; currentValue: number } | null>(null);
+  const [, forceTick] = useState(0);
+
+
   // Guided freeze / remove flow
   const [flow, setFlow] = useState<null | "frozen" | "removed">(null);
   const [reassignMap, setReassignMap] = useState<Record<string, string>>({});
@@ -539,7 +552,7 @@ function TeacherDetailModal({
                               <div className="truncate text-sm font-medium text-foreground">{s.name}</div>
                               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">{prod && <Tag className="bg-primary/10 text-primary">{prod.name}</Tag>}{(s.status ?? "active") === "suspended" && <Tag className="bg-muted text-muted-foreground">Suspended</Tag>}</div>
                             </div>
-                            <GhostBtn onClick={() => setReassignFor(reassignFor === s.id ? null : s.id)}><Users className="h-3.5 w-3.5" /> Reassign</GhostBtn>
+                            <button onClick={() => setReassignFor(reassignFor === s.id ? null : s.id)} className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#0f766e] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90"><Users className="h-3.5 w-3.5" /> Reassign</button>
                           </div>
                           {reassignFor === s.id && (
                             <div className="mt-2 flex items-end gap-2 border-t border-border pt-2">
@@ -566,9 +579,21 @@ function TeacherDetailModal({
           {tab === "kpis" && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <BigStat label="Avg. rating" value={avgRating(t) != null ? avgRating(t)!.toFixed(1) : "—"} />
-                <BigStat label="Planning on time" value={`${t.plan_punctuality ?? 0}%`} />
-                <BigStat label="Responsiveness" value={`${computeTeacherKpis(t).responsiveness}%`} />
+                <BigStat
+                  label="Avg. rating"
+                  value={avgRating(t) != null ? avgRating(t)!.toFixed(1) : "—"}
+                  onAdjust={canOverride ? () => setOverrideTarget({ metric: "ratingNormalized", currentValue: computeTeacherKpis(t).ratingNormalized }) : undefined}
+                />
+                <BigStat
+                  label="Planning on time"
+                  value={`${t.plan_punctuality ?? 0}%`}
+                  onAdjust={canOverride ? () => setOverrideTarget({ metric: "planningPunctuality", currentValue: computeTeacherKpis(t).planningPunctuality }) : undefined}
+                />
+                <BigStat
+                  label="Responsiveness"
+                  value={`${computeTeacherKpis(t).responsiveness}%`}
+                  onAdjust={canOverride ? () => setOverrideTarget({ metric: "responsiveness", currentValue: computeTeacherKpis(t).responsiveness }) : undefined}
+                />
                 <BigStat label="Hours this month" value={`${t.hours_month ?? 0}h`} />
               </div>
 
@@ -679,11 +704,11 @@ function TeacherDetailModal({
         {!flow && (
           <div className="flex flex-wrap items-center gap-2 border-t border-border bg-secondary/30 px-6 py-4">
             <GhostBtn onClick={onEdit}><Pencil className="h-3.5 w-3.5" /> Edit profile</GhostBtn>
-            <GhostBtn onClick={() => { onPersist({ ...t, must_change_password: true }); alert("This user will be asked to set a new password the next time they log in."); }}><KeyRound className="h-3.5 w-3.5" /> Reset password</GhostBtn>
+            <GhostBtn onClick={() => { onPersist({ ...t, must_change_password: true }); alert("This user will be asked to set a new password the next time they log in."); }}><KeyRound className="h-3.5 w-3.5" /> Require Password Reset</GhostBtn>
             {status === "frozen" ? (
               <GhostBtn onClick={() => onPersist(applyStatusPatch(t, "active"))}><Play className="h-3.5 w-3.5" /> Reactivate</GhostBtn>
             ) : status === "active" ? (
-              <GhostBtn onClick={() => startFlow("frozen")}><Snowflake className="h-3.5 w-3.5" /> Freeze</GhostBtn>
+              <button onClick={() => startFlow("frozen")} className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#38bdf8] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90"><Snowflake className="h-3.5 w-3.5" /> Freeze</button>
             ) : null}
             {status !== "removed" && (
               <button onClick={() => startFlow("removed")} className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground shadow-sm transition-opacity hover:opacity-90">
@@ -702,6 +727,17 @@ function TeacherDetailModal({
             onPersist({ ...t, adjustments: [...(t.adjustments ?? []), adj] });
             setAddAdjOpen(false);
           }}
+        />
+      )}
+
+      {overrideTarget && (
+        <KpiOverrideModal
+          teacher={t}
+          metric={overrideTarget.metric}
+          currentValue={overrideTarget.currentValue}
+          admin={admin}
+          onClose={() => setOverrideTarget(null)}
+          onSaved={() => { forceTick((n) => n + 1); setOverrideTarget(null); }}
         />
       )}
     </Overlay>
@@ -1261,9 +1297,18 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
-function BigStat({ label, value }: { label: string; value: string }) {
+function BigStat({ label, value, onAdjust }: { label: string; value: string; onAdjust?: () => void }) {
   return (
-    <div className="rounded-xl border border-border bg-background p-4 text-center">
+    <div className="relative rounded-xl border border-border bg-background p-4 text-center">
+      {onAdjust && (
+        <button
+          onClick={onAdjust}
+          title="Manual KPI override"
+          className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
       <div className="text-2xl font-semibold text-foreground">{value}</div>
       <div className="mt-1 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
