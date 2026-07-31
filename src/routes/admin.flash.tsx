@@ -1040,19 +1040,17 @@ function SeasonChallengesModal({ season, onClose }: { season: FlashSeason; onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
-      <div className="my-8 w-full max-w-3xl overflow-hidden rounded-2xl border border-border bg-card shadow-elevated">
-        <div
-          className="flex items-start justify-between gap-4 p-6 text-white"
-          style={{ background: seasonGradientCss(season) }}
-        >
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/70">Verbo Flash · Season</div>
-            <div className="mt-0.5 text-base font-semibold tracking-tight">{season.display_name} Challenges</div>
-          </div>
-          <button onClick={onClose} className="rounded-md p-1 text-white/80 hover:bg-white/10 hover:text-white"><X className="h-4 w-4" /></button>
-        </div>
-
+    <AccentModal
+      background={seasonGradientCss(season)}
+      iconTint="#ffffff"
+      icon={Sparkles}
+      eyebrow="Verbo Flash · Season"
+      title={`${season.display_name} Challenges`}
+      maxWidth="max-w-3xl"
+      zClass="z-40"
+      onClose={onClose}
+    >
+      <div className="max-h-[75vh] overflow-y-auto">
         <div className="space-y-5 p-6">
           <div className="flex flex-wrap gap-2">
             {FLASH_PRODUCT_ORDER.map((p) => (
