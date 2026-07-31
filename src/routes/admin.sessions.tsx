@@ -76,7 +76,7 @@ function Page() {
 
 
       {/* Bulk schedule panel */}
-      <Card className="!p-0 overflow-hidden border-l-4" style={{ borderLeftColor: ORANGE }}>
+      <Card className="!p-0 overflow-hidden border-l-4 border-l-[#f38934]">
         <button
           onClick={() => setBulkOpen((v) => !v)}
           className="flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-secondary/40"
