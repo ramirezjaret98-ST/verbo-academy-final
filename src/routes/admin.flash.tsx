@@ -1407,15 +1407,14 @@ function SeasonModal({
               </span>
             </span>
           </label>
-        </div>
-        <div className="flex items-center justify-end gap-3 border-t border-border bg-secondary/30 p-4">
-          <GhostButton onClick={onClose}>Cancel</GhostButton>
-          <PrimaryButton disabled={!displayName.trim()} onClick={handleSave}>
-            {isEdit ? "Save Changes" : "Save Season"}
-          </PrimaryButton>
-        </div>
       </div>
-    </div>
+      <AccentModalFooter accent="#5fca16">
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton accentColor="#5fca16" disabled={!displayName.trim()} onClick={handleSave}>
+          {isEdit ? "Save Changes" : "Save Season"}
+        </PrimaryButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }
 
