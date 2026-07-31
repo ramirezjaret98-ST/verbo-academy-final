@@ -26,6 +26,8 @@ export type ContentIssueType =
   | (typeof UNIT_ISSUE_TYPES)[number]
   | (typeof CHALLENGE_ISSUE_TYPES)[number];
 
+export type ContentIssueReportStatus = "pending" | "resolved" | "dismissed";
+
 export interface ContentIssueReport {
   id: string;
   studentId: string;
@@ -35,6 +37,8 @@ export interface ContentIssueReport {
   issueType: ContentIssueType;
   detail: string;
   createdAt: string; // ISO
+  status: ContentIssueReportStatus;
+  resolved_at?: string; // ISO — set when status leaves "pending"
 }
 
 export const CONTENT_ISSUE_KEY = "verbo:content-issue-reports";

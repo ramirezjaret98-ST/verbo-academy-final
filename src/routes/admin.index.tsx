@@ -211,7 +211,7 @@ function Overview() {
   }
 
   // 5 — Unresolved technical / content issues.
-  for (const r of loadContentIssueReports()) {
+  for (const r of loadContentIssueReports().filter((x) => x.status === "pending")) {
     urgentItems.push({
       id: `issue:${r.id}`,
       icon: Bug,
