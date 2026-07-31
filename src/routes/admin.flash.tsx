@@ -940,7 +940,7 @@ function SeasonTab() {
                 >
                   {s.display_name}
                 </div>
-                <span className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${s.active ? "bg-emerald-500 text-white" : "bg-white/80 text-slate-700"}`}>
+                <span className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${s.active ? "bg-emerald-500 text-white" : "bg-slate-500 text-white"}`}>
                   {s.active ? "Active" : "Inactive"}
                 </span>
               </div>
