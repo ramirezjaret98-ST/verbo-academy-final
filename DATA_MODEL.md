@@ -917,14 +917,15 @@ Reglas:
 
 Store simple (mismo patrón que `student-reports-store.ts`): `localStorage["verbo:content-issue-reports"]`, evento `"verbo:content-issue-reports-updated"`.
 
-`ContentIssueReport = { id, studentId, entityType, entityId, entityTitle, issueType, detail, createdAt }`.
+`ContentIssueReport = { id, studentId, entityType, entityId, entityTitle, issueType, detail, createdAt, status, resolved_at? }`.
 
 - `entityType: "unit" | "challenge"` — indica desde dónde se reportó. Los registros viejos (que tenían `unitId`/`unitTitle`) se normalizan al leer: `entityType = "unit"`, `entityId = unitId`, `entityTitle = unitTitle`.
 - `issueType` ∈ `UNIT_ISSUE_TYPES` (antes `CONTENT_ISSUE_TYPES`): "PDF won't download" | "Video won't play" | "Audio won't record" | "Exercise won't load" | "Score not saving" | "Other"; o ∈ `CHALLENGE_ISSUE_TYPES`: "The challenge won't open" | "I can't upload my evidence (submission link)" | "My completed challenge wasn't counted" | "My streak didn't update" | "Other".
 - `detail` es opcional (string vacío si no se completa).
-- `addContentIssueReport(input)` crea el reporte; `loadContentIssueReports()`, `contentIssuesForUnit(unitId)` (filtra `entityType === "unit"`) y `subscribeContentIssueReports(cb)` son lecturas ordenadas por fecha desc.
+- `status: ContentIssueReportStatus = "pending" | "resolved" | "dismissed"` (nace en `"pending"`; los registros previos al campo se backfillean a `"pending"` al leer). `resolved_at` (ISO) se setea al pasar a un status distinto de `"pending"`.
+- `addContentIssueReport(input)` crea el reporte; `updateContentIssueReport(id, { status })` cambia el estado y setea `resolved_at`; `loadContentIssueReports()`, `contentIssuesForUnit(unitId)` (filtra `entityType === "unit"`) y `subscribeContentIssueReports(cb)` son lecturas ordenadas por fecha desc.
 - Lo dispara el alumno desde `ReportContentIssueModal` (props: `entityType`, `entityId`, `entityTitle`), tanto en el detalle de unidad (`student.courses.tsx`) como en `ChallengeDetail` (`student.challenges.tsx`).
-- Bandeja de Admin: ruta `/admin/content-issue-reports` ("Technical Issues"), lista de solo lectura ordenada por fecha desc.
+- Bandeja de Admin: ruta `/admin/content-issue-reports` ("Technical Issues"), con columnas Status y Actions (resolver / descartar). El dashboard admin (`admin.index.tsx`) solo cuenta como urgentes los reportes con `status === "pending"`.
 - Notificaciones: cada reporte deriva una notificación admin `kind: "content_issue_reported"` ("New technical issue reported", body `alumno · entityType · issueType`, `to: "/admin/content-issue-reports"`).
 
 ---
