@@ -21,7 +21,7 @@ import {
   moveMember, markGroupAsPaid, activeMembersOf, membersOf, pendingCountdownDays,
   groupById, sessionProgressFor, type Group, type GroupMember,
 } from "@/lib/groups-store";
-import { Card, GhostButton, PrimaryButton } from "@/components/verbo/ui";
+import { Card, GhostButton, PrimaryButton, AccentModal, AccentModalFooter } from "@/components/verbo/ui";
 import { loadSessions, addGroupSession, type ExtSession } from "@/lib/sessions-store";
 import { loadHolidays } from "@/lib/holidays-store";
 import { RescheduleModal } from "@/components/verbo/RescheduleModal";
