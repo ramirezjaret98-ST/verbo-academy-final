@@ -580,22 +580,28 @@ function TeacherDetailModal({
           {tab === "kpis" && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <BigStat
+                <KpiHeroStat
                   label="Avg. rating"
                   value={avgRating(t) != null ? avgRating(t)!.toFixed(1) : "—"}
+                  icon={Star}
+                  color="#d97706"
                   onAdjust={canOverride ? () => setOverrideTarget({ metric: "ratingNormalized", currentValue: computeTeacherKpis(t).ratingNormalized }) : undefined}
                 />
-                <BigStat
+                <KpiHeroStat
                   label="Planning on time"
                   value={`${t.plan_punctuality ?? 0}%`}
+                  icon={CalendarClock}
+                  color="#01304a"
                   onAdjust={canOverride ? () => setOverrideTarget({ metric: "planningPunctuality", currentValue: computeTeacherKpis(t).planningPunctuality }) : undefined}
                 />
-                <BigStat
+                <KpiHeroStat
                   label="Responsiveness"
                   value={`${computeTeacherKpis(t).responsiveness}%`}
+                  icon={Zap}
+                  color="#3ebbad"
                   onAdjust={canOverride ? () => setOverrideTarget({ metric: "responsiveness", currentValue: computeTeacherKpis(t).responsiveness }) : undefined}
                 />
-                <BigStat label="Hours this month" value={`${t.hours_month ?? 0}h`} />
+                <KpiHeroStat label="Hours this month" value={`${t.hours_month ?? 0}h`} icon={Clock} color="#a34ac0" />
               </div>
 
               <p className="rounded-lg bg-muted px-3 py-2 text-[11px] text-muted-foreground">Full breakdown and history live in the global <span className="font-medium text-foreground">KPIs</span> page.</p>
