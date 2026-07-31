@@ -584,7 +584,7 @@ function PendingReviewsModal({
       icon={ClipboardList}
       eyebrow="Sessions needing review"
       title={teacher.name}
-      watermark={{ kind: "icon", icon: ClipboardList }}
+      watermark={{ type: "icon", icon: ClipboardList }}
       maxWidth="max-w-lg"
       onClose={onClose}
     >
