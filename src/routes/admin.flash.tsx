@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Card, GhostButton, PrimaryButton, Pill } from "@/components/verbo/ui";
+import { Card, GhostButton, PrimaryButton, Pill, AccentModal, AccentModalFooter } from "@/components/verbo/ui";
 import { Plus, Trash2, X, Pencil, Link2, Lock, Zap, Package, Gift, Sparkles } from "lucide-react";
 import {
   type FlashChallenge,
