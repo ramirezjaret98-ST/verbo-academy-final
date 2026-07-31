@@ -271,6 +271,19 @@ export function isPendingStatus(status?: ExtSessionStatus): boolean {
   return isPendingStatusKey(status);
 }
 
+/** VISUAL-ONLY derivation: a club (Insight / Book Club) still marked "upcoming"
+ *  whose end time (date + duration) has already passed never actually happened — no
+ *  teacher assigned, no report uploaded. It is painted as "Missed" (the same
+ *  muted grey as cancelled). The stored club.status is NEVER changed. */
+export function isMissedClubEvent(ev: CalendarEvent, now: Date = new Date()): boolean {
+  if (ev.kind !== "insight" && ev.kind !== "book_club") return false;
+  if (ev.status === "completed" || ev.status === "cancelled") return false;
+  const start = new Date(ev.date).getTime();
+  if (Number.isNaN(start)) return false;
+  const end = start + (ev.duration_minutes ?? 0) * 60_000;
+  return end < now.getTime();
+}
+
 function substitutionApplies(ev: CalendarEvent, substitutionAware?: boolean): boolean {
   return !!substitutionAware && !!ev.covered_by_substitute && isPendingStatus(ev.status as ExtSessionStatus | undefined);
 }
@@ -282,6 +295,9 @@ export function eventPillDisplay(
   ev: CalendarEvent,
   opts?: { substitutionAware?: boolean },
 ): { color: string; borderColor?: string; short: string; cellLabel: string } {
+  if (isMissedClubEvent(ev)) {
+    return { color: STATUS_PALETTE.cancelled.color, short: EVENT_KIND_META[ev.kind].short, cellLabel: "Missed" };
+  }
   if (substitutionApplies(ev, opts?.substitutionAware)) {
     return { color: SUBSTITUTION_COLOR, short: "SUB", cellLabel: "Substitution" };
   }
@@ -312,6 +328,9 @@ export function calendarEventTheme(
   ev: CalendarEvent,
   opts?: { substitutionAware?: boolean },
 ): { background: string; solid: string; textTone: "light" | "dark" } {
+  if (isMissedClubEvent(ev)) {
+    return { background: STATUS_PALETTE.cancelled.color, solid: STATUS_PALETTE.cancelled.color, textTone: "light" };
+  }
   if (substitutionApplies(ev, opts?.substitutionAware)) {
     return { background: SUBSTITUTION_COLOR, solid: SUBSTITUTION_COLOR, textTone: "light" };
   }
