@@ -704,11 +704,11 @@ function TeacherDetailModal({
         {!flow && (
           <div className="flex flex-wrap items-center gap-2 border-t border-border bg-secondary/30 px-6 py-4">
             <GhostBtn onClick={onEdit}><Pencil className="h-3.5 w-3.5" /> Edit profile</GhostBtn>
-            <GhostBtn onClick={() => { onPersist({ ...t, must_change_password: true }); alert("This user will be asked to set a new password the next time they log in."); }}><KeyRound className="h-3.5 w-3.5" /> Reset password</GhostBtn>
+            <GhostBtn onClick={() => { onPersist({ ...t, must_change_password: true }); alert("This user will be asked to set a new password the next time they log in."); }}><KeyRound className="h-3.5 w-3.5" /> Require Password Reset</GhostBtn>
             {status === "frozen" ? (
               <GhostBtn onClick={() => onPersist(applyStatusPatch(t, "active"))}><Play className="h-3.5 w-3.5" /> Reactivate</GhostBtn>
             ) : status === "active" ? (
-              <GhostBtn onClick={() => startFlow("frozen")}><Snowflake className="h-3.5 w-3.5" /> Freeze</GhostBtn>
+              <button onClick={() => startFlow("frozen")} className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#38bdf8] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-opacity hover:opacity-90"><Snowflake className="h-3.5 w-3.5" /> Freeze</button>
             ) : null}
             {status !== "removed" && (
               <button onClick={() => startFlow("removed")} className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground shadow-sm transition-opacity hover:opacity-90">
