@@ -433,31 +433,35 @@ function FlashModal({
     titleOverride ??
     `${isEdit ? "Edit" : "New"} ${format === "lightning" ? "Lightning" : "Mystery Box"} Challenge`;
 
+  const modalBackground =
+    format === "lightning"
+      ? "linear-gradient(135deg, #1e3a8a, #0284c7, #facc15)"
+      : headerBackground
+        ? headerBackground
+        : "linear-gradient(135deg, #4a044e, #7e22ce, #a855f7)";
+  const modalIcon = format === "lightning" ? Zap : format === "season" ? Sparkles : Gift;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-card shadow-elevated" onClick={(e) => e.stopPropagation()}>
-        <div
-          className={`flex items-start justify-between gap-4 p-6 text-white ${
-            headerBackground
-              ? ""
-              : format === "lightning"
-                ? "bg-gradient-to-br from-[#1e3a8a] via-[#0284c7] to-[#facc15]"
-                : "bg-gradient-to-br from-[#4a044e] via-[#7e22ce] to-[#a855f7]"
-          }`}
-          style={headerBackground ? { background: headerBackground } : undefined}
-        >
-          <div>
-            <div className="text-base font-semibold tracking-tight">{headerTitle}</div>
-            <div className="mt-0.5 text-xs text-white/70">{FLASH_PRODUCT_LABEL[product]}</div>
-            {editing?.synced_group_id && (
-              <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold text-white/90">
-                🔗 Synced across products
-              </div>
-            )}
-          </div>
-          <button onClick={onClose} className="rounded-md p-1 text-white/80 hover:bg-white/10 hover:text-white"><X className="h-4 w-4" /></button>
-        </div>
+    <AccentModal
+      maxWidth="max-w-xl"
+      background={modalBackground}
+      iconTint="#ffffff"
+      icon={modalIcon}
+      eyebrow={FLASH_PRODUCT_LABEL[product]}
+      title={headerTitle}
+      watermark={
+        format === "season"
+          ? { type: "icon", icon: Sparkles }
+          : { type: "text", value: format === "lightning" ? "FLASH" : "BOX" }
+      }
+      onClose={onClose}
+    >
         <div className="space-y-4 p-6">
+          {editing?.synced_group_id && (
+            <div className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+              🔗 Synced across products
+            </div>
+          )}
           <Field label="Category">
             {creatingCat ? (
               <div className="flex items-center gap-2">
