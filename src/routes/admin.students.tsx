@@ -834,13 +834,13 @@ function StudentFormModal({
                       key={opt.id}
                       type="button"
                       onClick={() => pickProductType(opt.id)}
-                      className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition-all ${active ? "border-accent bg-accent/10" : "border-border bg-background hover:border-accent/40"}`}
+                      className={`flex flex-col items-center gap-2 rounded-2xl border-2 px-3 py-2.5 text-center transition-all ${active ? "border-[#01304a] bg-[#01304a]" : "border-border bg-background hover:border-[#01304a]/40 hover:bg-secondary/40"}`}
                     >
-                      <span className={`flex h-12 w-12 items-center justify-center rounded-full ${active ? "bg-accent text-accent-foreground" : "bg-secondary text-muted-foreground"}`}>
-                        <Icon className="h-5 w-5" />
+                      <span className={`flex h-8 w-8 items-center justify-center rounded-full ${active ? "bg-white/15 text-white" : "bg-secondary text-muted-foreground"}`}>
+                        <Icon className="h-4 w-4" />
                       </span>
-                      <span className={`text-sm font-semibold ${active ? "text-accent" : "text-foreground"}`}>{opt.name}</span>
-                      <span className="text-[10.5px] leading-tight text-muted-foreground">{opt.blurb}</span>
+                      <span className={`text-sm font-semibold ${active ? "text-white" : "text-foreground"}`}>{opt.name}</span>
+                      <span className={`text-[10.5px] leading-tight ${active ? "text-white/80" : "text-muted-foreground"}`}>{opt.blurb}</span>
                     </button>
                   );
                 })}
