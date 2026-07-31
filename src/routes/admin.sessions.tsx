@@ -17,6 +17,7 @@ import {
   subscribeStudents,
 } from "@/lib/students-store";
 import { Card, Pill, PrimaryButton, GhostButton, SectionTitle, AccentModal } from "@/components/verbo/ui";
+import type { LucideIcon } from "lucide-react";
 import { CalendarPlus, ChevronDown, ChevronUp, X, Pencil, AlertTriangle, Users, Building2, UserCheck, CalendarClock } from "lucide-react";
 import { effectiveSessionCounts } from "@/lib/groups-store";
 import { CandidatesModal } from "@/components/verbo/CandidatesModal";
