@@ -154,7 +154,7 @@ export function AccentModal({
       onClick={onClose}
     >
       <div
-        className={`relative w-full ${maxWidth} overflow-hidden rounded-2xl bg-card shadow-floating`}
+        className={`relative w-full ${maxWidth} flex max-h-[90vh] flex-col overflow-hidden rounded-2xl bg-card shadow-floating`}
         onClick={(e) => e.stopPropagation()}
       >
         <AccentModalHeader
@@ -167,7 +167,9 @@ export function AccentModal({
           onClose={onClose}
           textTone={textTone}
         />
-        {children}
+        <div className="report-modal-scroll overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>
   );
