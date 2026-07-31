@@ -680,7 +680,7 @@ function SessionRow({
             )}
             {session.holiday_makeup && (
               <span
-                className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-800"
+                className="inline-flex items-center rounded-full bg-[#92400e] px-2 py-0.5 text-[10px] font-semibold text-white"
                 title="Replacement for a session that fell on a holiday"
               >
                 Holiday Makeup
@@ -688,7 +688,7 @@ function SessionRow({
             )}
 
             {session.needs_substitute && (
-              <span className="rounded-full bg-warning/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700">Needs Substitute</span>
+              <span className="rounded-full bg-[#b45309] px-1.5 py-0.5 text-[10px] font-semibold text-white">Needs Substitute</span>
             )}
           </div>
         </td>
@@ -697,7 +697,7 @@ function SessionRow({
             {session.needs_substitute && (
               <button
                 onClick={() => setCandidatesOpen(true)}
-                className="inline-flex cursor-pointer items-center gap-1 rounded-md border border-amber-500 bg-amber-50 px-2 py-1 text-[11px] font-medium text-amber-800 hover:bg-amber-100"
+                className="inline-flex cursor-pointer items-center gap-1 rounded-md bg-[#b45309] px-2 py-1 text-[11px] font-semibold text-white transition-opacity hover:opacity-90"
                 title="View Candidates"
               >
                 <UserCheck className="h-3 w-3" /> View Candidates
@@ -777,7 +777,7 @@ function SessionRow({
               );
             }}
             className="!px-3 !py-1 text-xs"
-            style={{ backgroundColor: ORANGE }}
+            style={{ backgroundColor: "#5fca16" }}
           >
             Save
           </PrimaryButton>
@@ -787,6 +787,19 @@ function SessionRow({
   );
 }
 
+
+/** Solid section banner, same pattern as the Teacher/Group modals. */
+function SectionBanner({ icon: Icon, label, color }: { icon: LucideIcon; label: string; color: string }) {
+  return (
+    <div
+      className="mb-4 flex items-center gap-2 rounded-lg px-3 py-1.5"
+      style={{ backgroundColor: color }}
+    >
+      <Icon className="h-3.5 w-3.5 text-white" />
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-white">{label}</span>
+    </div>
+  );
+}
 
 // ============== Bulk edit form (inside student modal) ==============
 function BulkEditForm({
@@ -812,10 +825,7 @@ function BulkEditForm({
 
   return (
     <div className="mb-5 rounded-xl border p-5" style={{ borderColor: BRAND, backgroundColor: "#f5f8fa" }}>
-      <div className="mb-4 flex items-center gap-2">
-        <Pencil className="h-4 w-4" style={{ color: BRAND }} />
-        <div className="text-sm font-semibold" style={{ color: BRAND }}>Bulk Edit · Future sessions only</div>
-      </div>
+      <SectionBanner icon={Pencil} label="Bulk Edit · Future sessions only" color="#f38934" />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="MS Teams Link (applied to all future sessions)">
@@ -871,7 +881,7 @@ function BulkEditForm({
         <button
           onClick={() => onApply({ teamsLink, teacherId, time, days })}
           className="inline-flex cursor-pointer items-center gap-2 rounded-lg px-4 py-2 text-xs font-medium text-white shadow-soft transition-opacity hover:opacity-90"
-          style={{ backgroundColor: ORANGE }}
+          style={{ backgroundColor: "#5fca16" }}
         >
           Apply Bulk Changes
         </button>
