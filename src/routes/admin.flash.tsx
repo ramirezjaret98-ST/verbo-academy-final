@@ -588,12 +588,11 @@ function FlashModal({
             </div>
           </Field>
         </div>
-        <div className="flex items-center justify-end gap-3 border-t border-border bg-secondary/30 p-4">
-          <GhostButton onClick={onClose}>Cancel</GhostButton>
-          <PrimaryButton disabled={!title.trim()} onClick={handleSave}>{isEdit ? "Save Changes" : "Create Challenge"}</PrimaryButton>
-        </div>
-      </div>
-    </div>
+      <AccentModalFooter accent="#5fca16">
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton accentColor="#5fca16" disabled={!title.trim()} onClick={handleSave}>{isEdit ? "Save Changes" : "Create Challenge"}</PrimaryButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }
 
