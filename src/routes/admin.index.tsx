@@ -124,7 +124,7 @@ function Overview() {
   const lowComposite = teacherRows
     .filter((r) => r.kpis.composite < ALERT_COMPOSITE)
     .sort((a, b) => a.kpis.composite - b.kpis.composite);
-  const createdClubs = upcomingCreatedClubs(loadClubs());
+  
 
   // ---- Urgency derivation (visual grouping only, no new persisted data) -----
   const now = Date.now();
@@ -152,12 +152,16 @@ function Overview() {
     }
   }
 
-  // 2 — Clubs at risk: no teacher assigned, or a pending release request.
+  // 2 — Clubs at risk: no teacher assigned (upcomingCreatedClubs) or a pending
+  //     release request from the assigned teacher.
   const releaseClubIds = new Set(loadReleaseRequests().map((r) => r.club_id));
   const allClubs = loadClubs();
-  const atRiskClubs = allClubs.filter(
-    (c) => c.status !== "completed" && c.status !== "cancelled" && (!c.teacher_id || releaseClubIds.has(c.id)),
-  );
+  const atRiskClubs = [
+    ...upcomingCreatedClubs(allClubs),
+    ...allClubs.filter(
+      (c) => c.teacher_id && releaseClubIds.has(c.id) && c.status !== "completed" && c.status !== "cancelled",
+    ),
+  ];
   for (const c of atRiskClubs) {
     const ms = +new Date(c.date) - now;
     const base = {
