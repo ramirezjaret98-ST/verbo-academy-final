@@ -183,7 +183,7 @@ function MysteryBoxTab() {
                 placeholder="https://... (image or .gif)"
                 className={inputCls}
               />
-              <PrimaryButton onClick={saveBoxArt}>Save</PrimaryButton>
+              <PrimaryButton accentColor="#5fca16" onClick={saveBoxArt}>Save</PrimaryButton>
             </div>
           </div>
         </div>
