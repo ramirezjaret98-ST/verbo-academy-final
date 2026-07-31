@@ -9,7 +9,7 @@ import {
   computeTeacherKpis, ratingBand, ratingHistory,
   getBonusThreshold, setBonusThreshold,
 } from "@/lib/teacher-kpis";
-import { MetricCard, SectionTitle } from "@/components/verbo/ui";
+import { MetricCard, SectionTitle, HeroStatCard, AnimatedNumber } from "@/components/verbo/ui";
 import { BonusBadge } from "@/components/verbo/BonusBadge";
 import { KpiOverrideModal } from "@/components/verbo/KpiOverrideModal";
 import { useAuth } from "@/lib/auth";
@@ -18,7 +18,10 @@ import {
   useKpiOverrides, overridesForMonth, type KpiMetric,
 } from "@/lib/teacher-kpi-overrides-store";
 import { monthKeyOf } from "@/lib/teacher-kpi-history-store";
-import { Star, AlertTriangle, TrendingUp, SlidersHorizontal, Pencil, ShieldCheck, X } from "lucide-react";
+import {
+  Star, AlertTriangle, TrendingUp, SlidersHorizontal, Pencil, ShieldCheck, X,
+  CalendarClock, GraduationCap,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin/kpis")({
   component: Page,
