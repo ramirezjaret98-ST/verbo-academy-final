@@ -306,6 +306,13 @@ function Page() {
           onClose={() => { setActModalUnit(null); setActivityRev((r) => r + 1); }}
         />
       )}
+      {bulkOpen && (
+        <BulkUploadModal
+          allUnits={allUnits}
+          onClose={() => setBulkOpen(false)}
+          onImported={() => setActivityRev((r) => r + 1)}
+        />
+      )}
     </div>
   );
 }
