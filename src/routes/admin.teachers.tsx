@@ -391,6 +391,17 @@ function TeacherDetailModal({
   const [notes, setNotes] = useState(t.admin_notes ?? "");
   const [addAdjOpen, setAddAdjOpen] = useState(false);
 
+  // KPI manual override (super_admin / coordinator_ops only)
+  const { user: adminUser } = useAuth();
+  const adminType = getAdminType(adminUser);
+  const canOverride = adminType === "super_admin" || adminType === "coordinator_ops";
+  const admin = adminUser
+    ? { id: adminUser.id, name: adminUser.name, admin_type: adminType }
+    : { id: "", name: "", admin_type: null };
+  const [overrideTarget, setOverrideTarget] = useState<{ metric: KpiMetric; currentValue: number } | null>(null);
+  const [, forceTick] = useState(0);
+
+
   // Guided freeze / remove flow
   const [flow, setFlow] = useState<null | "frozen" | "removed">(null);
   const [reassignMap, setReassignMap] = useState<Record<string, string>>({});
