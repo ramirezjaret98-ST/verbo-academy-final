@@ -184,41 +184,6 @@ export function CantAttendModal({
               <PrimaryButton onClick={() => setStep(2)} disabled={!step1Valid}>Confirm</PrimaryButton>
             </div>
           </>
-        ) : (
-          <>
-            <AccentModalHeader
-              background={ALERT_BG}
-              iconTint="#dc0000"
-              icon={AlertTriangle}
-              eyebrow="Step 2 of 2"
-              title="Confirm Cancellation"
-              watermark={{ type: "icon", icon: AlertTriangle }}
-              onClose={onClose}
-            />
-            <div className="space-y-3 px-5 py-5 text-sm text-foreground">
-              <p>
-                Cancelling this session will count as a <strong>strike</strong> against your
-                Cancellations / No-Shows KPI and will affect your Composite Score.
-              </p>
-              <p className="text-muted-foreground text-xs">
-                {hoursUntil >= 24
-                  ? "The session starts in more than 24 hours — you can propose a reschedule with Admin."
-                  : "The session starts in less than 24 hours — Admin will attempt to find a substitute. If none is found, this hour will not be paid."}
-              </p>
-              <p className="text-muted-foreground text-xs">
-                Reaching 3 unjustified strikes in the last 6 months automatically freezes your account.
-              </p>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-border bg-secondary/30 px-5 py-3">
-              <GhostButton onClick={() => setStep(1)}>Go Back</GhostButton>
-              <button
-                onClick={confirmCancel}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground shadow-sm transition-opacity hover:opacity-90"
-              >
-                Confirm Cancellation
-              </button>
-            </div>
-          </>
         ) : step === 2 ? (
           <>
             <AccentModalHeader
