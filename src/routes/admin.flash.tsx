@@ -923,7 +923,7 @@ function SeasonTab() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((s) => (
-            <div key={s.id} className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <div key={s.id} className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-md hover:shadow-lg transition-shadow duration-200">
               <div
                 className="relative flex h-32 items-center justify-center"
                 style={{
@@ -940,7 +940,7 @@ function SeasonTab() {
                 >
                   {s.display_name}
                 </div>
-                <span className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${s.active ? "bg-emerald-500 text-white" : "bg-white/80 text-slate-700"}`}>
+                <span className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${s.active ? "bg-emerald-500 text-white" : "bg-slate-500 text-white"}`}>
                   {s.active ? "Active" : "Inactive"}
                 </span>
               </div>
@@ -1040,19 +1040,17 @@ function SeasonChallengesModal({ season, onClose }: { season: FlashSeason; onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
-      <div className="my-8 w-full max-w-3xl overflow-hidden rounded-2xl border border-border bg-card shadow-elevated">
-        <div
-          className="flex items-start justify-between gap-4 p-6 text-white"
-          style={{ background: seasonGradientCss(season) }}
-        >
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.18em] text-white/70">Verbo Flash · Season</div>
-            <div className="mt-0.5 text-base font-semibold tracking-tight">{season.display_name} Challenges</div>
-          </div>
-          <button onClick={onClose} className="rounded-md p-1 text-white/80 hover:bg-white/10 hover:text-white"><X className="h-4 w-4" /></button>
-        </div>
-
+    <AccentModal
+      background={seasonGradientCss(season)}
+      iconTint="#ffffff"
+      icon={Sparkles}
+      eyebrow="Verbo Flash · Season"
+      title={`${season.display_name} Challenges`}
+      maxWidth="max-w-3xl"
+      zClass="z-40"
+      onClose={onClose}
+    >
+      <div className="max-h-[75vh] overflow-y-auto">
         <div className="space-y-5 p-6">
           <div className="flex flex-wrap gap-2">
             {FLASH_PRODUCT_ORDER.map((p) => (
@@ -1097,9 +1095,9 @@ function SeasonChallengesModal({ season, onClose }: { season: FlashSeason; onClo
                       <Pill tone="muted">No category</Pill>
                     )}
                     {c.premium && (
-                      <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
+                      <Pill tone="warning" style={{ background: "#d97706", color: "#fff" }}>
                         Premium
-                      </span>
+                      </Pill>
                     )}
                   </div>
                   <div>
@@ -1130,11 +1128,11 @@ function SeasonChallengesModal({ season, onClose }: { season: FlashSeason; onClo
             </div>
           )}
         </div>
-
-        <div className="flex items-center justify-end gap-3 border-t border-border bg-secondary/30 p-4">
-          <GhostButton onClick={onClose}>Close</GhostButton>
-        </div>
       </div>
+
+      <AccentModalFooter>
+        <GhostButton onClick={onClose}>Close</GhostButton>
+      </AccentModalFooter>
 
       {modal && (
         <FlashModal
@@ -1151,7 +1149,7 @@ function SeasonChallengesModal({ season, onClose }: { season: FlashSeason; onClo
           onSave={(cs) => { save(cs); setModal(null); }}
         />
       )}
-    </div>
+    </AccentModal>
   );
 }
 
@@ -1225,29 +1223,24 @@ function SeasonModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-elevated" onClick={(e) => e.stopPropagation()}>
-        <div
-          className="flex items-start justify-between gap-4 p-6 text-white"
-          style={{
-            background: themeImageUrl
-              ? `center / cover no-repeat url(${themeImageUrl}), ${previewGradient}`
-              : previewGradient,
-          }}
-        >
-          <div>
-            <div className="text-xs uppercase tracking-[0.18em] text-white/80">Verbo Flash · Season</div>
-            <div
-              className="mt-1 text-lg font-semibold tracking-tight drop-shadow"
-              style={{ fontFamily: `"${family}", system-ui, sans-serif` }}
-            >
-              {displayName || (isEdit ? "Edit Season" : "New Season")}
-            </div>
-            <div className="mt-1 text-xs text-white/80">🏅 Badge: {(displayName || "…") + " Challenger"}</div>
-          </div>
-          <button onClick={onClose} className="rounded-md p-1 text-white/80 hover:bg-white/10 hover:text-white"><X className="h-4 w-4" /></button>
-        </div>
-        <div className="space-y-4 overflow-y-auto p-6">
+    <AccentModal
+      background={
+        themeImageUrl
+          ? `center / cover no-repeat url(${themeImageUrl}), ${previewGradient}`
+          : previewGradient
+      }
+      iconTint="#ffffff"
+      icon={Sparkles}
+      eyebrow="Verbo Flash · Season"
+      title={
+        <span style={{ fontFamily: `"${family}", system-ui, sans-serif` }}>
+          {displayName || (isEdit ? "Edit Season" : "New Season")}
+        </span>
+      }
+      maxWidth="max-w-xl"
+      onClose={onClose}
+    >
+      <div className="max-h-[65vh] overflow-y-auto p-6 space-y-4">
           <Field label="Display Name">
             <input
               value={displayName}
@@ -1412,15 +1405,14 @@ function SeasonModal({
               </span>
             </span>
           </label>
-        </div>
-        <div className="flex items-center justify-end gap-3 border-t border-border bg-secondary/30 p-4">
-          <GhostButton onClick={onClose}>Cancel</GhostButton>
-          <PrimaryButton disabled={!displayName.trim()} onClick={handleSave}>
-            {isEdit ? "Save Changes" : "Save Season"}
-          </PrimaryButton>
-        </div>
       </div>
-    </div>
+      <AccentModalFooter accent="#5fca16">
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton accentColor="#5fca16" disabled={!displayName.trim()} onClick={handleSave}>
+          {isEdit ? "Save Changes" : "Save Season"}
+        </PrimaryButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }
 
