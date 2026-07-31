@@ -1,16 +1,18 @@
 // Admin > Technical Issues.
-// Read-only list of technical/content issues reported by students from a unit
-// detail view or from a challenge. Most recent first. No resolve workflow yet
-// by design.
+// List of technical/content issues reported by students from a unit detail view
+// or from a challenge. Most recent first. Admins can mark each one as resolved
+// or dismissed.
 import { createFileRoute } from "@tanstack/react-router";
 import { useSyncExternalStore } from "react";
-import { LifeBuoy } from "lucide-react";
+import { LifeBuoy, Check, X } from "lucide-react";
 import { Card, Pill } from "@/components/verbo/ui";
 import { USERS, userById } from "@/lib/mock-data";
 import {
   loadContentIssueReports,
   subscribeContentIssueReports,
+  updateContentIssueReport,
   type ContentIssueReport,
+  type ContentIssueReportStatus,
 } from "@/lib/content-issue-reports-store";
 
 export const Route = createFileRoute("/admin/content-issue-reports")({
@@ -18,9 +20,9 @@ export const Route = createFileRoute("/admin/content-issue-reports")({
   head: () => ({
     meta: [
       { title: "Technical Issues · Verbo Academy Admin" },
-      { name: "description", content: "Review technical issues students reported on course units and challenges." },
+      { name: "description", content: "Review, resolve or dismiss technical issues students reported on course units and challenges." },
       { property: "og:title", content: "Technical Issues · Verbo Academy Admin" },
-      { property: "og:description", content: "Review technical issues students reported on course units and challenges." },
+      { property: "og:description", content: "Review, resolve or dismiss technical issues students reported on course units and challenges." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -37,6 +39,18 @@ function nameFor(id: string) {
   return userById(id)?.name ?? USERS.find((u) => u.id === id)?.name ?? "Unknown";
 }
 
+const STATUS_TONE: Record<ContentIssueReportStatus, "warning" | "success" | "muted"> = {
+  pending: "warning",
+  resolved: "success",
+  dismissed: "muted",
+};
+
+const STATUS_LABEL: Record<ContentIssueReportStatus, string> = {
+  pending: "Pending",
+  resolved: "Resolved",
+  dismissed: "Dismissed",
+};
+
 function Page() {
   const reports = useSyncExternalStore(
     subscribeContentIssueReports,
@@ -47,6 +61,7 @@ function Page() {
   const sorted = [...reports].sort(
     (a, b) => +new Date(b.createdAt) - +new Date(a.createdAt),
   );
+
 
   return (
     <div className="space-y-8">
