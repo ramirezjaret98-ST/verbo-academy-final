@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { X, UserCheck } from "lucide-react";
 import { GhostButton, PrimaryButton } from "./ui";
 import { findCandidates } from "@/lib/substitute-engine";
-import { updateSession } from "@/lib/sessions-store";
+import { updateSession, getSessionsSnapshot, type ExtSession } from "@/lib/sessions-store";
 
 export function CandidatesModal({
   sessionId,
@@ -13,8 +14,17 @@ export function CandidatesModal({
   onAssigned?: () => void;
 }) {
   const candidates = findCandidates(sessionId);
+  const session = getSessionsSnapshot().find((s) => s.id === sessionId);
+  const [teamsLink, setTeamsLink] = useState("");
   const assign = (teacherId: string) => {
-    updateSession(sessionId, { teacher_id: teacherId, needs_substitute: false, covered_by_substitute: true });
+    const patch: Partial<ExtSession> = {
+      teacher_id: teacherId,
+      needs_substitute: false,
+      covered_by_substitute: true,
+      status: "rescheduled",
+    };
+    if (teamsLink.trim()) patch.teams_link = teamsLink.trim();
+    updateSession(sessionId, patch);
     onAssigned?.();
     onClose();
   };
@@ -34,6 +44,18 @@ export function CandidatesModal({
         <p className="mt-1 text-xs text-muted-foreground">
           Qualified, available teachers ranked by Composite Score. Admin picks the substitute.
         </p>
+
+        <div className="mt-4">
+          <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            New MS Teams Link (optional)
+          </label>
+          <input
+            value={teamsLink}
+            onChange={(e) => setTeamsLink(e.target.value)}
+            placeholder={session?.teams_link || "https://teams.microsoft.com/..."}
+            className="mt-1.5 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
 
         <div className="mt-4 overflow-hidden rounded-xl border border-border">
           {candidates.length === 0 ? (
