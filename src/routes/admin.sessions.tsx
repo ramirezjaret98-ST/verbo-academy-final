@@ -76,7 +76,7 @@ function Page() {
 
 
       {/* Bulk schedule panel */}
-      <Card className="!p-0 overflow-hidden">
+      <Card className="!p-0 overflow-hidden border-l-4" style={{ borderLeftColor: ORANGE }}>
         <button
           onClick={() => setBulkOpen((v) => !v)}
           className="flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-secondary/40"
@@ -429,7 +429,7 @@ function BulkScheduler({
           onClick={assign}
           disabled={overLimit || generated.length === 0 || !studentId || !teacherId}
           className="inline-flex cursor-pointer items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium text-white shadow-soft transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-          style={{ backgroundColor: ORANGE }}
+          style={{ backgroundColor: "#5fca16" }}
         >
           <CalendarPlus className="h-4 w-4" /> Assign {generated.length > 0 ? `(${consumingCount}${holidayHits > 0 ? ` +${holidayHits} holiday` : ""})` : ""}
         </button>
