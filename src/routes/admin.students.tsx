@@ -14,7 +14,7 @@ import { teachersForProduct, teachersForProductSorted } from "@/lib/teacher-mode
 import { teacherTier } from "@/lib/teacher-tiers";
 import { PLAN_DEFAULTS } from "@/lib/club-bookings-store";
 
-import { Card, GhostButton, PrimaryButton } from "@/components/verbo/ui";
+import { AccentModal, AccentModalFooter, Card, GhostButton, PrimaryButton } from "@/components/verbo/ui";
 import { useAvatar } from "@/lib/avatar-store";
 import {
   Plus, X, Eye, EyeOff, KeyRound, Mail, Building2, CalendarDays, GraduationCap,
@@ -575,6 +575,7 @@ function StudentFormModal({
   const [showPassword, setShowPassword] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
+  const [tab, setTab] = useState<"academic" | "financial" | "info">("academic");
   const prevPerWeek = useRef(f.sessions_per_week);
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setF((p) => ({ ...p, [k]: v }));
@@ -768,322 +769,369 @@ function StudentFormModal({
     onSave(u, isPerf ? (f.teacher_id || undefined) : undefined);
   };
 
+  const isPerf = f.product_type === "performance";
+  const TAB_ACCENT: Record<string, string> = { academic: "#01304a", financial: "#d97706", info: "#3ebbad" };
+  const accent = TAB_ACCENT[tab];
+  const academicMissing = attemptedSave && !isValid && isPerf
+    && (!f.product || !f.video_call_link.trim() || (isEnterprise && !f.company.trim()));
+  const infoMissing = attemptedSave && !isValid
+    && (!f.name.trim() || !isValidEmail(f.email) || !f.password.trim());
+  const tabs: { id: "academic" | "financial" | "info"; label: string; dot: boolean }[] = [
+    { id: "academic", label: "Academic", dot: !!academicMissing },
+    ...(isPerf ? [{ id: "financial" as const, label: "Financial", dot: false }] : []),
+    { id: "info", label: "Student Info", dot: !!infoMissing },
+  ];
+  const SectionTitleTab = ({ children }: { children: React.ReactNode }) => (
+    <h3 className="text-sm font-semibold" style={{ color: accent }}>{children}</h3>
+  );
+
   return (
-    <Overlay onClose={onClose}>
-      <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl bg-card shadow-floating">
-        <ModalHeader
-          kicker={editing ? "Edit student" : "New registration"}
-          title={editing ? f.name || "Edit Student" : "Register Student"}
-          onClose={onClose}
-        />
-
-        <div className="max-h-[72vh] space-y-7 overflow-y-auto px-6 py-6 report-modal-scroll">
-          {/* Basic data */}
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <Field label="Student Name">
-              <input value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="Full name" className={inputCls} />
-            </Field>
-            <Field label="Email" icon={<Mail className="h-3.5 w-3.5" />}>
-              <input
-                type="email"
-                value={f.email}
-                onChange={(e) => set("email", e.target.value)}
-                onBlur={() => setEmailTouched(true)}
-                placeholder="student@company.com"
-                className={`${inputCls} ${emailFormatError ? "!border-destructive focus:!border-destructive focus:!ring-destructive" : ""}`}
-                aria-invalid={emailFormatError ? "true" : "false"}
-              />
-              {emailFormatError && <p className="mt-1 text-xs text-destructive">Enter a valid email address</p>}
-            </Field>
-            <Field label="Initial Password" icon={<KeyRound className="h-3.5 w-3.5" />}>
-              <div className="relative">
-                <input type={showPassword ? "text" : "password"} value={f.password} onChange={(e) => set("password", e.target.value)} placeholder="Set a password" className={`${inputCls} pr-9`} />
-                <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground" aria-label="Toggle password">
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-            </Field>
-            <Field label="Member Since" icon={<CalendarDays className="h-3.5 w-3.5" />}>
-              <input type="date" value={f.member_since} onChange={(e) => set("member_since", e.target.value)} className={inputCls} />
-            </Field>
-          </div>
-
-          {/* STEP 0 — Product Type */}
-          <Step n={1} title="Product Type">
-            <div className="grid grid-cols-3 gap-3">
-              {PRODUCT_TYPE_OPTIONS.map((opt) => {
-                const Icon = opt.icon;
-                const active = f.product_type === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => pickProductType(opt.id)}
-                    className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition-all ${active ? "border-accent bg-accent/10" : "border-border bg-background hover:border-accent/40"}`}
-                  >
-                    <span className={`flex h-12 w-12 items-center justify-center rounded-full ${active ? "bg-accent text-accent-foreground" : "bg-secondary text-muted-foreground"}`}>
-                      <Icon className="h-5 w-5" />
-                    </span>
-                    <span className={`text-sm font-semibold ${active ? "text-accent" : "text-foreground"}`}>{opt.name}</span>
-                    <span className="text-[10.5px] leading-tight text-muted-foreground">{opt.blurb}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </Step>
-
-          {/* ============================================================
-              BRANCH: PERFORMANCE SESSIONS — original stepped flow intact
-          ============================================================ */}
-          {f.product_type === "performance" && (
-          <>
-          <Step n={2} title="Product">
-            <div className="grid grid-cols-3 gap-3">
-              {PRODUCTS.map((p) => {
-                const Icon = PRODUCT_ICON[p.icon];
-                const active = f.product === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => pickProduct(p.id)}
-                    className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition-all ${active ? "border-accent bg-accent/10" : "border-border bg-background hover:border-accent/40"}`}
-                  >
-                    <span className={`flex h-12 w-12 items-center justify-center rounded-full ${active ? "bg-accent text-accent-foreground" : "bg-secondary text-muted-foreground"}`}>
-                      <Icon className="h-5 w-5" />
-                    </span>
-                    <span className={`text-sm font-semibold ${active ? "text-accent" : "text-foreground"}`}>{p.name}</span>
-                    <span className="text-[10.5px] leading-tight text-muted-foreground">{p.blurb}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {isEnterprise && (
-              <div className="verbo-fade-up mt-4">
-                <Field label="Company" icon={<Building2 className="h-3.5 w-3.5" />}>
-                  <input value={f.company} onChange={(e) => set("company", e.target.value)} placeholder="Organization (required)" className={inputCls} />
-                </Field>
-              </div>
-            )}
-          </Step>
-
-          {/* STEP 2 — Focus */}
-          {product?.hasFocus && (
-            <Step n={3} title="Focus">
-              <div className="flex flex-wrap gap-2">
-                {focusesForProduct(f.product).map((focus) => {
-                  const active = f.focus === focus.name;
-                  return (
-                    <button
-                      key={focus.id}
-                      type="button"
-                      onClick={() => pickFocus(focus.name)}
-                      className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-accent bg-accent/10 text-accent" : "border-border bg-background text-foreground hover:border-accent/40"}`}
-                    >
-                      {focus.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </Step>
-          )}
-
-          {/* STEP 3 — Contracted levels */}
-          {f.product && (
-            <Step n={product?.hasFocus ? 4 : 3} title="Contracted levels (roadmap)">
-              <div className="flex flex-wrap gap-2">
-                {productLevels.map((lvl) => {
-                  const active = f.contracted_levels.includes(lvl);
-                  return (
-                    <button
-                      key={lvl}
-                      type="button"
-                      onClick={() => toggleLevel(lvl)}
-                      className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-foreground hover:border-primary/40"}`}
-                    >
-                      {active && <Check className="mr-1 inline h-3.5 w-3.5" />}{lvl}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="mt-2 text-[11px] text-muted-foreground">Each level ≈ {SESSIONS_PER_LEVEL} live sessions.</p>
-            </Step>
-          )}
-
-          {/* STEP 4 — Access plan */}
-          {f.product && (
-            <Step n={product?.hasFocus ? 5 : 4} title="Access plan">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {ACCESS_PLAN_IDS.map((id) => {
-                  const active = f.access_plan === id;
-                  return (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => pickAccessPlan(id)}
-                      className={`rounded-lg border-2 px-3 py-2.5 text-sm font-semibold transition-all ${active ? "border-accent bg-accent/10 text-accent" : "border-border bg-background text-foreground hover:border-accent/40"}`}
-                    >
-                      {id}
-                    </button>
-                  );
-                })}
-              </div>
-              {f.access_plan && (
-                <p className="mt-2 text-[11px] text-muted-foreground">{getAccessPlan(f.access_plan)?.blurb}</p>
-              )}
-            </Step>
-          )}
-
-          {/* Level + sessions */}
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <Field label="Initial English Level" icon={<GraduationCap className="h-3.5 w-3.5" />}>
-              <select value={f.current_level} onChange={(e) => set("current_level", e.target.value)} className={`${inputCls} cursor-pointer`}>
-                <option value="">Select a level</option>
-                {LEVEL_OPTIONS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
-              </select>
-            </Field>
-
-            <Field
-              label={<span className="flex items-center gap-1.5">Hired Sessions {f.sessions_auto ? <Wand2 className="h-3 w-3 text-accent" /> : <span className="rounded bg-warning/20 px-1 text-[9px] font-semibold text-foreground">edited manually</span>}</span>}
+    <AccentModal
+      background="linear-gradient(135deg, #01304a 0%, #02466b 100%)"
+      iconTint="#01304a"
+      icon={GraduationCap}
+      eyebrow={editing ? "Edit student" : "New registration"}
+      title={editing ? f.name || "Edit Student" : "Register Student"}
+      watermark={{ type: "text", value: "STUDENT" }}
+      onClose={onClose}
+      maxWidth="max-w-2xl"
+    >
+      {/* Tabs */}
+      <div className="flex items-center gap-1 border-b border-border px-6 pt-3">
+        {tabs.map((t) => {
+          const active = tab === t.id;
+          const color = TAB_ACCENT[t.id];
+          return (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setTab(t.id)}
+              className={`relative flex items-center gap-1.5 px-3 pb-2.5 pt-1 text-sm font-semibold transition-colors ${active ? "" : "text-muted-foreground hover:text-foreground"}`}
+              style={active ? { color } : undefined}
             >
-              <input type="number" min={0} value={f.hired_sessions} onChange={(e) => editSessions("hired_sessions", Number(e.target.value))} className={inputCls} />
-            </Field>
+              {t.label}
+              {t.dot && <span className="h-1.5 w-1.5 rounded-full bg-destructive" aria-hidden />}
+              {active && (
+                <span className="absolute inset-x-1 -bottom-px h-0.5 rounded-full" style={{ background: color }} />
+              )}
+            </button>
+          );
+        })}
+      </div>
 
-            <Field label="Remaining Sessions">
-              <input type="number" min={0} value={f.remaining_sessions} onChange={(e) => editSessions("remaining_sessions", Number(e.target.value))} className={inputCls} />
-            </Field>
+      <div className="max-h-[64vh] space-y-7 overflow-y-auto px-6 py-6 report-modal-scroll">
+        {/* ================= ACADEMIC ================= */}
+        {tab === "academic" && (
+          <>
+            {/* STEP 1 — Product Type */}
+            <Step n={1} title="Product Type">
+              <div className="grid grid-cols-3 gap-3">
+                {PRODUCT_TYPE_OPTIONS.map((opt) => {
+                  const Icon = opt.icon;
+                  const active = f.product_type === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => pickProductType(opt.id)}
+                      className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition-all ${active ? "border-accent bg-accent/10" : "border-border bg-background hover:border-accent/40"}`}
+                    >
+                      <span className={`flex h-12 w-12 items-center justify-center rounded-full ${active ? "bg-accent text-accent-foreground" : "bg-secondary text-muted-foreground"}`}>
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className={`text-sm font-semibold ${active ? "text-accent" : "text-foreground"}`}>{opt.name}</span>
+                      <span className="text-[10.5px] leading-tight text-muted-foreground">{opt.blurb}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </Step>
 
-            <div />
+            {/* BRANCH: FOCUS WORKSHOPS — standalone */}
+            {f.product_type === "workshops" && (
+              <Step n={2} title="Workshop Cohorts">
+                <p className="mb-3 text-[11px] text-muted-foreground">Standalone workshop customer. Add them to one or more cohorts from the Focus Workshops tab.</p>
+                <CohortChipsPicker
+                  selectedIds={f.selected_cohort_ids}
+                  currentUserId={initial?.id}
+                  onChange={(ids) => set("selected_cohort_ids", ids)}
+                />
+              </Step>
+            )}
 
-            {/* Cadence */}
-            <Field label="Sessions per week" icon={<Repeat className="h-3.5 w-3.5" />}>
-              <input type="number" min={1} value={f.sessions_per_week} onChange={(e) => changePerWeek(Number(e.target.value))} className={inputCls} />
-            </Field>
-            <Field label="Session duration (min)" icon={<Clock className="h-3.5 w-3.5" />}>
-              <input type="number" min={15} step={5} value={f.session_duration} onChange={(e) => set("session_duration", Number(e.target.value))} className={inputCls} />
-              <p className="mt-1 text-[10.5px] text-muted-foreground">{f.sessions_per_week * f.session_duration} min/week total.</p>
-            </Field>
+            {/* BRANCH: INSIGHTS — standalone */}
+            {f.product_type === "insights" && (
+              <Step n={2} title="Insights Access">
+                <p className="mb-3 text-[11px] text-muted-foreground">Standalone Insights customer. Set the monthly cap for this person.</p>
+                <Field label="Insights (per month)" icon={<Lightbulb className="h-3.5 w-3.5" />}>
+                  <input type="number" min={0} value={f.addon_insights_per_month} onChange={(e) => setAddon("insights", Number(e.target.value))} className={inputCls} />
+                </Field>
+              </Step>
+            )}
 
-            {/* Reschedule policy */}
-            <Field label="Reschedule policy" icon={<CalendarDays className="h-3.5 w-3.5" />} className="md:col-span-2">
-              <select value={f.reschedule_policy} onChange={(e) => set("reschedule_policy", e.target.value)} className={`${inputCls} cursor-pointer`}>
-                <option value="">Select a policy</option>
-                {RESCHEDULE_PRESETS.map((p) => <option key={p} value={p}>{p}</option>)}
-                <option value="Custom">Custom…</option>
-              </select>
-            </Field>
-            {isCustomReschedule && (
+            {/* BRANCH: PERFORMANCE SESSIONS */}
+            {isPerf && (
               <>
-                <Field label="Minimum hours of notice">
-                  <input type="number" min={0} value={f.reschedule_custom_hours} onChange={(e) => set("reschedule_custom_hours", Number(e.target.value))} className={inputCls} />
-                </Field>
-                <Field label="Max % of monthly sessions">
-                  <input type="number" min={0} max={100} value={f.reschedule_custom_pct} onChange={(e) => set("reschedule_custom_pct", Number(e.target.value))} className={inputCls} />
-                </Field>
+                <Step n={2} title="Product">
+                  <div className="grid grid-cols-3 gap-3">
+                    {PRODUCTS.map((p) => {
+                      const Icon = PRODUCT_ICON[p.icon];
+                      const active = f.product === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => pickProduct(p.id)}
+                          className={`flex flex-col items-center gap-2 rounded-xl border-2 px-3 py-4 text-center transition-all ${active ? "border-accent bg-accent/10" : "border-border bg-background hover:border-accent/40"}`}
+                        >
+                          <span className={`flex h-12 w-12 items-center justify-center rounded-full ${active ? "bg-accent text-accent-foreground" : "bg-secondary text-muted-foreground"}`}>
+                            <Icon className="h-5 w-5" />
+                          </span>
+                          <span className={`text-sm font-semibold ${active ? "text-accent" : "text-foreground"}`}>{p.name}</span>
+                          <span className="text-[10.5px] leading-tight text-muted-foreground">{p.blurb}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {isEnterprise && (
+                    <div className="verbo-fade-up mt-4">
+                      <Field label="Company" icon={<Building2 className="h-3.5 w-3.5" />}>
+                        <input value={f.company} onChange={(e) => set("company", e.target.value)} placeholder="Organization (required)" className={inputCls} />
+                      </Field>
+                    </div>
+                  )}
+                </Step>
+
+                {product?.hasFocus && (
+                  <Step n={3} title="Focus">
+                    <div className="flex flex-wrap gap-2">
+                      {focusesForProduct(f.product).map((focus) => {
+                        const active = f.focus === focus.name;
+                        return (
+                          <button
+                            key={focus.id}
+                            type="button"
+                            onClick={() => pickFocus(focus.name)}
+                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-accent bg-accent/10 text-accent" : "border-border bg-background text-foreground hover:border-accent/40"}`}
+                          >
+                            {focus.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </Step>
+                )}
+
+                {f.product && (
+                  <Step n={product?.hasFocus ? 4 : 3} title="Contracted levels (roadmap)">
+                    <div className="flex flex-wrap gap-2">
+                      {productLevels.map((lvl) => {
+                        const active = f.contracted_levels.includes(lvl);
+                        return (
+                          <button
+                            key={lvl}
+                            type="button"
+                            onClick={() => toggleLevel(lvl)}
+                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-foreground hover:border-primary/40"}`}
+                          >
+                            {active && <Check className="mr-1 inline h-3.5 w-3.5" />}{lvl}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-2 text-[11px] text-muted-foreground">Each level ≈ {SESSIONS_PER_LEVEL} live sessions.</p>
+                  </Step>
+                )}
+
+                {f.product && (
+                  <Step n={product?.hasFocus ? 5 : 4} title="Access plan">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                      {ACCESS_PLAN_IDS.map((id) => {
+                        const active = f.access_plan === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => pickAccessPlan(id)}
+                            className={`rounded-lg border-2 px-3 py-2.5 text-sm font-semibold transition-all ${active ? "border-accent bg-accent/10 text-accent" : "border-border bg-background text-foreground hover:border-accent/40"}`}
+                          >
+                            {id}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {f.access_plan && (
+                      <p className="mt-2 text-[11px] text-muted-foreground">{getAccessPlan(f.access_plan)?.blurb}</p>
+                    )}
+                  </Step>
+                )}
+
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <Field label="Sessions per week" icon={<Repeat className="h-3.5 w-3.5" />}>
+                    <input type="number" min={1} value={f.sessions_per_week} onChange={(e) => changePerWeek(Number(e.target.value))} className={inputCls} />
+                  </Field>
+                  <Field label="Session duration (min)" icon={<Clock className="h-3.5 w-3.5" />}>
+                    <input type="number" min={15} step={5} value={f.session_duration} onChange={(e) => set("session_duration", Number(e.target.value))} className={inputCls} />
+                    <p className="mt-1 text-[10.5px] text-muted-foreground">{f.sessions_per_week * f.session_duration} min/week total.</p>
+                  </Field>
+
+                  <Field label="Reschedule policy" icon={<CalendarDays className="h-3.5 w-3.5" />} className="md:col-span-2">
+                    <select value={f.reschedule_policy} onChange={(e) => set("reschedule_policy", e.target.value)} className={`${inputCls} cursor-pointer`}>
+                      <option value="">Select a policy</option>
+                      {RESCHEDULE_PRESETS.map((p) => <option key={p} value={p}>{p}</option>)}
+                      <option value="Custom">Custom…</option>
+                    </select>
+                  </Field>
+                  {isCustomReschedule && (
+                    <>
+                      <Field label="Minimum hours of notice">
+                        <input type="number" min={0} value={f.reschedule_custom_hours} onChange={(e) => set("reschedule_custom_hours", Number(e.target.value))} className={inputCls} />
+                      </Field>
+                      <Field label="Max % of monthly sessions">
+                        <input type="number" min={0} max={100} value={f.reschedule_custom_pct} onChange={(e) => set("reschedule_custom_pct", Number(e.target.value))} className={inputCls} />
+                      </Field>
+                    </>
+                  )}
+
+                  <Field label="Video Call Link" icon={<Video className="h-3.5 w-3.5" />} className="md:col-span-2">
+                    <input type="url" value={f.video_call_link} onChange={(e) => set("video_call_link", e.target.value)} placeholder="https://teams.microsoft.com/..." className={inputCls} />
+                    <p className="mt-1 text-[10.5px] text-muted-foreground">This link will be used for all of the student's sessions until an admin changes it.</p>
+                  </Field>
+
+                  <Field label="Assign Initial Teacher" icon={<Users className="h-3.5 w-3.5" />} className="md:col-span-2">
+                    <select value={f.teacher_id} onChange={(e) => set("teacher_id", e.target.value)} className={`${inputCls} cursor-pointer`}>
+                      <option value="">Select a teacher (optional)</option>
+                      {teachersForProductSorted(teachers, f.product || null).map((t) => <option key={t.id} value={t.id}>{t.name} · {teacherTier(t).name}</option>)}
+                    </select>
+                    {f.product && <p className="mt-1 text-[10.5px] text-muted-foreground">Solo se muestran teachers calificados para {getProduct(f.product)?.name}.</p>}
+                  </Field>
+                </div>
               </>
             )}
-
-            {/* Payment */}
-            <Field label="Payment day (1–31)" icon={<CreditCard className="h-3.5 w-3.5" />}>
-              <input type="number" min={1} max={31} value={f.payment_day} onChange={(e) => set("payment_day", Number(e.target.value))} className={inputCls} />
-            </Field>
-            <Field label="Cycle start" icon={<CalendarDays className="h-3.5 w-3.5" />}>
-              <input type="date" value={f.cycle_start} onChange={(e) => set("cycle_start", e.target.value)} className={inputCls} />
-              {nextPayPreview && <p className="mt-1 text-[10.5px] text-muted-foreground">Next payment: {nextPayPreview.toLocaleDateString()}</p>}
-            </Field>
-
-            {/* Video call link */}
-            <Field label="Video Call Link" icon={<Video className="h-3.5 w-3.5" />} className="md:col-span-2">
-              <input type="url" value={f.video_call_link} onChange={(e) => set("video_call_link", e.target.value)} placeholder="https://teams.microsoft.com/..." className={inputCls} />
-              <p className="mt-1 text-[10.5px] text-muted-foreground">This link will be used for all of the student's sessions until an admin changes it.</p>
-            </Field>
-
-            {/* Teacher */}
-            <Field label="Assign Initial Teacher" icon={<Users className="h-3.5 w-3.5" />} className="md:col-span-2">
-              <select value={f.teacher_id} onChange={(e) => set("teacher_id", e.target.value)} className={`${inputCls} cursor-pointer`}>
-                <option value="">Select a teacher (optional)</option>
-                {teachersForProductSorted(teachers, f.product || null).map((t) => <option key={t.id} value={t.id}>{t.name} · {teacherTier(t).name}</option>)}
-              </select>
-              {f.product && <p className="mt-1 text-[10.5px] text-muted-foreground">Solo se muestran teachers calificados para {getProduct(f.product)?.name}.</p>}
-            </Field>
-          </div>
-
-          {/* Add-on Access (Performance branch only) */}
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-accent"><Sparkles className="h-3.5 w-3.5" /></span>
-              <h3 className="text-sm font-semibold text-foreground">Add-on Access</h3>
-            </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <Field label="Insights (per month)" icon={<Lightbulb className="h-3.5 w-3.5" />}>
-                <input type="number" min={0} value={f.addon_insights_per_month} onChange={(e) => setAddon("insights", Number(e.target.value))} className={inputCls} />
-              </Field>
-              <Field label="Book Clubs (per month)" icon={<Users className="h-3.5 w-3.5" />}>
-                <input type="number" min={0} value={f.addon_bookclubs_per_month} onChange={(e) => setAddon("bookclubs", Number(e.target.value))} className={inputCls} />
-              </Field>
-              <Field label="Spotlight Sessions (per month)" icon={<Sparkles className="h-3.5 w-3.5" />}>
-                <input type="number" min={0} value={f.addon_spotlight_per_month} onChange={(e) => setAddon("spotlight", Number(e.target.value))} className={inputCls} />
-              </Field>
-
-            </div>
-            <div className="mt-4">
-              <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                <Layers className="h-3.5 w-3.5" /> Workshops
-              </label>
-              <div className="inline-flex rounded-lg border border-border bg-secondary/40 p-1">
-                <button type="button" onClick={() => set("addon_workshops_enabled", true)} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${f.addon_workshops_enabled ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>Yes</button>
-                <button type="button" onClick={() => { set("addon_workshops_enabled", false); set("selected_cohort_ids", []); }} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${!f.addon_workshops_enabled ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>No</button>
-              </div>
-              {f.addon_workshops_enabled && (
-                <div className="mt-3">
-                  <CohortChipsPicker
-                    selectedIds={f.selected_cohort_ids}
-                    currentUserId={initial?.id}
-                    onChange={(ids) => set("selected_cohort_ids", ids)}
-                  />
-                  <p className="mt-1 text-[10.5px] text-muted-foreground">Cohorts are created in Admin → Focus Workshops. A student can be enrolled in multiple cohorts over time.</p>
-                </div>
-              )}
-            </div>
-          </div>
           </>
-          )}
+        )}
 
-          {/* ============================================================
-              BRANCH: FOCUS WORKSHOPS — standalone (no Performance fields)
-          ============================================================ */}
-          {f.product_type === "workshops" && (
-            <Step n={2} title="Workshop Cohorts">
-              <p className="mb-3 text-[11px] text-muted-foreground">Standalone workshop customer. Add them to one or more cohorts from the Focus Workshops tab.</p>
-              <CohortChipsPicker
-                selectedIds={f.selected_cohort_ids}
-                currentUserId={initial?.id}
-                onChange={(ids) => set("selected_cohort_ids", ids)}
-              />
-            </Step>
-          )}
+        {/* ================= FINANCIAL ================= */}
+        {tab === "financial" && isPerf && (
+          <>
+            <div>
+              <div className="mb-3"><SectionTitleTab>Sessions & Billing</SectionTitleTab></div>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <Field
+                  label={<span className="flex items-center gap-1.5">Hired Sessions {f.sessions_auto ? <Wand2 className="h-3 w-3 text-accent" /> : <span className="rounded bg-warning/20 px-1 text-[9px] font-semibold text-foreground">edited manually</span>}</span>}
+                >
+                  <input type="number" min={0} value={f.hired_sessions} onChange={(e) => editSessions("hired_sessions", Number(e.target.value))} className={inputCls} />
+                </Field>
 
-          {/* ============================================================
-              BRANCH: INSIGHTS — standalone (no Performance fields)
-          ============================================================ */}
-          {f.product_type === "insights" && (
-            <Step n={2} title="Insights Access">
-              <p className="mb-3 text-[11px] text-muted-foreground">Standalone Insights customer. Set the monthly cap for this person.</p>
-              <Field label="Insights (per month)" icon={<Lightbulb className="h-3.5 w-3.5" />}>
-                <input type="number" min={0} value={f.addon_insights_per_month} onChange={(e) => setAddon("insights", Number(e.target.value))} className={inputCls} />
+                <Field label="Remaining Sessions">
+                  <input type="number" min={0} value={f.remaining_sessions} onChange={(e) => editSessions("remaining_sessions", Number(e.target.value))} className={inputCls} />
+                </Field>
+
+                <Field label="Payment day (1–31)" icon={<CreditCard className="h-3.5 w-3.5" />}>
+                  <input type="number" min={1} max={31} value={f.payment_day} onChange={(e) => set("payment_day", Number(e.target.value))} className={inputCls} />
+                </Field>
+                <Field label="Cycle start" icon={<CalendarDays className="h-3.5 w-3.5" />}>
+                  <input type="date" value={f.cycle_start} onChange={(e) => set("cycle_start", e.target.value)} className={inputCls} />
+                  {nextPayPreview && <p className="mt-1 text-[10.5px] text-muted-foreground">Next payment: {nextPayPreview.toLocaleDateString()}</p>}
+                </Field>
+              </div>
+            </div>
+
+            {/* Add-on Access */}
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full" style={{ backgroundColor: `${accent}26`, color: accent }}><Sparkles className="h-3.5 w-3.5" /></span>
+                <SectionTitleTab>Add-on Access</SectionTitleTab>
+              </div>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <Field label="Insights (per month)" icon={<Lightbulb className="h-3.5 w-3.5" />}>
+                  <input type="number" min={0} value={f.addon_insights_per_month} onChange={(e) => setAddon("insights", Number(e.target.value))} className={inputCls} />
+                </Field>
+                <Field label="Book Clubs (per month)" icon={<Users className="h-3.5 w-3.5" />}>
+                  <input type="number" min={0} value={f.addon_bookclubs_per_month} onChange={(e) => setAddon("bookclubs", Number(e.target.value))} className={inputCls} />
+                </Field>
+                <Field label="Spotlight Sessions (per month)" icon={<Sparkles className="h-3.5 w-3.5" />}>
+                  <input type="number" min={0} value={f.addon_spotlight_per_month} onChange={(e) => setAddon("spotlight", Number(e.target.value))} className={inputCls} />
+                </Field>
+              </div>
+              <div className="mt-4">
+                <label className="mb-1.5 flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Layers className="h-3.5 w-3.5" /> Workshops
+                </label>
+                <div className="inline-flex rounded-lg border border-border bg-secondary/40 p-1">
+                  <button type="button" onClick={() => set("addon_workshops_enabled", true)} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${f.addon_workshops_enabled ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>Yes</button>
+                  <button type="button" onClick={() => { set("addon_workshops_enabled", false); set("selected_cohort_ids", []); }} className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${!f.addon_workshops_enabled ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>No</button>
+                </div>
+                {f.addon_workshops_enabled && (
+                  <div className="mt-3">
+                    <CohortChipsPicker
+                      selectedIds={f.selected_cohort_ids}
+                      currentUserId={initial?.id}
+                      onChange={(ids) => set("selected_cohort_ids", ids)}
+                    />
+                    <p className="mt-1 text-[10.5px] text-muted-foreground">Cohorts are created in Admin → Focus Workshops. A student can be enrolled in multiple cohorts over time.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ================= STUDENT INFO ================= */}
+        {tab === "info" && (
+          <div>
+            <div className="mb-3"><SectionTitleTab>Student Info</SectionTitleTab></div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <Field label="Student Name">
+                <input value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="Full name" className={inputCls} />
               </Field>
-
-            </Step>
-          )}
-        </div>
-
-        <div className="flex items-center justify-end gap-2 border-t border-border bg-secondary/30 px-6 py-4">
-          <GhostButton onClick={onClose}>Cancel</GhostButton>
-          <PrimaryButton onClick={handleSave} disabled={!isValid}>{editing ? "Save changes" : "Save"}</PrimaryButton>
-        </div>
+              <Field label="Email" icon={<Mail className="h-3.5 w-3.5" />}>
+                <input
+                  type="email"
+                  value={f.email}
+                  onChange={(e) => set("email", e.target.value)}
+                  onBlur={() => setEmailTouched(true)}
+                  placeholder="student@company.com"
+                  className={`${inputCls} ${emailFormatError ? "!border-destructive focus:!border-destructive focus:!ring-destructive" : ""}`}
+                  aria-invalid={emailFormatError ? "true" : "false"}
+                />
+                {emailFormatError && <p className="mt-1 text-xs text-destructive">Enter a valid email address</p>}
+              </Field>
+              <Field label="Initial Password" icon={<KeyRound className="h-3.5 w-3.5" />}>
+                <div className="relative">
+                  <input type={showPassword ? "text" : "password"} value={f.password} onChange={(e) => set("password", e.target.value)} placeholder="Set a password" className={`${inputCls} pr-9`} />
+                  <button type="button" onClick={() => setShowPassword((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground" aria-label="Toggle password">
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </Field>
+              <Field label="Member Since" icon={<CalendarDays className="h-3.5 w-3.5" />}>
+                <input type="date" value={f.member_since} onChange={(e) => set("member_since", e.target.value)} className={inputCls} />
+              </Field>
+              <Field label="Initial English Level" icon={<GraduationCap className="h-3.5 w-3.5" />}>
+                <select value={f.current_level} onChange={(e) => set("current_level", e.target.value)} className={`${inputCls} cursor-pointer`}>
+                  <option value="">Select a level</option>
+                  {LEVEL_OPTIONS.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
+                </select>
+              </Field>
+            </div>
+          </div>
+        )}
       </div>
-    </Overlay>
+
+      <AccentModalFooter>
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton
+          onClick={handleSave}
+          disabled={!isValid}
+          accentColor="#5fca16"
+          className="hover:!bg-[#4fb010]"
+        >
+          {editing ? "Save changes" : "Save"}
+        </PrimaryButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }
 
