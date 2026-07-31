@@ -173,7 +173,7 @@ export function CantAttendModal({
               <PrimaryButton onClick={() => setStep(2)} disabled={!step1Valid}>Confirm</PrimaryButton>
             </div>
           </>
-        ) : step === 2 ? (
+        ) : (
           <>
             <AccentModalHeader
               background={ALERT_BG}
@@ -206,35 +206,6 @@ export function CantAttendModal({
               >
                 Confirm Cancellation
               </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <AccentModalHeader
-              background={ALERT_BG}
-              iconTint="#dc0000"
-              icon={AlertTriangle}
-              eyebrow="Substitute needed"
-              title="Notify Admin"
-              watermark={{ type: "icon", icon: AlertTriangle }}
-              onClose={() => onDone({ needsSubstitute: true })}
-            />
-            <div className="space-y-3 px-5 py-5 text-sm text-foreground">
-              <p>
-                Your cancellation was submitted and Admin was notified in-app. Since this session
-                starts soon, you can also ping Admin directly on WhatsApp.
-              </p>
-              <a
-                href={whatsappUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:opacity-90 active:scale-[0.97]"
-              >
-                <MessageCircle className="h-4 w-4" /> Notify Admin via WhatsApp
-              </a>
-            </div>
-            <div className="flex justify-end gap-2 border-t border-border bg-secondary/30 px-5 py-3">
-              <GhostButton onClick={() => onDone({ needsSubstitute: true })}>Done</GhostButton>
             </div>
           </>
         )}
