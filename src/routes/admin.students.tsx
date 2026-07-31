@@ -14,7 +14,7 @@ import { teachersForProduct, teachersForProductSorted } from "@/lib/teacher-mode
 import { teacherTier } from "@/lib/teacher-tiers";
 import { PLAN_DEFAULTS } from "@/lib/club-bookings-store";
 
-import { Card, GhostButton, PrimaryButton } from "@/components/verbo/ui";
+import { AccentModal, AccentModalFooter, Card, GhostButton, PrimaryButton } from "@/components/verbo/ui";
 import { useAvatar } from "@/lib/avatar-store";
 import {
   Plus, X, Eye, EyeOff, KeyRound, Mail, Building2, CalendarDays, GraduationCap,
