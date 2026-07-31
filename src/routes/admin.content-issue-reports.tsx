@@ -119,6 +119,38 @@ function Page() {
                       {r.detail || <span className="text-muted-foreground">No extra details.</span>}
                     </p>
                   </td>
+                  <td className="px-6 py-4">
+                    <Pill tone={STATUS_TONE[r.status]}>{STATUS_LABEL[r.status]}</Pill>
+                    {r.resolved_at && (
+                      <div className="mt-1 text-[11px] text-muted-foreground">
+                        {fmt(r.resolved_at)}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => updateContentIssueReport(r.id, { status: "resolved" })}
+                        disabled={r.status === "resolved"}
+                        aria-label="Mark as resolved"
+                        title="Mark as resolved"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-success/10 hover:text-success disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateContentIssueReport(r.id, { status: "dismissed" })}
+                        disabled={r.status === "dismissed"}
+                        aria-label="Dismiss"
+                        title="Dismiss"
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
