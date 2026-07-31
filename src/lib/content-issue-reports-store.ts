@@ -46,13 +46,14 @@ export const CONTENT_ISSUE_EVENT = "verbo:content-issue-reports-updated";
 
 type LegacyReport = ContentIssueReport & { unitId?: string; unitTitle?: string };
 
-/** Legacy records predate entityType/entityId/entityTitle — they were always units. */
+/** Legacy records predate entityType/entityId/entityTitle/status. */
 function normalize(r: LegacyReport): ContentIssueReport {
   return {
     ...r,
     entityType: r.entityType ?? "unit",
     entityId: r.entityId ?? r.unitId ?? "",
     entityTitle: r.entityTitle ?? r.unitTitle ?? "",
+    status: r.status ?? "pending",
   };
 }
 
@@ -89,6 +90,7 @@ export function addContentIssueReport(input: {
     issueType: input.issueType,
     detail: (input.detail ?? "").trim(),
     createdAt: new Date().toISOString(),
+    status: "pending",
   };
   writeAll([report, ...readAll()]);
   return report;
@@ -96,6 +98,22 @@ export function addContentIssueReport(input: {
 
 export function loadContentIssueReports(): ContentIssueReport[] {
   return readAll().sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+}
+
+export function updateContentIssueReport(
+  id: string,
+  patch: Partial<Pick<ContentIssueReport, "status">>,
+): ContentIssueReport | null {
+  const list = readAll();
+  const idx = list.findIndex((r) => r.id === id);
+  if (idx < 0) return null;
+  const next: ContentIssueReport = { ...list[idx], ...patch };
+  if (patch.status && patch.status !== "pending") {
+    next.resolved_at = new Date().toISOString();
+  }
+  list[idx] = next;
+  writeAll(list);
+  return next;
 }
 
 export function contentIssuesForUnit(unitId: string): ContentIssueReport[] {
