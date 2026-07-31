@@ -189,6 +189,7 @@ function SpotlightCategoryCard({
   subtitle,
   accent,
   icon: Icon,
+  iconImage,
   compact = false,
   noBlob = false,
   badge,
@@ -199,12 +200,14 @@ function SpotlightCategoryCard({
   subtitle: string;
   accent: string;
   icon: typeof Book;
+  iconImage?: string;
   compact?: boolean;
   noBlob?: boolean;
   badge?: React.ReactNode;
   art?: { src: string; className: string };
   onClick: () => void;
 }) {
+
   return (
     <div
       className={`group relative flex h-full ${compact ? "min-h-[140px]" : "min-h-[200px]"} flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-elevated`}
@@ -229,12 +232,22 @@ function SpotlightCategoryCard({
       )}
 
       <div className="relative z-10">
-        <div
-          className="flex h-12 w-12 items-center justify-center rounded-2xl"
-          style={{ backgroundColor: `${accent}1F` }}
-        >
-          <Icon className="h-6 w-6" style={{ color: accent }} />
-        </div>
+        {iconImage ? (
+          <img
+            src={iconImage}
+            alt=""
+            aria-hidden="true"
+            className="h-14 w-14 select-none object-contain"
+          />
+        ) : (
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: `${accent}1F` }}
+          >
+            <Icon className="h-6 w-6" style={{ color: accent }} />
+          </div>
+        )}
+
         <div className="mt-4 flex items-center gap-2">
           <h3 className="text-base font-semibold text-foreground">{name}</h3>
           {badge}
