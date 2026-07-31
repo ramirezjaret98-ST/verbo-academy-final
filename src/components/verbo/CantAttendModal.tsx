@@ -7,13 +7,17 @@
 // so all downstream effects (session → cancelled, strike ledger, auto-freeze
 // at 3 strikes, Needs Substitute flag when <24h) stay in one place.
 import { useMemo, useState } from "react";
-import { AlertTriangle, NotebookPen } from "lucide-react";
+import { AlertTriangle, NotebookPen, MessageCircle } from "lucide-react";
 import { GhostButton, PrimaryButton, AccentModalHeader } from "@/components/verbo/ui";
 import type { ExtSession } from "@/lib/sessions-store";
 import {
   cancelSessionByTeacher, CANCEL_REASON_LABEL, type CancelReason,
 } from "@/lib/strikes-store";
 import { getCoverageNote, setCoverageNote } from "@/lib/coverage-notes-store";
+import { userById } from "@/lib/mock-data";
+
+// Same plain wa.me pattern already used by teacher.clubs.tsx (PROPOSE_URL).
+const WA_BASE = "https://wa.me/522461152136?text=";
 
 export function CantAttendModal({
   session, teacherId, onClose, onDone,
@@ -23,7 +27,7 @@ export function CantAttendModal({
   onClose: () => void;
   onDone: (result: { needsSubstitute: boolean }) => void;
 }) {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [reason, setReason] = useState<CancelReason | "">("");
   const [note, setNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -66,7 +70,19 @@ export function CantAttendModal({
       note: note.trim() || undefined,
       medicalNoteName: file?.name,
     });
+    if (needsSubstitute) { setStep(3); return; }
     onDone({ needsSubstitute });
+  };
+
+  const whatsappUrl = () => {
+    const name = userById(teacherId)?.name ?? "Profesor";
+    const motivo = reason ? CANCEL_REASON_LABEL[reason as CancelReason] : "";
+    const fecha = new Date(session.date_time).toLocaleString("es-MX", {
+      weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
+    });
+    return WA_BASE + encodeURIComponent(
+      `Hola! Necesito un sustituto urgente. Profesor: ${name}. Motivo: ${motivo}. Sesión: ${fecha}.`,
+    );
   };
 
   return (
@@ -201,6 +217,70 @@ export function CantAttendModal({
               >
                 Confirm Cancellation
               </button>
+            </div>
+          </>
+        ) : step === 2 ? (
+          <>
+            <AccentModalHeader
+              background={ALERT_BG}
+              iconTint="#dc0000"
+              icon={AlertTriangle}
+              eyebrow="Step 2 of 2"
+              title="Confirm Cancellation"
+              watermark={{ type: "icon", icon: AlertTriangle }}
+              onClose={onClose}
+            />
+            <div className="space-y-3 px-5 py-5 text-sm text-foreground">
+              <p>
+                Cancelling this session will count as a <strong>strike</strong> against your
+                Cancellations / No-Shows KPI and will affect your Composite Score.
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {hoursUntil >= 24
+                  ? "The session starts in more than 24 hours — you can propose a reschedule with Admin."
+                  : "The session starts in less than 24 hours — Admin will attempt to find a substitute. If none is found, this hour will not be paid."}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                Reaching 3 unjustified strikes in the last 6 months automatically freezes your account.
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border bg-secondary/30 px-5 py-3">
+              <GhostButton onClick={() => setStep(1)}>Go Back</GhostButton>
+              <button
+                onClick={confirmCancel}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground shadow-sm transition-opacity hover:opacity-90"
+              >
+                Confirm Cancellation
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <AccentModalHeader
+              background={ALERT_BG}
+              iconTint="#dc0000"
+              icon={AlertTriangle}
+              eyebrow="Substitute needed"
+              title="Notify Admin"
+              watermark={{ type: "icon", icon: AlertTriangle }}
+              onClose={() => onDone({ needsSubstitute: true })}
+            />
+            <div className="space-y-3 px-5 py-5 text-sm text-foreground">
+              <p>
+                Your cancellation was submitted and Admin was notified in-app. Since this session
+                starts soon, you can also ping Admin directly on WhatsApp.
+              </p>
+              <a
+                href={whatsappUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-transform hover:opacity-90 active:scale-[0.97]"
+              >
+                <MessageCircle className="h-4 w-4" /> Notify Admin via WhatsApp
+              </a>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border bg-secondary/30 px-5 py-3">
+              <GhostButton onClick={() => onDone({ needsSubstitute: true })}>Done</GhostButton>
             </div>
           </>
         )}
