@@ -135,7 +135,7 @@ function Page() {
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Manage Clubs</h1>
           <p className="mt-1 text-sm text-muted-foreground">Create and curate Verbo Insights and Book Clubs that appear on the student calendar.</p>
         </div>
-        <PrimaryButton onClick={onCreate}>
+        <PrimaryButton accentColor="#5fca16" onClick={onCreate}>
           <Plus className="h-4 w-4" /> Create New Club Event
         </PrimaryButton>
       </div>
@@ -211,11 +211,27 @@ function ListView({ clubs, onEdit, onDelete }: { clubs: Club[]; onEdit: (c: Club
                 <td className="px-6 py-4 text-muted-foreground">{formatDate(c.date)}</td>
                 <td className="px-6 py-4 text-foreground">{c.spots_taken}/{c.spots_total}</td>
                 <td className="px-6 py-4">
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${assignment === "assigned" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${assignment === "assigned" ? "" : "bg-warning text-warning-foreground"}`}
+                    style={assignment === "assigned" ? { background: "#5fca16", color: "#fff" } : undefined}
+                  >
                     {assignment === "assigned" ? "Assigned" : "Created"}
                   </span>
                 </td>
-                <td className="px-6 py-4"><Pill tone={STATUS_TONE[c.status]}>{c.status}</Pill></td>
+                <td className="px-6 py-4">
+                  <Pill
+                    tone={STATUS_TONE[c.status]}
+                    style={
+                      c.status === "live"
+                        ? { background: "#5fca16", color: "#fff" }
+                        : c.status === "cancelled"
+                          ? { background: "#ef4444", color: "#fff" }
+                          : undefined
+                    }
+                  >
+                    {c.status}
+                  </Pill>
+                </td>
                 <td className="px-6 py-4">
                   <div className="flex justify-end gap-1">
                     <button onClick={() => onEdit(c)} aria-label="Edit" className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground">
@@ -303,8 +319,9 @@ function CalendarView({ clubs, onEdit }: { clubs: Club[]; onEdit: (c: Club) => v
                           onClick={() => onEdit(c)}
                           title={`${c.title} · ${assigned ? "Assigned" : "Created"}`}
                           className={`flex w-full items-center gap-1 truncate rounded-md px-2 py-1 text-left text-[11px] font-medium transition-opacity hover:opacity-80 ${
-                            assigned ? "bg-success/15 text-success" : "bg-warning/20 text-foreground"
+                            assigned ? "" : "bg-warning text-warning-foreground"
                           }`}
+                          style={assigned ? { background: "#5fca16", color: "#fff" } : undefined}
                         >
                           {c.type === "insight" ? <Sparkles className="h-3 w-3 shrink-0" /> : <BookOpen className="h-3 w-3 shrink-0" />}
                           <span className="truncate">{c.title}</span>
@@ -318,8 +335,8 @@ function CalendarView({ clubs, onEdit }: { clubs: Club[]; onEdit: (c: Club) => v
           ))}
         </div>
         <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-success/40" /> Assigned</span>
-          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-warning/50" /> Created</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded" style={{ background: "#5fca16" }} /> Assigned</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-warning" /> Created</span>
         </div>
       </div>
     </Card>
@@ -371,6 +388,7 @@ function TopicHistory({ clubs }: { clubs: Club[] }) {
           <tr className="border-b border-border">
             <th className="px-6 py-3 font-medium">Type</th>
             <th className="px-6 py-3 font-medium">Title</th>
+            <th className="px-6 py-3 font-medium">Teacher</th>
             <th className="px-6 py-3 font-medium">Delivered</th>
           </tr>
         </thead>
@@ -378,17 +396,18 @@ function TopicHistory({ clubs }: { clubs: Club[] }) {
           {rows.map((c) => (
             <tr key={c.id} className="border-b border-border last:border-0">
               <td className="px-6 py-4">
-                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${c.type === "insight" ? "bg-accent/15 text-accent" : "bg-primary/10 text-primary"}`}>
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${c.type === "insight" ? "bg-[#f38934] text-white" : "bg-[#01304a] text-white"}`}>
                   {c.type === "insight" ? <Sparkles className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
                   {c.type === "insight" ? "Verbo Insight" : "Book Club"}
                 </span>
               </td>
               <td className="px-6 py-4 font-medium text-foreground">{c.title}</td>
+              <td className="px-6 py-4 text-muted-foreground">{teacherName(c.teacher_id) ?? <span className="italic text-muted-foreground/70">Unassigned</span>}</td>
               <td className="px-6 py-4 text-muted-foreground">{formatDay(c.date)}</td>
             </tr>
           ))}
           {rows.length === 0 && (
-            <tr><td colSpan={3} className="px-6 py-12 text-center text-sm text-muted-foreground">No topics match your search.</td></tr>
+            <tr><td colSpan={4} className="px-6 py-12 text-center text-sm text-muted-foreground">No topics match your search.</td></tr>
           )}
         </tbody>
       </table>
