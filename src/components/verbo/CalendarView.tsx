@@ -375,12 +375,14 @@ function EventPill({ ev, onClick, pulse = false, substitutionAware = false }: { 
     ? ` · ${display.cellLabel}`
     : "";
   const full = isClub && isClubFull(ev);
+  const missed = isMissedClubEvent(ev);
+  const showBooked = !!ev.booked && !missed;
   return (
     <div className="group relative">
       <button
         onClick={onClick}
         className={`flex w-full items-center gap-1 truncate rounded-lg border px-1.5 py-1 text-left text-[10.5px] font-medium shadow-sm transition-opacity hover:opacity-90 cursor-pointer ${
-          ev.booked ? "ring-2 ring-[#f38934] ring-offset-1 ring-offset-card" : ""
+          showBooked ? "ring-2 ring-[#f38934] ring-offset-1 ring-offset-card" : ""
         } ${pulse ? "verbo-focus-pulse" : ""} ${full ? "opacity-55 grayscale-[0.4]" : ""}`}
         style={{
           background: display.color,
@@ -392,12 +394,12 @@ function EventPill({ ev, onClick, pulse = false, substitutionAware = false }: { 
         title={
           (ev.sub_status
             ? `${SUB_STATUS_META[ev.sub_status].label} — ${ev.title}`
-            : `${ev.booked ? "Reserved — " : ""}${ev.is_group ? "Group" : kindMeta.label} — ${ev.title}`) +
+            : `${showBooked ? "Reserved — " : ""}${missed ? "Missed" : ev.is_group ? "Group" : kindMeta.label} — ${ev.title}`) +
           (full ? " · Full" : "")
         }
       >
 
-        {ev.booked ? (
+        {showBooked ? (
           <span className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-[#f38934] text-white" title="You're in">
             <Check className="h-2.5 w-2.5" strokeWidth={3} />
           </span>
@@ -408,7 +410,7 @@ function EventPill({ ev, onClick, pulse = false, substitutionAware = false }: { 
         )}
         <span className="truncate">
           {isClub
-            ? `${fmtTime(ev.date)} · ${ev.title}${seats ? ` · ${seats}` : ""}`
+            ? `${fmtTime(ev.date)} · ${ev.title}${missed ? " · Missed" : seats ? ` · ${seats}` : ""}`
             : `${fmtTime(ev.date)} · ${ev.is_group ? ev.title : ev.title.split(" ")[0]}${cellLabelInline}`}
         </span>
         {ev.holiday_makeup && (
