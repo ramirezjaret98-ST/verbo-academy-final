@@ -729,6 +729,17 @@ function TeacherDetailModal({
           }}
         />
       )}
+
+      {overrideTarget && (
+        <KpiOverrideModal
+          teacher={t}
+          metric={overrideTarget.metric}
+          currentValue={overrideTarget.currentValue}
+          admin={admin}
+          onClose={() => setOverrideTarget(null)}
+          onSaved={() => { forceTick((n) => n + 1); setOverrideTarget(null); }}
+        />
+      )}
     </Overlay>
   );
 }
