@@ -125,37 +125,81 @@ function Page() {
 
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard label="Avg rating (all teachers)" value={`${overallAvg}★`} />
-        <MetricCard label="Sessions tracked" value={String(SESSIONS.length)} />
-        <MetricCard label="Teachers" value={String(teachers.length)} />
-        <MetricCard label="Avg composite score" value={`${avgComposite}%`} />
+        {([
+          {
+            label: "Avg rating (all teachers)",
+            value: overallAvg,
+            icon: Star,
+            color: "#01304a",
+          },
+          {
+            label: "Sessions tracked",
+            value: SESSIONS.length,
+            icon: CalendarClock,
+            color: "#3ebbad",
+          },
+          {
+            label: "Teachers",
+            value: teachers.length,
+            icon: GraduationCap,
+            color: "#7e22ce",
+          },
+          {
+            label: "Avg composite score",
+            value: avgComposite,
+            suffix: "%",
+            icon: TrendingUp,
+            color: "#d97706",
+          },
+        ] as const).map((m) => {
+          const Icon = m.icon;
+          return (
+            <HeroStatCard
+              key={m.label}
+              className="!min-h-[132px] !items-start border border-border bg-card"
+              style={{ boxShadow: `0 0 24px -8px ${m.color}66` }}
+            >
+              <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-xl">
+                <Icon className="h-7 w-7" style={{ color: m.color }} strokeWidth={1.75} />
+              </div>
+              <div className="relative w-full">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{m.label}</div>
+                <div className="mt-2 text-5xl font-bold leading-none text-foreground">
+                  <AnimatedNumber value={m.value} suffix={m.suffix} />
+                </div>
+              </div>
+            </HeroStatCard>
+          );
+        })}
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-        <label className="inline-flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
-          <input
-            type="checkbox"
-            checked={onlyReview}
-            onChange={(e) => setOnlyReview(e.target.checked)}
-            className="h-4 w-4 cursor-pointer rounded border-input accent-[#f38934]"
-          />
-          Show only teachers needing review
-          {onlyReview && <span className="text-xs text-muted-foreground">({visibleRows.length})</span>}
-        </label>
-        <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium text-foreground">Bonus threshold:</span>
-          <div className="flex items-center rounded-lg border border-input bg-background">
+      <div className="flex justify-end">
+        <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:w-[30%]">
+          <label className="inline-flex cursor-pointer items-center gap-2.5 text-sm text-foreground">
             <input
-              type="number"
-              min={0}
-              max={100}
-              value={threshold}
-              onChange={(e) => updateThreshold(Number(e.target.value))}
-              className="w-16 bg-transparent px-2.5 py-1.5 text-sm text-foreground focus:outline-none"
+              type="checkbox"
+              checked={onlyReview}
+              onChange={(e) => setOnlyReview(e.target.checked)}
+              className="h-4 w-4 cursor-pointer rounded border-input accent-[#f38934]"
             />
-            <span className="pr-3 text-sm text-muted-foreground">%</span>
+            Show only teachers needing review
+            {onlyReview && <span className="text-xs text-muted-foreground">({visibleRows.length})</span>}
+          </label>
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium text-foreground">Bonus threshold:</span>
+            <div className="flex items-center rounded-lg border border-input bg-background">
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={threshold}
+                onChange={(e) => updateThreshold(Number(e.target.value))}
+                className="w-16 bg-transparent px-2.5 py-1.5 text-sm text-foreground focus:outline-none"
+              />
+              <span className="pr-3 text-sm text-muted-foreground">%</span>
+            </div>
           </div>
         </div>
       </div>
