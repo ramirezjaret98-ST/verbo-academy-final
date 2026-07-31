@@ -465,6 +465,13 @@ function barColor(value: number, invert: boolean) {
   return "#ef4444";
 }
 
+/** Same thresholds CompositeRing paints with. */
+function compositeColor(value: number) {
+  return value >= 85 ? "#5fca16" : value >= 70 ? "#f59e0b" : "#ef4444";
+}
+
+
+
 function AdjustedBadge({ override }: { override: { admin_name: string; created_at: string; previous_value: number; new_value: number; justification: string } }) {
   const when = new Date(override.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
   return (
