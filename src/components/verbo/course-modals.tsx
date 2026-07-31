@@ -108,6 +108,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctIndex, setCorrectIndex] = useState(0);
+  const [feedback, setFeedback] = useState("");
   const [rev, setRev] = useState(0);
 
   const existing = useMemo(() => activitiesForUnit(unitId), [unitId, rev]);
