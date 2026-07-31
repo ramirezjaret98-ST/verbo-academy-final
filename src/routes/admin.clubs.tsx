@@ -211,7 +211,10 @@ function ListView({ clubs, onEdit, onDelete }: { clubs: Club[]; onEdit: (c: Club
                 <td className="px-6 py-4 text-muted-foreground">{formatDate(c.date)}</td>
                 <td className="px-6 py-4 text-foreground">{c.spots_taken}/{c.spots_total}</td>
                 <td className="px-6 py-4">
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${assignment === "assigned" ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"}`}>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${assignment === "assigned" ? "" : "bg-warning text-warning-foreground"}`}
+                    style={assignment === "assigned" ? { background: "#5fca16", color: "#fff" } : undefined}
+                  >
                     {assignment === "assigned" ? "Assigned" : "Created"}
                   </span>
                 </td>
