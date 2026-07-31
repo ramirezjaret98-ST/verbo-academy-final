@@ -7,17 +7,17 @@
 // so all downstream effects (session → cancelled, strike ledger, auto-freeze
 // at 3 strikes, Needs Substitute flag when <24h) stay in one place.
 import { useMemo, useState } from "react";
-import { AlertTriangle, NotebookPen, MessageCircle } from "lucide-react";
+import { AlertTriangle, NotebookPen } from "lucide-react";
 import { GhostButton, PrimaryButton, AccentModalHeader } from "@/components/verbo/ui";
 import type { ExtSession } from "@/lib/sessions-store";
 import {
   cancelSessionByTeacher, CANCEL_REASON_LABEL, type CancelReason,
 } from "@/lib/strikes-store";
 import { getCoverageNote, setCoverageNote } from "@/lib/coverage-notes-store";
-import { userById } from "@/lib/mock-data";
 
-// Same plain wa.me pattern already used by teacher.clubs.tsx (PROPOSE_URL).
-const WA_BASE = "https://wa.me/522461152136?text=";
+// Admin is pinged on WhatsApp as part of the confirmation click itself.
+const ADMIN_WA_LINK = "https://wa.link/pqrkgz";
+
 
 export function CantAttendModal({
   session, teacherId, onClose, onDone,
