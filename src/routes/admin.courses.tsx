@@ -16,6 +16,7 @@ import {
   Wand2,
   Link2,
   Info,
+  Upload,
 } from "lucide-react";
 import {
   loadActivities,
@@ -23,6 +24,7 @@ import {
 } from "@/lib/activities-store";
 import {
   ActivityModal,
+  BulkUploadModal,
   Field,
   ModalFooter,
   ModalShell,
