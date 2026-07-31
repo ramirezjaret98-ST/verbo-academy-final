@@ -27,8 +27,9 @@ import {
   Plus, X, Eye, EyeOff, Star, Users, Clock, KeyRound, Snowflake, Ban, Play,
   Pencil, Search, Filter, ArrowUpDown, Check, AlertTriangle, Mail, ShieldAlert,
   CheckCircle2, CalendarClock, ChevronRight, UserX, Wallet, FileDown, CircleDollarSign, Trophy,
-  ShieldCheck,
+  ShieldCheck, Zap,
 } from "lucide-react";
+import { HeroStatCard, Pill } from "@/components/verbo/ui";
 import { useAuth } from "@/lib/auth";
 import { getAdminType } from "@/lib/admin-roles";
 import { KpiOverrideModal } from "@/components/verbo/KpiOverrideModal";
