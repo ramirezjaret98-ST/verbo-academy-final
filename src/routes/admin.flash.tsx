@@ -215,9 +215,10 @@ function MysteryBoxTab() {
             onClick={() => setProduct(p)}
             className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
               product === p
-                ? "border-[#7e22ce] bg-[#7e22ce]/10 text-[#7e22ce]"
+                ? "border-[#7e22ce] text-white"
                 : "border-border bg-background text-muted-foreground hover:bg-secondary"
             }`}
+            style={product === p ? { background: "#7e22ce" } : undefined}
           >
             {FLASH_PRODUCT_LABEL[p]}
           </button>
