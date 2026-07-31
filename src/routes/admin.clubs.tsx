@@ -335,8 +335,8 @@ function CalendarView({ clubs, onEdit }: { clubs: Club[]; onEdit: (c: Club) => v
           ))}
         </div>
         <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-success/40" /> Assigned</span>
-          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-warning/50" /> Created</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded" style={{ background: "#5fca16" }} /> Assigned</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-3 w-3 rounded bg-warning" /> Created</span>
         </div>
       </div>
     </Card>
