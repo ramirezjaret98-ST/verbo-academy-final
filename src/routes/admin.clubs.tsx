@@ -469,188 +469,208 @@ function ClubFormPanel({
     });
   };
 
+  const isInsight = type === "insight";
+
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40">
-      <div onClick={(e) => e.stopPropagation()} className="flex h-full w-full max-w-xl flex-col bg-background shadow-2xl">
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <div>
-            <h2 className="text-base font-semibold tracking-tight text-foreground">{initial ? "Edit Club Event" : "Create New Club Event"}</h2>
-            <p className="text-xs text-muted-foreground">Configure how it appears on the student calendar.</p>
+    <AccentModal
+      background={isInsight
+        ? "linear-gradient(150deg, var(--orange-400) 0%, var(--orange-500) 55%, var(--orange-600) 100%)"
+        : "linear-gradient(135deg, #01304a 0%, #02466b 100%)"}
+      iconTint={isInsight ? "#f38934" : "#01304a"}
+      icon={isInsight ? Sparkles : BookOpen}
+      eyebrow="Manage Clubs"
+      title={initial ? "Edit Club Event" : "Create New Club Event"}
+      watermark={{ type: "text", value: "CLUB" }}
+      maxWidth="max-w-xl"
+      onClose={onClose}
+    >
+      <form onSubmit={submit} className="max-h-[70vh] space-y-5 overflow-y-auto px-6 py-6">
+        <ClubSectionBanner color="#01304a" textColor="#ffffff" icon={Sparkles} title="Event Details" />
+
+        {/* Type toggle */}
+        <div>
+          <label className="text-xs font-medium text-foreground">Event type</label>
+          <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-border bg-secondary/40 p-1">
+            {(["insight", "book"] as ClubType[]).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => setType(t)}
+                className={`inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all ${
+                  type === t ? "bg-[#01304a] text-white shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t === "insight" ? <Sparkles className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
+                {t === "insight" ? "Verbo Insight" : "Book Club"}
+              </button>
+            ))}
           </div>
-          <button onClick={onClose} aria-label="Close" className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground">
-            <X className="h-4 w-4" />
-          </button>
         </div>
 
-        <form onSubmit={submit} className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
-          {/* Type toggle */}
-          <div>
-            <label className="text-xs font-medium text-foreground">Event type</label>
-            <div className="mt-2 grid grid-cols-2 gap-2 rounded-lg border border-border bg-secondary/40 p-1">
-              {(["insight", "book"] as ClubType[]).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setType(t)}
-                  className={`inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all ${
-                    type === t ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {t === "insight" ? <Sparkles className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
-                  {t === "insight" ? "Verbo Insight" : "Book Club"}
-                </button>
-              ))}
+        <Field label="Club title">
+          <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Public Speaking Essentials" className={fieldCls} required />
+          {similarMatch && (
+            <div className="mt-2 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/15 px-3 py-2 text-xs text-foreground">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+              <span>
+                A similar topic was already taught: <strong>"{similarMatch.title}"</strong> on {formatDay(similarMatch.date)}. You can continue if you want to repeat it.
+              </span>
             </div>
-          </div>
+          )}
+        </Field>
 
-          <Field label="Club title">
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Public Speaking Essentials" className={fieldCls} required />
-            {similarMatch && (
-              <div className="mt-2 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/15 px-3 py-2 text-xs text-foreground">
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-                <span>
-                  A similar topic was already taught: <strong>"{similarMatch.title}"</strong> on {formatDay(similarMatch.date)}. You can continue if you want to repeat it.
-                </span>
-              </div>
+        <Field label="Description">
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder="What students will learn or discuss." className={`${fieldCls} resize-none`} />
+        </Field>
+
+        <ClubSectionBanner color="#3ebbad" textColor="#0b2b28" icon={ImageIcon} title="Media & Materials" />
+
+        <Field label="Cover image" help="Cover image students will see on their calendar.">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-secondary/30 p-8 text-center">
+            <ImageIcon className="h-7 w-7 text-muted-foreground" />
+            {cover ? (
+              <img src={cover} alt="Cover preview" className="mb-2 h-32 w-full max-w-xs rounded-lg object-cover" />
+            ) : (
+              <div className="mt-2 text-sm font-medium text-foreground">Drag & drop or choose an image</div>
             )}
-          </Field>
-
-          <Field label="Description">
-            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} placeholder="What students will learn or discuss." className={`${fieldCls} resize-none`} />
-          </Field>
-
-          <Field label="Cover image" help="Cover image students will see on their calendar.">
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-secondary/30 p-8 text-center">
-              <ImageIcon className="h-7 w-7 text-muted-foreground" />
-              {cover ? (
-                <img src={cover} alt="Cover preview" className="mb-2 h-32 w-full max-w-xs rounded-lg object-cover" />
-              ) : (
-                <div className="mt-2 text-sm font-medium text-foreground">Drag & drop or choose an image</div>
-              )}
-              <div className="mt-1 text-xs text-muted-foreground">JPG or PNG shown on the student calendar</div>
-              <input
-                ref={coverInputRef}
-                type="file"
-                accept="image/png,image/jpeg"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => setCover(String(reader.result));
-                  reader.readAsDataURL(file);
-                  e.target.value = "";
-                }}
-              />
-              <GhostButton
-                type="button"
-                className="mt-3"
-                onClick={() => {
-                  if (cover) setCover("");
-                  else coverInputRef.current?.click();
-                }}
-              >
-                {cover ? "Remove image" : "Choose file"}
-              </GhostButton>
-            </div>
-          </Field>
-
-          <Field label="Assigned teacher" help="Optional — assigning a teacher marks this event as “Assigned”.">
-            <div className="relative">
-              <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <select value={teacherId} onChange={(e) => setTeacherId(e.target.value)} className={`${fieldCls} pl-9`}>
-                <option value="">— Unassigned —</option>
-                {teachers.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
-            </div>
-          </Field>
-
-          <Field label="Session link">
-            <div className="relative">
-              <LinkIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://teams.microsoft.com/..." className={`${fieldCls} pl-9`} />
-            </div>
-          </Field>
-
-          <Field label="Pre-club material">
-            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-secondary/30 p-8 text-center">
-              <UploadCloud className="h-7 w-7 text-muted-foreground" />
-              <div className="mt-2 text-sm font-medium text-foreground">{materialName || "Drop a PDF or image"}</div>
-              <div className="mt-1 text-xs text-muted-foreground">Shared with students before the event</div>
-              <input
-                ref={materialInputRef}
-                type="file"
-                accept="application/pdf,image/png,image/jpeg"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    setMaterial(String(reader.result));
-                    setMaterialName(file.name);
-                  };
-                  reader.readAsDataURL(file);
-                  e.target.value = "";
-                }}
-              />
-              <GhostButton
-                type="button"
-                className="mt-3"
-                onClick={() => {
-                  if (material) {
-                    setMaterial("");
-                    setMaterialName("");
-                  } else {
-                    materialInputRef.current?.click();
-                  }
-                }}
-              >
-                {material ? "Remove file" : "Choose file"}
-              </GhostButton>
-            </div>
-          </Field>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2">
-              <Field label="Date & time">
-                <div className="relative">
-                  <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} className={`${fieldCls} pl-9`} required />
-                </div>
-              </Field>
-            </div>
-            <Field label="Duration (min)">
-              <input type="number" min={5} step={5} value={duration} onChange={(e) => setDuration(parseInt(e.target.value) || 60)} className={fieldCls} />
-            </Field>
-          </div>
-
-          <div className="max-w-[160px]">
-            <Field label="Capacity">
-              <input type="number" min={1} value={spotsTotal} onChange={(e) => setSpotsTotal(parseInt(e.target.value) || 1)} className={fieldCls} />
-            </Field>
-          </div>
-
-          <Field label="Teacher Payment (MXN)" help="Optional — how much the teacher earns for delivering this club. Used as the default penalty when an admin approves a release request.">
+            <div className="mt-1 text-xs text-muted-foreground">JPG or PNG shown on the student calendar</div>
             <input
-              type="number"
-              min={0}
-              step="0.01"
-              value={teacherPayment}
-              onChange={(e) => setTeacherPayment(e.target.value)}
-              placeholder="e.g. 350"
-              className={fieldCls}
+              ref={coverInputRef}
+              type="file"
+              accept="image/png,image/jpeg"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => setCover(String(reader.result));
+                reader.readAsDataURL(file);
+                e.target.value = "";
+              }}
             />
-          </Field>
-        </form>
+            <GhostButton
+              type="button"
+              className="mt-3"
+              onClick={() => {
+                if (cover) setCover("");
+                else coverInputRef.current?.click();
+              }}
+            >
+              {cover ? "Remove image" : "Choose file"}
+            </GhostButton>
+          </div>
+        </Field>
 
-        <div className="flex items-center justify-end gap-2 border-t border-border bg-secondary/30 px-6 py-4">
-          <GhostButton onClick={onClose} type="button">Cancel</GhostButton>
-          <PrimaryButton onClick={submit as unknown as () => void}>{initial ? "Save changes" : "Publish event"}</PrimaryButton>
+        <Field label="Pre-club material">
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-secondary/30 p-8 text-center">
+            <UploadCloud className="h-7 w-7 text-muted-foreground" />
+            <div className="mt-2 text-sm font-medium text-foreground">{materialName || "Drop a PDF or image"}</div>
+            <div className="mt-1 text-xs text-muted-foreground">Shared with students before the event</div>
+            <input
+              ref={materialInputRef}
+              type="file"
+              accept="application/pdf,image/png,image/jpeg"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                  setMaterial(String(reader.result));
+                  setMaterialName(file.name);
+                };
+                reader.readAsDataURL(file);
+                e.target.value = "";
+              }}
+            />
+            <GhostButton
+              type="button"
+              className="mt-3"
+              onClick={() => {
+                if (material) {
+                  setMaterial("");
+                  setMaterialName("");
+                } else {
+                  materialInputRef.current?.click();
+                }
+              }}
+            >
+              {material ? "Remove file" : "Choose file"}
+            </GhostButton>
+          </div>
+        </Field>
+
+        <ClubSectionBanner color="#d97706" textColor="#ffffff" icon={Calendar} title="Schedule, Capacity & Payment" />
+
+        <Field label="Assigned teacher" help="Optional — assigning a teacher marks this event as “Assigned”.">
+          <div className="relative">
+            <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <select value={teacherId} onChange={(e) => setTeacherId(e.target.value)} className={`${fieldCls} pl-9`}>
+              <option value="">— Unassigned —</option>
+              {teachers.map((t) => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
+          </div>
+        </Field>
+
+        <Field label="Session link">
+          <div className="relative">
+            <LinkIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://teams.microsoft.com/..." className={`${fieldCls} pl-9`} />
+          </div>
+        </Field>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-2">
+            <Field label="Date & time">
+              <div className="relative">
+                <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} className={`${fieldCls} pl-9`} required />
+              </div>
+            </Field>
+          </div>
+          <Field label="Duration (min)">
+            <input type="number" min={5} step={5} value={duration} onChange={(e) => setDuration(parseInt(e.target.value) || 60)} className={fieldCls} />
+          </Field>
         </div>
-      </div>
+
+        <div className="max-w-[160px]">
+          <Field label="Capacity">
+            <input type="number" min={1} value={spotsTotal} onChange={(e) => setSpotsTotal(parseInt(e.target.value) || 1)} className={fieldCls} />
+          </Field>
+        </div>
+
+        <Field label="Teacher Payment (MXN)" help="Optional — how much the teacher earns for delivering this club. Used as the default penalty when an admin approves a release request.">
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={teacherPayment}
+            onChange={(e) => setTeacherPayment(e.target.value)}
+            placeholder="e.g. 350"
+            className={fieldCls}
+          />
+        </Field>
+      </form>
+
+      <AccentModalFooter>
+        <GhostButton onClick={onClose} type="button">Cancel</GhostButton>
+        <PrimaryButton accentColor="#5fca16" className="hover:!bg-[#4fb010]" onClick={submit as unknown as () => void}>
+          {initial ? "Save changes" : "Publish event"}
+        </PrimaryButton>
+      </AccentModalFooter>
+    </AccentModal>
+  );
+}
+
+function ClubSectionBanner({
+  color, textColor, icon: Icon, title, className = "",
+}: { color: string; textColor: string; icon: LucideIcon; title: string; className?: string }) {
+  return (
+    <div className={`flex items-center gap-2 rounded-lg px-3 py-1.5 ${className}`} style={{ background: color }}>
+      <Icon className="h-3.5 w-3.5" style={{ color: textColor }} />
+      <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: textColor }}>{title}</span>
     </div>
   );
 }
