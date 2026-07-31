@@ -1,7 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, CreditCard, ExternalLink } from "lucide-react";
-import { Card, SectionTitle, MetricCard, Pill } from "@/components/verbo/ui";
+import {
+  ChevronLeft, ChevronRight, CreditCard, ExternalLink,
+  Wallet, CircleDollarSign, Clock, TrendingUp, type LucideIcon,
+} from "lucide-react";
+import {
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
+} from "recharts";
+import { Card, SectionTitle, HeroStatCard, Pill } from "@/components/verbo/ui";
 import { USERS, type User } from "@/lib/mock-data";
 import { hydrateStudents } from "@/lib/students-store";
 import {
@@ -281,11 +287,31 @@ function MoneyLabPage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <MetricCard label="Expected Income" value={money(expectedIncome)} sub={`${incomeRows.length} customers`} />
-        <MetricCard label="Received Income" value={money(receivedIncome)} sub={`${incomeRows.filter((r) => r.status === "Paid").length} paid`} />
-        <MetricCard label="Outstanding" value={money(outstanding)} sub={`${incomeRows.filter((r) => r.status !== "Paid").length} unpaid`} />
-        <MetricCard label="Expenses" value={money(expensesTotal)} sub={`${expenseRows.length} teachers`} />
-        <MetricCard label="Net" value={money(net)} sub={net >= 0 ? "Profit" : "Loss"} />
+        {([
+          { label: "Expected Income", value: money(expectedIncome), sub: `${incomeRows.length} customers`, icon: Wallet, color: "#01304a" },
+          { label: "Received Income", value: money(receivedIncome), sub: `${incomeRows.filter((r) => r.status === "Paid").length} paid`, icon: CircleDollarSign, color: "#5fca16" },
+          { label: "Outstanding", value: money(outstanding), sub: `${incomeRows.filter((r) => r.status !== "Paid").length} unpaid`, icon: Clock, color: "#b45309" },
+          { label: "Expenses", value: money(expensesTotal), sub: `${expenseRows.length} teachers`, icon: CreditCard, color: "#d97706" },
+          { label: "Net", value: money(net), sub: net >= 0 ? "Profit" : "Loss", icon: TrendingUp, color: net >= 0 ? "#5fca16" : "#b52904" },
+        ] as { label: string; value: string; sub: string; icon: LucideIcon; color: string }[]).map((m) => {
+          const Icon = m.icon;
+          return (
+            <HeroStatCard
+              key={m.label}
+              className="!min-h-[132px] !items-start border border-border bg-card"
+              style={{ boxShadow: `0 0 24px -8px ${m.color}66` }}
+            >
+              <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-xl">
+                <Icon className="h-7 w-7" style={{ color: m.color }} strokeWidth={1.75} />
+              </div>
+              <div className="relative w-full">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{m.label}</div>
+                <div className="mt-2 text-3xl font-bold leading-none text-foreground">{m.value}</div>
+                <div className="mt-2 text-[11px] text-muted-foreground">{m.sub}</div>
+              </div>
+            </HeroStatCard>
+          );
+        })}
       </div>
 
       {/* Trend chart */}
@@ -295,10 +321,12 @@ function MoneyLabPage() {
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-success" /> Received Income</span>
             <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-destructive" /> Expenses</span>
+            <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-[#01304a]" /> Net</span>
           </div>
         </div>
         <TrendChart data={trend} onSelect={(d) => setViewMonth(firstOfMonth(d))} selectedMkey={mkey} />
       </Card>
+
 
       {/* Income table */}
       <Card>
@@ -333,9 +361,9 @@ function MoneyLabPage() {
                     <td className="px-3 py-2.5 text-muted-foreground">{r.typeLabel}</td>
                     <td className="px-3 py-2.5 text-right font-semibold text-foreground">{money(r.amount)}</td>
                     <td className="px-3 py-2.5">
-                      {r.status === "Paid" && <Pill tone="success">Paid</Pill>}
-                      {r.status === "Pending" && <Pill tone="warning">Pending</Pill>}
-                      {r.status === "Overdue" && <Pill tone="danger">Overdue</Pill>}
+                      {r.status === "Paid" && <Pill tone="success" style={{ background: "#5fca16", color: "#fff" }}>Paid</Pill>}
+                      {r.status === "Pending" && <Pill tone="warning" style={{ background: "#b45309", color: "#fff" }}>Pending</Pill>}
+                      {r.status === "Overdue" && <Pill tone="danger" style={{ background: "#b52904", color: "#fff" }}>Overdue</Pill>}
                     </td>
                     <td className="px-3 py-2.5 text-muted-foreground">
                       {r.date ? r.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
@@ -345,10 +373,12 @@ function MoneyLabPage() {
                         type="button"
                         onClick={() => markIncomePaid(r)}
                         disabled={r.status === "Paid"}
-                        className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:opacity-40"
+                        style={{ background: "#5fca16" }}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
                       >
                         <CreditCard className="h-3 w-3" /> Mark as Paid
                       </button>
+
                     </td>
                   </tr>
                 ))}
@@ -413,7 +443,7 @@ function MoneyLabPage() {
 }
 
 // ---------------------------------------------------------------------------
-// Trend chart — minimal grouped-bars SVG (Received vs Expenses).
+// Trend chart — recharts ComposedChart (Received vs Expenses + Net line).
 // ---------------------------------------------------------------------------
 function TrendChart({
   data, onSelect, selectedMkey,
@@ -422,30 +452,37 @@ function TrendChart({
   onSelect: (d: Date) => void;
   selectedMkey: string;
 }) {
-  const max = Math.max(1, ...data.flatMap((m) => [m.received, m.expenses]));
-  const H = 160;
+  const rows = data.map((m) => ({ ...m, net: m.received - m.expenses }));
+  const handleClick = (p: unknown) => {
+    const payload = (p as { payload?: { d?: Date } } | undefined)?.payload ?? (p as { d?: Date });
+    if (payload?.d) onSelect(payload.d);
+  };
   return (
-    <div className="grid grid-cols-6 gap-3">
-      {data.map((m) => {
-        const rh = (m.received / max) * H;
-        const eh = (m.expenses / max) * H;
-        const isSelected = m.mkey === selectedMkey;
-        return (
-          <button
-            key={m.mkey}
-            type="button"
-            onClick={() => onSelect(m.d)}
-            className={`flex flex-col items-center gap-2 rounded-lg p-2 text-center transition-colors ${isSelected ? "bg-secondary" : "hover:bg-secondary/50"}`}
-            aria-label={`Select ${m.label}`}
-          >
-            <div className="flex h-[160px] w-full items-end justify-center gap-1.5">
-              <div className="w-4 rounded-t bg-success/80 transition-all" style={{ height: `${rh}px` }} title={`Received: ${m.received}`} />
-              <div className="w-4 rounded-t bg-destructive/80 transition-all" style={{ height: `${eh}px` }} title={`Expenses: ${m.expenses}`} />
-            </div>
-            <div className={`text-[11px] ${isSelected ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{m.label}</div>
-          </button>
-        );
-      })}
+    <div className="h-[260px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} width={70} tickFormatter={(v: number) => money(v)} />
+          <Tooltip
+            cursor={{ fill: "var(--muted-foreground)", fillOpacity: 0.08 }}
+            contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 12 }}
+            formatter={(value: number, name: string) => [money(value), name]}
+          />
+          <Bar dataKey="received" name="Received Income" fill="var(--success)" radius={[4, 4, 0, 0]} onClick={handleClick} cursor="pointer">
+            {rows.map((m) => (
+              <Cell key={m.mkey} fillOpacity={m.mkey === selectedMkey ? 1 : 0.55} />
+            ))}
+          </Bar>
+          <Bar dataKey="expenses" name="Expenses" fill="var(--destructive)" radius={[4, 4, 0, 0]} onClick={handleClick} cursor="pointer">
+            {rows.map((m) => (
+              <Cell key={m.mkey} fillOpacity={m.mkey === selectedMkey ? 1 : 0.55} />
+            ))}
+          </Bar>
+          <Line type="monotone" dataKey="net" name="Net" stroke="#01304a" strokeWidth={2} dot={{ r: 4, fill: "#01304a" }} activeDot={{ r: 6 }} />
+        </ComposedChart>
+      </ResponsiveContainer>
     </div>
   );
 }
+
