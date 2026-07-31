@@ -414,6 +414,7 @@ function TeacherKpiCard({
       {/* Composite score — prominent */}
       <div
         className="mt-4 flex items-center gap-4 rounded-xl border border-border border-t-border/60 bg-secondary/30 p-4"
+        style={{ boxShadow: `0 0 20px -6px ${compositeColor(kpis.composite)}80` }}
         onClick={(e) => e.stopPropagation()}
       >
         <CompositeRing value={kpis.composite} />
