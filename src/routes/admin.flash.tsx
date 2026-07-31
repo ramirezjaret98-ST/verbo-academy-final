@@ -1225,29 +1225,24 @@ function SeasonModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-elevated" onClick={(e) => e.stopPropagation()}>
-        <div
-          className="flex items-start justify-between gap-4 p-6 text-white"
-          style={{
-            background: themeImageUrl
-              ? `center / cover no-repeat url(${themeImageUrl}), ${previewGradient}`
-              : previewGradient,
-          }}
-        >
-          <div>
-            <div className="text-xs uppercase tracking-[0.18em] text-white/80">Verbo Flash · Season</div>
-            <div
-              className="mt-1 text-lg font-semibold tracking-tight drop-shadow"
-              style={{ fontFamily: `"${family}", system-ui, sans-serif` }}
-            >
-              {displayName || (isEdit ? "Edit Season" : "New Season")}
-            </div>
-            <div className="mt-1 text-xs text-white/80">🏅 Badge: {(displayName || "…") + " Challenger"}</div>
-          </div>
-          <button onClick={onClose} className="rounded-md p-1 text-white/80 hover:bg-white/10 hover:text-white"><X className="h-4 w-4" /></button>
-        </div>
-        <div className="space-y-4 overflow-y-auto p-6">
+    <AccentModal
+      background={
+        themeImageUrl
+          ? `center / cover no-repeat url(${themeImageUrl}), ${previewGradient}`
+          : previewGradient
+      }
+      iconTint="#ffffff"
+      icon={Sparkles}
+      eyebrow="Verbo Flash · Season"
+      title={
+        <span style={{ fontFamily: `"${family}", system-ui, sans-serif` }}>
+          {displayName || (isEdit ? "Edit Season" : "New Season")}
+        </span>
+      }
+      maxWidth="max-w-xl"
+      onClose={onClose}
+    >
+      <div className="max-h-[65vh] overflow-y-auto p-6 space-y-4">
           <Field label="Display Name">
             <input
               value={displayName}
