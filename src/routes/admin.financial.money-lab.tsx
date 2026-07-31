@@ -441,7 +441,7 @@ function MoneyLabPage() {
 }
 
 // ---------------------------------------------------------------------------
-// Trend chart — minimal grouped-bars SVG (Received vs Expenses).
+// Trend chart — recharts ComposedChart (Received vs Expenses + Net line).
 // ---------------------------------------------------------------------------
 function TrendChart({
   data, onSelect, selectedMkey,
@@ -450,30 +450,37 @@ function TrendChart({
   onSelect: (d: Date) => void;
   selectedMkey: string;
 }) {
-  const max = Math.max(1, ...data.flatMap((m) => [m.received, m.expenses]));
-  const H = 160;
+  const rows = data.map((m) => ({ ...m, net: m.received - m.expenses }));
+  const handleClick = (p: unknown) => {
+    const payload = (p as { payload?: { d?: Date } } | undefined)?.payload ?? (p as { d?: Date });
+    if (payload?.d) onSelect(payload.d);
+  };
   return (
-    <div className="grid grid-cols-6 gap-3">
-      {data.map((m) => {
-        const rh = (m.received / max) * H;
-        const eh = (m.expenses / max) * H;
-        const isSelected = m.mkey === selectedMkey;
-        return (
-          <button
-            key={m.mkey}
-            type="button"
-            onClick={() => onSelect(m.d)}
-            className={`flex flex-col items-center gap-2 rounded-lg p-2 text-center transition-colors ${isSelected ? "bg-secondary" : "hover:bg-secondary/50"}`}
-            aria-label={`Select ${m.label}`}
-          >
-            <div className="flex h-[160px] w-full items-end justify-center gap-1.5">
-              <div className="w-4 rounded-t bg-success/80 transition-all" style={{ height: `${rh}px` }} title={`Received: ${m.received}`} />
-              <div className="w-4 rounded-t bg-destructive/80 transition-all" style={{ height: `${eh}px` }} title={`Expenses: ${m.expenses}`} />
-            </div>
-            <div className={`text-[11px] ${isSelected ? "font-semibold text-foreground" : "text-muted-foreground"}`}>{m.label}</div>
-          </button>
-        );
-      })}
+    <div className="h-[260px] w-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <ComposedChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} width={70} tickFormatter={(v: number) => money(v)} />
+          <Tooltip
+            cursor={{ fill: "var(--muted-foreground)", fillOpacity: 0.08 }}
+            contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", fontSize: 12 }}
+            formatter={(value: number, name: string) => [money(value), name]}
+          />
+          <Bar dataKey="received" name="Received Income" fill="var(--success)" radius={[4, 4, 0, 0]} onClick={handleClick} cursor="pointer">
+            {rows.map((m) => (
+              <Cell key={m.mkey} fillOpacity={m.mkey === selectedMkey ? 1 : 0.55} />
+            ))}
+          </Bar>
+          <Bar dataKey="expenses" name="Expenses" fill="var(--destructive)" radius={[4, 4, 0, 0]} onClick={handleClick} cursor="pointer">
+            {rows.map((m) => (
+              <Cell key={m.mkey} fillOpacity={m.mkey === selectedMkey ? 1 : 0.55} />
+            ))}
+          </Bar>
+          <Line type="monotone" dataKey="net" name="Net" stroke="#01304a" strokeWidth={2} dot={{ r: 4, fill: "#01304a" }} activeDot={{ r: 6 }} />
+        </ComposedChart>
+      </ResponsiveContainer>
     </div>
   );
 }
+
