@@ -135,7 +135,7 @@ function Page() {
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">Manage Clubs</h1>
           <p className="mt-1 text-sm text-muted-foreground">Create and curate Verbo Insights and Book Clubs that appear on the student calendar.</p>
         </div>
-        <PrimaryButton onClick={onCreate}>
+        <PrimaryButton accentColor="#5fca16" onClick={onCreate}>
           <Plus className="h-4 w-4" /> Create New Club Event
         </PrimaryButton>
       </div>
