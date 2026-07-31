@@ -143,7 +143,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
   const save = () => {
     if (!name.trim()) { alert("Please give the activity a name."); return; }
     const finalCategory = (useCustomCategory ? customCategory.trim().toLowerCase() : category) || "vocabulary";
-    const base: Activity = { id: `act-${Date.now()}`, unit_id: unitId, name: name.trim(), type, category: finalCategory, session_phase: phase };
+    const base: Activity = { id: `act-${Date.now()}`, unit_id: unitId, name: name.trim(), type, category: finalCategory, session_phase: phase, feedback: feedback.trim() || undefined };
     let payload: Activity = base;
     if (type === "fill_gaps" || type === "read_complete") {
       if (!paragraph.trim() || !answer.trim()) { alert("Provide a paragraph and the correct answer."); return; }
