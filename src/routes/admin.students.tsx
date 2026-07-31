@@ -954,7 +954,7 @@ function StudentFormModal({
                             key={id}
                             type="button"
                             onClick={() => pickAccessPlan(id)}
-                            className={`rounded-lg border-2 px-3 py-2.5 text-sm font-semibold transition-all ${active ? "border-accent bg-accent/10 text-accent" : "border-border bg-background text-foreground hover:border-accent/40"}`}
+                            className={`rounded-lg border-2 px-3 py-2.5 text-sm font-semibold transition-all ${active ? "border-[#01304a] bg-[#01304a] text-white" : "border-border bg-background text-foreground hover:border-[#01304a]/40"}`}
                           >
                             {id}
                           </button>
