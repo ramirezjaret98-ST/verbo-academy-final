@@ -913,7 +913,7 @@ function StudentFormModal({
                             key={focus.id}
                             type="button"
                             onClick={() => pickFocus(focus.name)}
-                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-accent bg-accent/10 text-accent" : "border-border bg-background text-foreground hover:border-accent/40"}`}
+                            className={`rounded-full border-2 px-4 py-2 text-sm font-medium transition-all ${active ? "border-[#01304a] bg-[#01304a] text-white" : "border-border bg-background text-foreground hover:border-[#01304a]/40"}`}
                           >
                             {focus.name}
                           </button>
