@@ -1286,9 +1286,18 @@ function Info({ label, value }: { label: string; value: string }) {
   );
 }
 
-function BigStat({ label, value }: { label: string; value: string }) {
+function BigStat({ label, value, onAdjust }: { label: string; value: string; onAdjust?: () => void }) {
   return (
-    <div className="rounded-xl border border-border bg-background p-4 text-center">
+    <div className="relative rounded-xl border border-border bg-background p-4 text-center">
+      {onAdjust && (
+        <button
+          onClick={onAdjust}
+          title="Manual KPI override"
+          className="absolute right-2 top-2 rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
       <div className="text-2xl font-semibold text-foreground">{value}</div>
       <div className="mt-1 text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
     </div>
