@@ -725,7 +725,7 @@ function LightningTab() {
               {confirmEnd ? (
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-white/90">End now?</span>
-                  <PrimaryButton onClick={() => { endLightningEarly(); setConfirmEnd(false); }}>Yes, end</PrimaryButton>
+                  <PrimaryButton accentColor="#b52904" onClick={() => { endLightningEarly(); setConfirmEnd(false); }}>Yes, end</PrimaryButton>
                   <GhostButton onClick={() => setConfirmEnd(false)}>Cancel</GhostButton>
                 </div>
               ) : (
@@ -781,7 +781,7 @@ function LightningTab() {
               </Field>
             </div>
             <div className="flex justify-end">
-              <PrimaryButton disabled={!selectedChallengeId} onClick={handleActivate}>
+              <PrimaryButton accentColor="#5fca16" disabled={!selectedChallengeId} onClick={handleActivate}>
                 <Zap className="h-3.5 w-3.5" /> Activate Lightning now
               </PrimaryButton>
             </div>
@@ -797,9 +797,10 @@ function LightningTab() {
             onClick={() => setProduct(p)}
             className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
               product === p
-                ? "border-[#0284c7] bg-[#0284c7]/10 text-[#0284c7]"
+                ? "border-[#0284c7] text-white"
                 : "border-border bg-background text-muted-foreground hover:bg-secondary"
             }`}
+            style={product === p ? { background: "#0284c7" } : undefined}
           >
             {FLASH_PRODUCT_LABEL[p]}
           </button>
@@ -825,7 +826,7 @@ function LightningTab() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((c) => (
-            <div key={c.id} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-sm">
+            <div key={c.id} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5 shadow-md transition-shadow duration-200 hover:shadow-lg">
               <div className="flex flex-wrap items-center gap-1.5">
                 {c.category ? (
                   <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${categoryColor(c.category)}`}>
@@ -1605,7 +1606,7 @@ function BannerThemeCard({
         )}
 
         <div className="flex justify-end">
-          <PrimaryButton onClick={handleSave}>Save</PrimaryButton>
+          <PrimaryButton accentColor="#5fca16" onClick={handleSave}>Save</PrimaryButton>
         </div>
       </div>
     </Card>
