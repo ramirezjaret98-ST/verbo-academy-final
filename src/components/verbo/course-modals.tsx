@@ -5,7 +5,7 @@
 import { useMemo, useState } from "react";
 import {
   Plus, Trash2, X, Info, Headphones, GripVertical, Mic, AlignLeft,
-  Shuffle, BookOpen, ListChecks,
+  Shuffle, BookOpen, ListChecks, Upload,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GhostButton, PrimaryButton, Pill, AccentModal } from "./ui";
@@ -23,6 +23,9 @@ import {
   addActivity,
   removeActivity,
   phaseOf,
+  saveActivities,
+  loadActivities,
+  validateBulkActivities,
 } from "@/lib/activities-store";
 
 export const inputCls =
