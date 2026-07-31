@@ -454,7 +454,7 @@ export function BulkUploadModal({ allUnits, onClose, onImported }: {
                   <span className="truncate text-xs font-medium text-foreground">
                     {allUnits.find((u) => u.id === unitId)?.title ?? unitId}
                   </span>
-                  <Pill tone="neutral">{count}</Pill>
+                  <Pill tone="default">{count}</Pill>
                 </div>
               ))}
             </div>
