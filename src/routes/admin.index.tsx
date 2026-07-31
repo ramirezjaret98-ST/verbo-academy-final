@@ -5,13 +5,19 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from "recharts";
 import { USERS, SESSIONS, type User, type Session } from "@/lib/mock-data";
-import { Card, PrimaryButton, GhostButton, HeroStatCard, AnimatedNumber } from "@/components/verbo/ui";
+import { Card, PrimaryButton, GhostButton, HeroStatCard, AnimatedNumber, AccentModal } from "@/components/verbo/ui";
 import { hydrateStudents } from "@/lib/students-store";
 import { nextPaymentDate, daysUntil, MAX_INSIGHT_STRIKES, getProduct } from "@/lib/student-model";
 import { computeTeacherKpis } from "@/lib/teacher-kpis";
 import { pendingReviews } from "@/lib/teacher-model";
 import { monthlySnapshot } from "@/lib/teacher-kpi-history-store";
-import { loadClubs, subscribeClubs, upcomingCreatedClubs } from "@/lib/clubs-store";
+import { loadClubs, subscribeClubs, upcomingCreatedClubs, loadReleaseRequests } from "@/lib/clubs-store";
+import { loadSessions } from "@/lib/sessions-store";
+import { activeStrikeCount } from "@/lib/strikes-store";
+import { loadConductReports } from "@/lib/conduct-reports-store";
+import { loadContentIssueReports } from "@/lib/content-issue-reports-store";
+import { listChangeRequests } from "@/lib/availability-store";
+import { loadFinancialIssues } from "@/lib/financial-issues-store";
 import {
   useAnnouncements, activeAnnouncements, publishAnnouncement, endAnnouncement,
   ANNOUNCEMENT_MAX, type Audience,
@@ -19,8 +25,10 @@ import {
 import {
   UserPlus, CalendarPlus, Sparkles, BarChart3, X, CreditCard, Lock,
   Star, TrendingDown, Users2, Megaphone, ChevronRight, CheckCircle2,
-  GraduationCap, CalendarClock, Layers, TrendingUp,
+  GraduationCap, CalendarClock, Layers, TrendingUp, AlertTriangle, Eye,
+  UserX, Bug, ShieldAlert, Wallet, CalendarCheck, Flag, Snowflake,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({ component: Overview });
 
