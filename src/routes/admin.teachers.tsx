@@ -27,9 +27,10 @@ import {
   Plus, X, Eye, EyeOff, Star, Users, Clock, KeyRound, Snowflake, Ban, Play,
   Pencil, Search, Filter, ArrowUpDown, Check, AlertTriangle, Mail, ShieldAlert,
   CheckCircle2, CalendarClock, ChevronRight, UserX, Wallet, FileDown, CircleDollarSign, Trophy,
-  ShieldCheck, Zap,
+  ShieldCheck, Zap, Briefcase,
 } from "lucide-react";
-import { HeroStatCard, Pill } from "@/components/verbo/ui";
+import type { LucideIcon } from "lucide-react";
+import { HeroStatCard, Pill, AccentModal, AccentModalFooter, GhostButton, PrimaryButton } from "@/components/verbo/ui";
 import { useAuth } from "@/lib/auth";
 import { getAdminType } from "@/lib/admin-roles";
 import { KpiOverrideModal } from "@/components/verbo/KpiOverrideModal";
@@ -1189,99 +1190,120 @@ function TeacherFormModal({
   };
 
   return (
-    <Overlay onClose={onClose}>
-      <div className="relative flex max-h-[88vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl bg-card shadow-floating">
-        <div className="flex items-start justify-between border-b border-border px-6 py-5" style={{ background: "linear-gradient(135deg, #01304a 0%, #02466b 100%)" }}>
-          <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/60">{editing ? "Edit teacher" : "Register teacher"}</div>
-            <h2 className="mt-1 text-xl font-semibold tracking-tight text-white">{editing ? name || "Teacher" : "New teacher"}</h2>
+    <AccentModal
+      background="linear-gradient(135deg, #01304a 0%, #02466b 100%)"
+      iconTint="#01304a"
+      icon={Briefcase}
+      eyebrow={editing ? "Edit teacher" : "New registration"}
+      title={editing ? name || "Teacher" : "Register Teacher"}
+      watermark={{ type: "text", value: "TEACHER" }}
+      maxWidth="max-w-xl"
+      onClose={onClose}
+    >
+      <div className="max-h-[70vh] space-y-4 overflow-y-auto px-6 py-5 report-modal-scroll">
+        <SectionBanner color="#01304a" icon={Users} title="Teacher Info" />
+        <Field label="Full name" icon={<Users className="h-3.5 w-3.5" />}>
+          <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Jane Doe" />
+        </Field>
+        <Field label="Email" icon={<Mail className="h-3.5 w-3.5" />}>
+          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="jane@verbo.com" />
+        </Field>
+        <Field label="Initial password" icon={<KeyRound className="h-3.5 w-3.5" />}>
+          <div className="relative">
+            <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} placeholder="••••••••" />
+            <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground">
+              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
           </div>
-          <button onClick={onClose} aria-label="Close" className="rounded-md p-1 text-white/70 transition-colors hover:bg-white/10 hover:text-white"><X className="h-4 w-4" /></button>
-        </div>
+          <p className="mt-1 text-[10.5px] text-muted-foreground">The teacher will be required to change it on their first sign-in.</p>
+        </Field>
 
-        <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5 report-modal-scroll">
-          <Field label="Full name" icon={<Users className="h-3.5 w-3.5" />}>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Jane Doe" />
-          </Field>
-          <Field label="Email" icon={<Mail className="h-3.5 w-3.5" />}>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} placeholder="jane@verbo.com" />
-          </Field>
-          <Field label="Initial password" icon={<KeyRound className="h-3.5 w-3.5" />}>
-            <div className="relative">
-              <input type={showPw ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} placeholder="••••••••" />
-              <button type="button" onClick={() => setShowPw((v) => !v)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground">
-                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-            <p className="mt-1 text-[10.5px] text-muted-foreground">The teacher will be required to change it on their first sign-in.</p>
-          </Field>
-          <Field label="Hourly rate (MXN)">
-            <div className="flex items-center rounded-lg border border-input bg-background">
-              <span className="px-3 text-sm text-muted-foreground">$</span>
-              <input type="number" min={0} value={rate} onChange={(e) => setRate(e.target.value)} className="w-32 bg-transparent py-2 pr-3 text-sm text-foreground focus:outline-none" />
-              <span className="pr-3 text-xs text-muted-foreground">MXN/h</span>
-            </div>
-          </Field>
-          <Field label="Hire date">
-            <input
-              type="date"
-              value={hireDate}
-              onChange={(e) => setHireDate(e.target.value)}
-              className={inputCls}
-            />
-            <p className="mt-1 text-[10.5px] text-muted-foreground">
-              KPI tracking activates in week 2 of the hire month. The 6-month bonus streak counts from the first full calendar month after the hire month.
-            </p>
-          </Field>
-          <Field label="Qualified products (at least one)">
-            <div className="flex flex-wrap gap-2">
-              {QUALIFIED_PRODUCTS.map((p) => {
-                const on = products.includes(p.id);
-                return (
-                  <button key={p.id} type="button" onClick={() => setProducts((prev) => on ? prev.filter((x) => x !== p.id) : [...prev, p.id])} className={`rounded-full px-3 py-1 text-xs font-semibold transition ${on ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/70"}`}>
-                    {p.name}
-                  </button>
-                );
-              })}
-            </div>
-          </Field>
+        <SectionBanner color="#d97706" icon={Briefcase} title="Contract & Products" />
+        <Field label="Hourly rate (MXN)">
+          <div className="flex items-center rounded-lg border border-input bg-background">
+            <span className="px-3 text-sm text-muted-foreground">$</span>
+            <input type="number" min={0} value={rate} onChange={(e) => setRate(e.target.value)} className="w-32 bg-transparent py-2 pr-3 text-sm text-foreground focus:outline-none" />
+            <span className="pr-3 text-xs text-muted-foreground">MXN/h</span>
+          </div>
+        </Field>
+        <Field label="Hire date">
+          <input
+            type="date"
+            value={hireDate}
+            onChange={(e) => setHireDate(e.target.value)}
+            className={inputCls}
+          />
+          <p className="mt-1 text-[10.5px] text-muted-foreground">
+            KPI tracking activates in week 2 of the hire month. The 6-month bonus streak counts from the first full calendar month after the hire month.
+          </p>
+        </Field>
+        <Field label="Qualified products (at least one)">
+          <div className="flex flex-wrap gap-2">
+            {QUALIFIED_PRODUCTS.map((p) => {
+              const on = products.includes(p.id);
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => setProducts((prev) => on ? prev.filter((x) => x !== p.id) : [...prev, p.id])}
+                  style={on ? { background: "#01304a" } : undefined}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${on ? "text-white" : "bg-secondary text-secondary-foreground hover:bg-secondary/70"}`}
+                >
+                  {p.name}
+                </button>
+              );
+            })}
+          </div>
+        </Field>
 
-          {!editing && (
-            <Field label="Assign initial students (optional)">
-              {unassigned.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No unassigned students available.</p>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {unassigned.map((s) => {
-                    const on = studentIds.includes(s.id);
-                    const prod = getProduct(s.product);
-                    const eligible = !s.product || products.includes(s.product as QualifiedProduct);
-                    return (
-                      <button
-                        key={s.id} type="button" disabled={!eligible}
-                        onClick={() => setStudentIds((prev) => on ? prev.filter((x) => x !== s.id) : [...prev, s.id])}
-                        className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${on ? "bg-accent text-accent-foreground" : "bg-secondary text-secondary-foreground hover:bg-secondary/70"}`}
-                        title={eligible ? "" : `Mark ${prod?.name} first to assign this student`}
-                      >
-                        {s.name}{prod ? ` · ${prod.name}` : ""}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-              <p className="mt-1 text-[10.5px] text-muted-foreground">Only students whose product matches a qualified product can be assigned.</p>
-            </Field>
-          )}
-        </div>
-
-        <div className="flex items-center justify-end gap-2 border-t border-border bg-secondary/30 px-6 py-4">
-          <GhostBtn onClick={onClose}>Cancel</GhostBtn>
-          <PrimaryBtn onClick={handleSave} disabled={!valid}>{editing ? "Save changes" : "Save"}</PrimaryBtn>
-        </div>
+        {!editing && (
+          <Field label="Assign initial students (optional)">
+            {unassigned.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No unassigned students available.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {unassigned.map((s) => {
+                  const on = studentIds.includes(s.id);
+                  const prod = getProduct(s.product);
+                  const eligible = !s.product || products.includes(s.product as QualifiedProduct);
+                  return (
+                    <button
+                      key={s.id} type="button" disabled={!eligible}
+                      onClick={() => setStudentIds((prev) => on ? prev.filter((x) => x !== s.id) : [...prev, s.id])}
+                      style={on ? { background: "#01304a" } : undefined}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 ${on ? "text-white" : "bg-secondary text-secondary-foreground hover:bg-secondary/70"}`}
+                      title={eligible ? "" : `Mark ${prod?.name} first to assign this student`}
+                    >
+                      {s.name}{prod ? ` · ${prod.name}` : ""}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+            <p className="mt-1 text-[10.5px] text-muted-foreground">Only students whose product matches a qualified product can be assigned.</p>
+          </Field>
+        )}
       </div>
-    </Overlay>
+
+      <AccentModalFooter>
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton accentColor="#5fca16" className="hover:!bg-[#4fb010]" onClick={handleSave} disabled={!valid}>
+          {editing ? "Save changes" : "Save"}
+        </PrimaryButton>
+      </AccentModalFooter>
+    </AccentModal>
   );
 }
+
+function SectionBanner({ color, icon: Icon, title }: { color: string; icon: LucideIcon; title: string }) {
+  return (
+    <div className="flex items-center gap-2 rounded-lg px-3 py-1.5" style={{ background: color }}>
+      <Icon className="h-3.5 w-3.5 text-white" />
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-white">{title}</span>
+    </div>
+  );
+}
+
 
 // ===========================================================================
 // Shared building blocks
