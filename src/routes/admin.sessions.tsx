@@ -622,7 +622,8 @@ function StudentSessionsModal({
           </table>
         </div>
       </div>
-    </div>
+    </AccentModal>
+
   );
 }
 
