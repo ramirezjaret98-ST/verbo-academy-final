@@ -27,7 +27,7 @@ export function CantAttendModal({
   onClose: () => void;
   onDone: (result: { needsSubstitute: boolean }) => void;
 }) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [reason, setReason] = useState<CancelReason | "">("");
   const [note, setNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -70,19 +70,8 @@ export function CantAttendModal({
       note: note.trim() || undefined,
       medicalNoteName: file?.name,
     });
-    if (needsSubstitute) { setStep(3); return; }
+    window.open(ADMIN_WA_LINK, "_blank", "noopener,noreferrer");
     onDone({ needsSubstitute });
-  };
-
-  const whatsappUrl = () => {
-    const name = userById(teacherId)?.name ?? "Profesor";
-    const motivo = reason ? CANCEL_REASON_LABEL[reason as CancelReason] : "";
-    const fecha = new Date(session.date_time).toLocaleString("es-MX", {
-      weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit",
-    });
-    return WA_BASE + encodeURIComponent(
-      `Hola! Necesito un sustituto urgente. Profesor: ${name}. Motivo: ${motivo}. Sesión: ${fecha}.`,
-    );
   };
 
   return (
