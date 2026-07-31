@@ -139,6 +139,7 @@ function Page() {
           <Plus className="h-4 w-4" /> Create New Club Event
         </PrimaryButton>
       </div>
+      <ReleaseRequestsPanel requests={requests} clubs={clubs} />
 
       {/* View switcher */}
       <div className="inline-flex rounded-lg border border-border bg-secondary/40 p-1">
@@ -163,7 +164,6 @@ function Page() {
       {view === "calendar" && <CalendarView clubs={clubs} onEdit={onEdit} />}
       {view === "history" && <TopicHistory clubs={clubs} />}
 
-      <ReleaseRequestsPanel requests={requests} clubs={clubs} />
 
       {open && <ClubFormPanel initial={editing} clubs={clubs} onClose={() => setOpen(false)} onSave={onSave} />}
     </div>
