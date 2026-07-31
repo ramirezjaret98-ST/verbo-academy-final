@@ -908,15 +908,17 @@ function UnclaimedRequestsBanner() {
   const escalated = list.filter((r) => r.status === "escalated");
   if (escalated.length === 0) return null;
   return (
-    <Card className="border-amber-300 bg-amber-50">
+    <Card
+      className="card-gradient-crimson verbo-focus-pulse [--verbo-focus-pulse-color:#b52904]"
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-amber-500 text-white">
+          <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/15 text-white">
             <AlertTriangle className="h-4 w-4" />
           </div>
           <div>
-            <div className="text-sm font-semibold text-foreground">Unclaimed Request queue</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-sm font-semibold text-white">Unclaimed Request queue</div>
+            <div className="text-xs text-white/80">
               {escalated.length} student request{escalated.length === 1 ? "" : "s"} went 8h+ without being claimed and need manual assignment.
             </div>
           </div>
@@ -981,7 +983,7 @@ function AssignTeacherModal({ request, onClose, onAssigned }: {
                 <div>
                   <div className="font-medium text-foreground">
                     {t?.name ?? c.teacherId}
-                    {i === 0 && <span className="ml-2 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">Suggested</span>}
+                    {i === 0 && <span className="ml-2 rounded-full bg-[#5fca16] px-2 py-0.5 text-[10px] font-semibold text-white">Suggested</span>}
                   </div>
                   <div className="text-[11px] text-muted-foreground">{c.load} request{c.load === 1 ? "" : "s"} this month</div>
                 </div>
