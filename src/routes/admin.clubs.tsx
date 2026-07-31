@@ -766,41 +766,44 @@ function ApproveReleaseModal({
   const valid = amount.trim() !== "" && !isNaN(parseFloat(amount)) && parseFloat(amount) >= 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div onClick={(e) => e.stopPropagation()} className="w-full max-w-md rounded-2xl bg-background shadow-2xl">
-        <div className="border-b border-border px-6 py-4">
-          <h2 className="text-base font-semibold text-foreground">Approve release</h2>
-          <p className="mt-1 text-xs text-muted-foreground">
-            The club will return to “Created” and a negative adjustment will be recorded in the teacher’s Financial tab.
-          </p>
-        </div>
-        <div className="space-y-4 px-6 py-5">
-          {club && (
-            <div className="rounded-lg bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
-              <div className="font-medium text-foreground">{club.title}</div>
-              <div>{club.type === "insight" ? "Insight" : "Book Club"} · {formatDate(club.date)}</div>
-            </div>
-          )}
-          <Field label="Penalty amount (MXN)" help={club?.teacher_payment == null ? "This club has no Teacher Payment configured — enter the amount manually." : "Pre-filled from the club’s Teacher Payment. Adjust if needed."}>
-            <input
-              type="number"
-              min={0}
-              step="0.01"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder="e.g. 350"
-              className={fieldCls}
-              autoFocus
-            />
-          </Field>
-        </div>
-        <div className="flex justify-end gap-2 border-t border-border bg-secondary/30 px-6 py-4">
-          <GhostButton onClick={onClose}>Cancel</GhostButton>
-          <PrimaryButton disabled={!valid} onClick={() => onConfirm(parseFloat(amount))}>
-            Confirm approval
-          </PrimaryButton>
-        </div>
+    <AccentModal
+      background="linear-gradient(150deg, #c2410c 0%, #b52904 55%, #760137 100%)"
+      iconTint="#b52904"
+      icon={AlertTriangle}
+      eyebrow="Release Request"
+      title="Approve release"
+      onClose={onClose}
+    >
+      <div className="space-y-4 px-6 py-5">
+        <p className="text-xs text-muted-foreground">
+          The club will return to “Created” and a negative adjustment will be recorded in the teacher’s Financial tab.
+        </p>
+        {club && (
+          <div className="rounded-lg bg-secondary/40 px-3 py-2 text-xs text-muted-foreground">
+            <div className="font-medium text-foreground">{club.title}</div>
+            <div>{club.type === "insight" ? "Insight" : "Book Club"} · {formatDate(club.date)}</div>
+          </div>
+        )}
+        <Field label="Penalty amount (MXN)" help={club?.teacher_payment == null ? "This club has no Teacher Payment configured — enter the amount manually." : "Pre-filled from the club’s Teacher Payment. Adjust if needed."}>
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="e.g. 350"
+            className={fieldCls}
+            autoFocus
+          />
+        </Field>
       </div>
-    </div>
+      <div className="flex justify-end gap-2 border-t border-border bg-secondary/30 px-6 py-4">
+        <GhostButton onClick={onClose}>Cancel</GhostButton>
+        <PrimaryButton accentColor="#5fca16" disabled={!valid} onClick={() => onConfirm(parseFloat(amount))}>
+          Confirm approval
+        </PrimaryButton>
+      </div>
+    </AccentModal>
   );
+
 }
