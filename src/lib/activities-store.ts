@@ -73,6 +73,95 @@ export interface Activity {
   question?: string;
   options?: string[];
   correctIndex?: number;
+  /** Free text shown to the student when the answer is incorrect — explains WHY. */
+  feedback?: string;
+}
+
+const EXERCISE_TYPES: ExerciseType[] = [
+  "fill_gaps", "drag_drop", "listen_select", "read_select", "record", "read_complete", "match",
+];
+
+/**
+ * Validates a raw JSON array of activities for bulk upload. Returns the valid
+ * Activity objects plus a descriptive error per rejected item.
+ * NOTE: audioName / audioDurationSec are intentionally ignored — audio is
+ * always attached manually in Admin after the import.
+ */
+export function validateBulkActivities(raw: unknown[]): { valid: Activity[]; errs: string[] } {
+  const valid: Activity[] = [];
+  const errs: string[] = [];
+  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+
+  raw.forEach((item, i) => {
+    const tag = `#${i}`;
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      errs.push(`${tag}: el item no es un objeto.`);
+      return;
+    }
+    const o = item as Record<string, unknown>;
+    const unitId = str(o.unit_id);
+    const name = str(o.name);
+    const type = str(o.type) as ExerciseType;
+    if (!unitId) { errs.push(`${tag}: falta unit_id.`); return; }
+    if (!name) { errs.push(`${tag}: falta name.`); return; }
+    if (!type) { errs.push(`${tag}: falta type.`); return; }
+    if (!EXERCISE_TYPES.includes(type)) { errs.push(`${tag}: type inválido "${type}".`); return; }
+
+    const base: Activity = {
+      id: `act-bulk-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 7)}`,
+      unit_id: unitId,
+      name,
+      type,
+    };
+    const category = str(o.category);
+    if (category) base.category = category;
+    if (o.session_phase !== undefined) base.session_phase = o.session_phase === "post" ? "post" : "pre";
+    const feedback = str(o.feedback);
+    if (feedback) base.feedback = feedback;
+
+    if (type === "fill_gaps" || type === "read_complete") {
+      const paragraph = str(o.paragraph);
+      const answer = str(o.answer);
+      if (!paragraph || !answer) { errs.push(`${tag}: ${type} requiere paragraph y answer.`); return; }
+      base.paragraph = paragraph;
+      base.answer = answer;
+    } else if (type === "drag_drop" || type === "match") {
+      const rawItems = Array.isArray(o.items) ? (o.items as unknown[]) : [];
+      const cleaned: MatchItem[] = [];
+      for (const it of rawItems) {
+        if (!it || typeof it !== "object") continue;
+        const t = str((it as Record<string, unknown>).text);
+        const k = str((it as Record<string, unknown>).key);
+        if (t && k) cleaned.push({ text: t, key: k });
+      }
+      if (cleaned.length < 2) { errs.push(`${tag}: ${type} requiere al menos 2 items con text y key.`); return; }
+      base.items = cleaned;
+    } else if (type === "read_select" || type === "listen_select") {
+      const question = str(o.question);
+      const rawOptions = Array.isArray(o.options) ? (o.options as unknown[]) : [];
+      const options = rawOptions.map((x) => str(x)).filter(Boolean);
+      if (!question) { errs.push(`${tag}: ${type} requiere question.`); return; }
+      if (options.length < 2) { errs.push(`${tag}: ${type} requiere al menos 2 options.`); return; }
+      const ci = o.correctIndex;
+      if (typeof ci !== "number" || !Number.isInteger(ci) || ci < 0 || ci >= options.length) {
+        errs.push(`${tag}: correctIndex debe ser un número dentro del rango de options.`);
+        return;
+      }
+      const prompt = str(o.prompt);
+      if (prompt) base.prompt = prompt;
+      base.question = question;
+      base.options = options;
+      base.correctIndex = ci;
+    } else if (type === "record") {
+      const answer = str(o.answer);
+      if (!answer) { errs.push(`${tag}: record requiere answer.`); return; }
+      base.answer = answer;
+    }
+
+    valid.push(base);
+  });
+
+  return { valid, errs };
 }
 
 const ACTIVITIES_KEY = "verbo:activities";
