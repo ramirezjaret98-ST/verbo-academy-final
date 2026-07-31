@@ -29,7 +29,7 @@ import {
 } from "@/lib/workshops-store";
 import { groupsByStudentId, groupOfStudent, removeMember, subscribeGroups, effectiveSessionCounts, sessionProgressFor } from "@/lib/groups-store";
 import { studentAttendance } from "@/lib/sessions-store";
-import { logPayment, expectedAmountForStudent } from "@/lib/payments-log";
+import { logPayment, expectedAmountForStudent, loadPayments } from "@/lib/payments-log";
 import { setLevelReopened } from "@/lib/students-store";
 import { RotateCcw, Unlock as UnlockIcon, Lock as LockIcon, Trophy } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -1374,13 +1374,25 @@ function StudentDetailModal({
         {/* Footer actions */}
         <div className="flex flex-wrap items-center gap-2 border-t border-border bg-secondary/30 px-6 py-4">
           <GhostButton onClick={onEdit} className="!py-1.5 !text-xs"><Pencil className="h-3.5 w-3.5" /> Edit profile</GhostButton>
-          <GhostButton onClick={() => { patch({ must_change_password: true }); alert("This user will be asked to set a new password the next time they log in."); }} className="!py-1.5 !text-xs"><KeyRound className="h-3.5 w-3.5" /> Reset password</GhostButton>
-          <GhostButton onClick={() => setPanel((p) => (p === "reassign" ? "none" : "reassign"))} className="!py-1.5 !text-xs"><Users className="h-3.5 w-3.5" /> Reassign teacher</GhostButton>
-          <GhostButton onClick={() => setPanel((p) => (p === "freeze" ? "none" : "freeze"))} className="!py-1.5 !text-xs"><Snowflake className="h-3.5 w-3.5" /> Freeze</GhostButton>
+          <GhostButton onClick={() => { patch({ must_change_password: true }); alert("This user will be asked to set a new password the next time they log in."); }} className="!py-1.5 !text-xs"><KeyRound className="h-3.5 w-3.5" /> Require Password Reset</GhostButton>
+          <button
+            onClick={() => setPanel((p) => (p === "reassign" ? "none" : "reassign"))}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:brightness-110"
+            style={{ backgroundColor: "#0f766e" }}
+          >
+            <Users className="h-3.5 w-3.5" /> Reassign teacher
+          </button>
+          <button
+            onClick={() => setPanel((p) => (p === "freeze" ? "none" : "freeze"))}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:brightness-110"
+            style={{ backgroundColor: "#38bdf8" }}
+          >
+            <Snowflake className="h-3.5 w-3.5" /> Freeze
+          </button>
           {student.status === "suspended" ? (
             <GhostButton onClick={() => patch({ status: "active" })} className="!py-1.5 !text-xs"><Play className="h-3.5 w-3.5" /> Reactivate</GhostButton>
           ) : (
-            <GhostButton
+            <button
               onClick={() => {
                 if (isGrouped) {
                   removeMember(student.id);
@@ -1390,10 +1402,10 @@ function StudentDetailModal({
                 }
               }}
               disabled={isGrouped && groupInfo?.member.status !== "active"}
-              className="!py-1.5 !text-xs"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground shadow-sm transition-all hover:brightness-110 disabled:opacity-40"
             >
               <Ban className="h-3.5 w-3.5" /> Suspend
-            </GhostButton>
+            </button>
           )}
           <button
             onClick={() => blocked && patch({ insights_strikes: 0 })}
