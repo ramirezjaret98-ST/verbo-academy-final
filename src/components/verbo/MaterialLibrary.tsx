@@ -6,6 +6,15 @@ import type { MaterialType } from "@/lib/mock-data";
 import { PremiumBadge } from "@/components/verbo/PremiumGate";
 import { useAuth } from "@/lib/auth";
 import { groupsByStudentId } from "@/lib/groups-store";
+import listeningArt from "@/assets/Listiening.svg.asset.json";
+import grammarArt from "@/assets/Grammar.svg.asset.json";
+import vocabularyArt from "@/assets/Vocabulary_2.svg.asset.json";
+import speakingArt from "@/assets/speaking.svg.asset.json";
+import premiumArt from "@/assets/Premium.svg.asset.json";
+import gettingStartedArt from "@/assets/Getting_Started.svg.asset.json";
+import studyTipsArt from "@/assets/study_tips.svg.asset.json";
+import businessArt from "@/assets/Business.svg.asset.json";
+import troubleshootingArt from "@/assets/Troubleshooting.svg.asset.json";
 
 
 import {
@@ -189,6 +198,7 @@ function SpotlightCategoryCard({
   subtitle,
   accent,
   icon: Icon,
+  iconImage,
   compact = false,
   noBlob = false,
   badge,
@@ -199,12 +209,14 @@ function SpotlightCategoryCard({
   subtitle: string;
   accent: string;
   icon: typeof Book;
+  iconImage?: string;
   compact?: boolean;
   noBlob?: boolean;
   badge?: React.ReactNode;
   art?: { src: string; className: string };
   onClick: () => void;
 }) {
+
   return (
     <div
       className={`group relative flex h-full ${compact ? "min-h-[140px]" : "min-h-[200px]"} flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-5 shadow-elevated`}
@@ -229,12 +241,22 @@ function SpotlightCategoryCard({
       )}
 
       <div className="relative z-10">
-        <div
-          className="flex h-12 w-12 items-center justify-center rounded-2xl"
-          style={{ backgroundColor: `${accent}1F` }}
-        >
-          <Icon className="h-6 w-6" style={{ color: accent }} />
-        </div>
+        {iconImage ? (
+          <img
+            src={iconImage}
+            alt=""
+            aria-hidden="true"
+            className="h-14 w-14 select-none object-contain"
+          />
+        ) : (
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-2xl"
+            style={{ backgroundColor: `${accent}1F` }}
+          >
+            <Icon className="h-6 w-6" style={{ color: accent }} />
+          </div>
+        )}
+
         <div className="mt-4 flex items-center gap-2">
           <h3 className="text-base font-semibold text-foreground">{name}</h3>
           {badge}
@@ -394,6 +416,7 @@ export function MaterialLibrary({
     subtitle: string;
     accent: string;
     icon: typeof Book;
+    iconImage?: string;
     badge?: React.ReactNode;
     onClick: () => void;
   }[] = [
@@ -402,6 +425,7 @@ export function MaterialLibrary({
       subtitle: "Audio practice and listening exercises to train your ear.",
       accent: "#ef8f14",
       icon: Headphones,
+      iconImage: listeningArt.url,
       onClick: () => openCategory("Listening"),
     },
     {
@@ -409,6 +433,7 @@ export function MaterialLibrary({
       subtitle: "Structures and practice sheets to sharpen your grammar.",
       accent: "#157f36",
       icon: SpellCheck,
+      iconImage: grammarArt.url,
       onClick: () => openCategory("Grammar"),
     },
     {
@@ -416,6 +441,7 @@ export function MaterialLibrary({
       subtitle: "Word lists and expressions to grow your everyday vocabulary.",
       accent: "#2f6fe4",
       icon: Type,
+      iconImage: vocabularyArt.url,
       onClick: () => openCategory("Vocabulary"),
     },
     {
@@ -423,6 +449,7 @@ export function MaterialLibrary({
       subtitle: "Prompts and exercises to build real speaking confidence.",
       accent: "#d13da4",
       icon: Mic,
+      iconImage: speakingArt.url,
       onClick: () => openCategory("Speaking"),
     },
     {
@@ -430,6 +457,7 @@ export function MaterialLibrary({
       subtitle: "Deep-dive guides and exclusive practice packs for Advance tier and up.",
       accent: "#b45309",
       icon: Crown,
+      iconImage: premiumArt.url,
       badge: <PremiumBadge />,
       onClick: () => openCategory(PREMIUM_KEY),
     },
@@ -438,6 +466,7 @@ export function MaterialLibrary({
       subtitle: "Everything you need to take your first steps with confidence.",
       accent: "#f97316",
       icon: Rocket,
+      iconImage: gettingStartedArt.url,
       onClick: () => openCategory("Getting Started"),
     },
     {
@@ -445,6 +474,7 @@ export function MaterialLibrary({
       subtitle: "Habits, routines and techniques to study smarter every week.",
       accent: "#a41630",
       icon: Lightbulb,
+      iconImage: studyTipsArt.url,
       onClick: () => openCategory("Study Tips"),
     },
     {
@@ -452,6 +482,7 @@ export function MaterialLibrary({
       subtitle: "Templates and phrases for professional communication.",
       accent: "#01304a",
       icon: Briefcase,
+      iconImage: businessArt.url,
       onClick: () => openCategory("Business"),
     },
     ...extraCategories.map((c, i) => ({
@@ -498,6 +529,7 @@ export function MaterialLibrary({
                 subtitle="Quick fixes and answers for common technical issues."
                 accent="#64748b"
                 icon={LifeBuoy}
+                iconImage={troubleshootingArt.url}
                 noBlob
                 compact
                 onClick={() => openCategory("Troubleshooting")}
@@ -513,6 +545,7 @@ export function MaterialLibrary({
                 subtitle={c.subtitle}
                 accent={c.accent}
                 icon={c.icon}
+                iconImage={c.iconImage}
                 badge={c.badge}
                 onClick={c.onClick}
               />
