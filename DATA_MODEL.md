@@ -309,6 +309,7 @@ Nombres de nivel confirmados por producto:
 | paragraph / answer / items / prompt / question / options / correctIndex | — | opcional | según `type` |
 | audioName | string | opcional | `listen_select` únicamente |
 | audioDurationSec | number | opcional | `listen_select` únicamente |
+| feedback | string | opcional | shown to the student when the answer is incorrect; explains WHY, not just that it's wrong |
 
 ⚠️ **`audioName` es metadata interna de Admin y NUNCA debe renderizarse en ninguna vista de alumno.** Contiene el nombre real del archivo subido (incluye referencias a nuestro proveedor de voz). Se muestra solo en el modal de Admin al cargar el archivo; el reproductor del alumno (`VerboAudioPlayer`) rotula siempre con el texto fijo "Audio · Verbo Academy".
 
