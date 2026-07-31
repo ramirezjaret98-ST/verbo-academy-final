@@ -287,11 +287,31 @@ function MoneyLabPage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <MetricCard label="Expected Income" value={money(expectedIncome)} sub={`${incomeRows.length} customers`} />
-        <MetricCard label="Received Income" value={money(receivedIncome)} sub={`${incomeRows.filter((r) => r.status === "Paid").length} paid`} />
-        <MetricCard label="Outstanding" value={money(outstanding)} sub={`${incomeRows.filter((r) => r.status !== "Paid").length} unpaid`} />
-        <MetricCard label="Expenses" value={money(expensesTotal)} sub={`${expenseRows.length} teachers`} />
-        <MetricCard label="Net" value={money(net)} sub={net >= 0 ? "Profit" : "Loss"} />
+        {([
+          { label: "Expected Income", value: money(expectedIncome), sub: `${incomeRows.length} customers`, icon: Wallet, color: "#01304a" },
+          { label: "Received Income", value: money(receivedIncome), sub: `${incomeRows.filter((r) => r.status === "Paid").length} paid`, icon: CircleDollarSign, color: "#5fca16" },
+          { label: "Outstanding", value: money(outstanding), sub: `${incomeRows.filter((r) => r.status !== "Paid").length} unpaid`, icon: Clock, color: "#b45309" },
+          { label: "Expenses", value: money(expensesTotal), sub: `${expenseRows.length} teachers`, icon: CreditCard, color: "#d97706" },
+          { label: "Net", value: money(net), sub: net >= 0 ? "Profit" : "Loss", icon: TrendingUp, color: net >= 0 ? "#5fca16" : "#b52904" },
+        ] as { label: string; value: string; sub: string; icon: LucideIcon; color: string }[]).map((m) => {
+          const Icon = m.icon;
+          return (
+            <HeroStatCard
+              key={m.label}
+              className="!min-h-[132px] !items-start border border-border bg-card"
+              style={{ boxShadow: `0 0 24px -8px ${m.color}66` }}
+            >
+              <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-xl">
+                <Icon className="h-7 w-7" style={{ color: m.color }} strokeWidth={1.75} />
+              </div>
+              <div className="relative w-full">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{m.label}</div>
+                <div className="mt-2 text-3xl font-bold leading-none text-foreground">{m.value}</div>
+                <div className="mt-2 text-[11px] text-muted-foreground">{m.sub}</div>
+              </div>
+            </HeroStatCard>
+          );
+        })}
       </div>
 
       {/* Trend chart */}
@@ -301,10 +321,12 @@ function MoneyLabPage() {
           <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
             <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-success" /> Received Income</span>
             <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-destructive" /> Expenses</span>
+            <span className="inline-flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-[#01304a]" /> Net</span>
           </div>
         </div>
         <TrendChart data={trend} onSelect={(d) => setViewMonth(firstOfMonth(d))} selectedMkey={mkey} />
       </Card>
+
 
       {/* Income table */}
       <Card>
