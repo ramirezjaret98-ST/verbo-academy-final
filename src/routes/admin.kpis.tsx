@@ -22,6 +22,7 @@ import {
   Star, AlertTriangle, TrendingUp, SlidersHorizontal, Pencil, ShieldCheck, X,
   CalendarClock, GraduationCap,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 export const Route = createFileRoute("/admin/kpis")({
   component: Page,
