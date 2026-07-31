@@ -983,7 +983,7 @@ function AssignTeacherModal({ request, onClose, onAssigned }: {
                 <div>
                   <div className="font-medium text-foreground">
                     {t?.name ?? c.teacherId}
-                    {i === 0 && <span className="ml-2 rounded-full bg-success/15 px-2 py-0.5 text-[10px] font-semibold text-success">Suggested</span>}
+                    {i === 0 && <span className="ml-2 rounded-full bg-[#5fca16] px-2 py-0.5 text-[10px] font-semibold text-white">Suggested</span>}
                   </div>
                   <div className="text-[11px] text-muted-foreground">{c.load} request{c.load === 1 ? "" : "s"} this month</div>
                 </div>
