@@ -1461,18 +1461,26 @@ function AvailabilityChangeRequestsSection() {
     <div className="rounded-2xl border border-border bg-card shadow-sm">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-5 py-3 text-left"
+        className={`flex w-full items-center justify-between px-5 py-3 text-left ${
+          pending.length > 0 ? "rounded-2xl card-gradient-orange text-white" : ""
+        }`}
       >
         <div className="flex items-center gap-2">
-          <CalendarClock className="h-4 w-4 text-accent" />
-          <span className="text-sm font-semibold text-foreground">Availability Change Requests</span>
+          <CalendarClock className={`h-4 w-4 ${pending.length > 0 ? "text-white" : "text-accent"}`} />
+          <span className={`text-sm font-semibold ${pending.length > 0 ? "text-white" : "text-foreground"}`}>
+            Availability Change Requests
+          </span>
           {pending.length > 0 && (
-            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+            <span className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-semibold text-white">
               {pending.length} pending
             </span>
           )}
         </div>
-        <ChevronRight className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-90" : ""}`} />
+        <ChevronRight
+          className={`h-4 w-4 transition-transform ${open ? "rotate-90" : ""} ${
+            pending.length > 0 ? "text-white/70" : "text-muted-foreground"
+          }`}
+        />
       </button>
       {open && (
         <div className="border-t border-border px-5 py-4">
