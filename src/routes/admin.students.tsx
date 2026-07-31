@@ -1308,6 +1308,30 @@ function StudentDetailModal({
                 </div>
               </div>
 
+              {/* Payment history */}
+              <div>
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Payment History</div>
+                {(() => {
+                  const payments = loadPayments()
+                    .filter((p) => p.entity_type === "individual" && p.entity_id === student.id)
+                    .sort((a, b) => new Date(b.paid_at).getTime() - new Date(a.paid_at).getTime())
+                    .slice(0, 5);
+                  if (payments.length === 0) {
+                    return <p className="text-sm text-muted-foreground">No payments recorded yet.</p>;
+                  }
+                  return (
+                    <div className="divide-y divide-border rounded-lg border border-border bg-background">
+                      {payments.map((p) => (
+                        <div key={p.id} className="flex items-center justify-between px-3 py-2">
+                          <span className="text-sm text-foreground">{new Date(p.paid_at).toLocaleDateString()}</span>
+                          <span className="text-sm font-semibold text-foreground">${p.amount.toLocaleString()} MXN</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+
               {/* Teachers */}
               <div>
                 <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Assigned teacher(s)</div>
