@@ -361,9 +361,9 @@ function MoneyLabPage() {
                     <td className="px-3 py-2.5 text-muted-foreground">{r.typeLabel}</td>
                     <td className="px-3 py-2.5 text-right font-semibold text-foreground">{money(r.amount)}</td>
                     <td className="px-3 py-2.5">
-                      {r.status === "Paid" && <Pill tone="success">Paid</Pill>}
-                      {r.status === "Pending" && <Pill tone="warning">Pending</Pill>}
-                      {r.status === "Overdue" && <Pill tone="danger">Overdue</Pill>}
+                      {r.status === "Paid" && <Pill tone="success" style={{ background: "#5fca16", color: "#fff" }}>Paid</Pill>}
+                      {r.status === "Pending" && <Pill tone="warning" style={{ background: "#b45309", color: "#fff" }}>Pending</Pill>}
+                      {r.status === "Overdue" && <Pill tone="danger" style={{ background: "#b52904", color: "#fff" }}>Overdue</Pill>}
                     </td>
                     <td className="px-3 py-2.5 text-muted-foreground">
                       {r.date ? r.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
@@ -373,10 +373,12 @@ function MoneyLabPage() {
                         type="button"
                         onClick={() => markIncomePaid(r)}
                         disabled={r.status === "Paid"}
-                        className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-[11px] font-semibold text-foreground transition-colors hover:bg-secondary disabled:opacity-40"
+                        style={{ background: "#5fca16" }}
+                        className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
                       >
                         <CreditCard className="h-3 w-3" /> Mark as Paid
                       </button>
+
                     </td>
                   </tr>
                 ))}
