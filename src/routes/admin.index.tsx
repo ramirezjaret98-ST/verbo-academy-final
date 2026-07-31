@@ -35,6 +35,33 @@ export const Route = createFileRoute("/admin/")({ component: Overview });
 // Composite-score early-warning threshold (distinct from the 85% bonus gate).
 const ALERT_COMPOSITE = 70;
 
+// Identity palette (already used across the app) + urgency window.
+const CRIMSON = "#b52904";
+const CRIMSON_BG = "linear-gradient(150deg, #c2410c 0%, #b52904 55%, #760137 100%)";
+const AMBER_BG = "linear-gradient(150deg, #f59e0b 0%, #d97706 55%, #b45309 100%)";
+const RED = "#dc2626";
+const GOLD = "#d97706";
+const TEAL = "#3ebbad";
+const ORCHID = "#a34ac0";
+const NAVY = "#01304a";
+const EIGHT_H = 8 * 60 * 60 * 1000;
+
+/** Same time-intensity ladder Session Report uses on the Teacher Dashboard. */
+function timeAccent(ms: number): { color: string; glow: boolean } {
+  const hours = ms / 3_600_000;
+  if (hours < 1) return { color: RED, glow: true };
+  if (hours < 4) return { color: RED, glow: false };
+  return { color: GOLD, glow: false };
+}
+
+function countdownLabel(ms: number): string {
+  if (ms < 0) return "Overdue";
+  const hours = ms / 3_600_000;
+  if (hours < 1) return `${Math.max(1, Math.round(ms / 60_000))}m left`;
+  if (hours < 48) return `${Math.round(hours)}h left`;
+  return `${Math.round(hours / 24)}d left`;
+}
+
 // Persistence keys — hydrate teacher overrides the same way KPIs/Teachers do.
 const T_PROFILE_KEY = "verbo:teacher-profile-overrides";
 const T_REGISTERED_KEY = "verbo:registered-teachers";
@@ -54,6 +81,7 @@ function Overview() {
   const navigate = useNavigate();
   const [, forceTick] = useState(0);
   const [metricsOpen, setMetricsOpen] = useState(false);
+  const [panel, setPanel] = useState<null | "urgent" | "watch">(null);
 
   useEffect(() => {
     // Hydrate the SAME overrides the Students/Teachers/KPIs pages use so the
