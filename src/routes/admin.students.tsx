@@ -29,7 +29,7 @@ import {
 } from "@/lib/workshops-store";
 import { groupsByStudentId, groupOfStudent, removeMember, subscribeGroups, effectiveSessionCounts, sessionProgressFor } from "@/lib/groups-store";
 import { studentAttendance } from "@/lib/sessions-store";
-import { logPayment, expectedAmountForStudent } from "@/lib/payments-log";
+import { logPayment, expectedAmountForStudent, loadPayments } from "@/lib/payments-log";
 import { setLevelReopened } from "@/lib/students-store";
 import { RotateCcw, Unlock as UnlockIcon, Lock as LockIcon, Trophy } from "lucide-react";
 import { useAuth } from "@/lib/auth";
@@ -1308,6 +1308,30 @@ function StudentDetailModal({
                 </div>
               </div>
 
+              {/* Payment history */}
+              <div>
+                <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Payment History</div>
+                {(() => {
+                  const payments = loadPayments()
+                    .filter((p) => p.entity_type === "individual" && p.entity_id === student.id)
+                    .sort((a, b) => new Date(b.paid_at).getTime() - new Date(a.paid_at).getTime())
+                    .slice(0, 5);
+                  if (payments.length === 0) {
+                    return <p className="text-sm text-muted-foreground">No payments recorded yet.</p>;
+                  }
+                  return (
+                    <div className="divide-y divide-border rounded-lg border border-border bg-background">
+                      {payments.map((p) => (
+                        <div key={p.id} className="flex items-center justify-between px-3 py-2">
+                          <span className="text-sm text-foreground">{new Date(p.paid_at).toLocaleDateString()}</span>
+                          <span className="text-sm font-semibold text-foreground">${p.amount.toLocaleString()} MXN</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+
               {/* Teachers */}
               <div>
                 <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Assigned teacher(s)</div>
@@ -1374,13 +1398,25 @@ function StudentDetailModal({
         {/* Footer actions */}
         <div className="flex flex-wrap items-center gap-2 border-t border-border bg-secondary/30 px-6 py-4">
           <GhostButton onClick={onEdit} className="!py-1.5 !text-xs"><Pencil className="h-3.5 w-3.5" /> Edit profile</GhostButton>
-          <GhostButton onClick={() => { patch({ must_change_password: true }); alert("This user will be asked to set a new password the next time they log in."); }} className="!py-1.5 !text-xs"><KeyRound className="h-3.5 w-3.5" /> Reset password</GhostButton>
-          <GhostButton onClick={() => setPanel((p) => (p === "reassign" ? "none" : "reassign"))} className="!py-1.5 !text-xs"><Users className="h-3.5 w-3.5" /> Reassign teacher</GhostButton>
-          <GhostButton onClick={() => setPanel((p) => (p === "freeze" ? "none" : "freeze"))} className="!py-1.5 !text-xs"><Snowflake className="h-3.5 w-3.5" /> Freeze</GhostButton>
+          <GhostButton onClick={() => { patch({ must_change_password: true }); alert("This user will be asked to set a new password the next time they log in."); }} className="!py-1.5 !text-xs"><KeyRound className="h-3.5 w-3.5" /> Require Password Reset</GhostButton>
+          <button
+            onClick={() => setPanel((p) => (p === "reassign" ? "none" : "reassign"))}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:brightness-110"
+            style={{ backgroundColor: "#0f766e" }}
+          >
+            <Users className="h-3.5 w-3.5" /> Reassign teacher
+          </button>
+          <button
+            onClick={() => setPanel((p) => (p === "freeze" ? "none" : "freeze"))}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:brightness-110"
+            style={{ backgroundColor: "#38bdf8" }}
+          >
+            <Snowflake className="h-3.5 w-3.5" /> Freeze
+          </button>
           {student.status === "suspended" ? (
             <GhostButton onClick={() => patch({ status: "active" })} className="!py-1.5 !text-xs"><Play className="h-3.5 w-3.5" /> Reactivate</GhostButton>
           ) : (
-            <GhostButton
+            <button
               onClick={() => {
                 if (isGrouped) {
                   removeMember(student.id);
@@ -1390,10 +1426,10 @@ function StudentDetailModal({
                 }
               }}
               disabled={isGrouped && groupInfo?.member.status !== "active"}
-              className="!py-1.5 !text-xs"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground shadow-sm transition-all hover:brightness-110 disabled:opacity-40"
             >
               <Ban className="h-3.5 w-3.5" /> Suspend
-            </GhostButton>
+            </button>
           )}
           <button
             onClick={() => blocked && patch({ insights_strikes: 0 })}
