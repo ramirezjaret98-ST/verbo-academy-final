@@ -303,6 +303,19 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
             </Field>
           )}
 
+          <Field
+            label="Feedback for incorrect answers (optional)"
+            hint="Explain WHY the answer is wrong — shown to the student instead of the generic message."
+          >
+            <textarea
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              className={textareaCls}
+              placeholder={`e.g. "Good evening" is used to greet someone, while "Good night" is used to say goodbye.`}
+            />
+          </Field>
+
+
           <div className="flex items-center justify-end gap-3 pt-2">
             <GhostButton onClick={onClose}>Done</GhostButton>
             <PrimaryButton onClick={save}><Plus className="h-3.5 w-3.5" /> Save {phase === "post" ? "Post-Session" : "Pre-Session"} Activity</PrimaryButton>
