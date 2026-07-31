@@ -575,6 +575,7 @@ function StudentFormModal({
   const [showPassword, setShowPassword] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
+  const [tab, setTab] = useState<"academic" | "financial" | "info">("academic");
   const prevPerWeek = useRef(f.sessions_per_week);
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setF((p) => ({ ...p, [k]: v }));
