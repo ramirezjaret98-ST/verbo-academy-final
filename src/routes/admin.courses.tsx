@@ -237,6 +237,9 @@ function Page() {
           <GhostButton onClick={() => setUnitModal({ mode: "create" })}>
             <Plus className="h-3.5 w-3.5" /> Add unit
           </GhostButton>
+          <GhostButton onClick={() => setBulkOpen(true)}>
+            <Upload className="h-3.5 w-3.5" /> Bulk Upload
+          </GhostButton>
         </div>
       </div>
 
