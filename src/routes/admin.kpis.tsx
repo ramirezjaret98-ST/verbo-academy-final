@@ -425,13 +425,13 @@ function TeacherKpiCard({
       </div>
 
       {/* Metric bars */}
-      <div className="mt-4 space-y-3 border-t border-border/60 pt-4" onClick={(e) => e.stopPropagation()}>
-        <KpiBar label="Connection punctuality" value={kpis.connectionPunctuality} metric="connectionPunctuality" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.connectionPunctuality} />
-        <KpiBar label="Planning punctuality" value={kpis.planningPunctuality} metric="planningPunctuality" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.planningPunctuality} />
-        <KpiBar label="Session completion rate" value={kpis.completionRate} metric="completionRate" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.completionRate} />
-        <KpiBar label="Cancellations / No-Shows" value={kpis.cancellationScore} sub={`${Math.min(3, kpis.activeStrikes)}/3 (last 6 months)`} metric="cancellationScore" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.cancellationScore} />
-        <KpiBar label="Reschedule/Substitute Responsiveness" value={kpis.responsiveness} sub={kpis.penaltyState > 0 ? `−${kpis.penaltyState} cumulative penalty this month` : "No penalty this month"} metric="responsiveness" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.responsiveness} />
-        <KpiBar label="Teacher-caused absence rate" value={kpis.teacherAbsenceRate} invert />
+      <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border/60 pt-4" onClick={(e) => e.stopPropagation()}>
+        <KpiTile label="Connection punctuality" value={kpis.connectionPunctuality} metric="connectionPunctuality" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.connectionPunctuality} />
+        <KpiTile label="Planning punctuality" value={kpis.planningPunctuality} metric="planningPunctuality" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.planningPunctuality} />
+        <KpiTile label="Session completion rate" value={kpis.completionRate} metric="completionRate" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.completionRate} />
+        <KpiTile label="Cancellations / No-Shows" value={kpis.cancellationScore} sub={`${Math.min(3, kpis.activeStrikes)}/3 (last 6 months)`} metric="cancellationScore" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.cancellationScore} />
+        <KpiTile label="Reschedule/Substitute Responsiveness" value={kpis.responsiveness} sub={kpis.penaltyState > 0 ? `−${kpis.penaltyState} cumulative penalty this month` : "No penalty this month"} metric="responsiveness" canOverride={canOverride} onOverride={onOverride} override={monthOverrides.responsiveness} />
+        <KpiTile label="Teacher-caused absence rate" value={kpis.teacherAbsenceRate} invert />
       </div>
     </div>
 
@@ -441,7 +441,7 @@ function TeacherKpiCard({
 function barColor(value: number, invert: boolean) {
   const good = invert ? value <= 5 : value >= 85;
   const mid = invert ? value <= 15 : value >= 70;
-  if (good) return "#22c55e";
+  if (good) return "#5fca16";
   if (mid) return "#f59e0b";
   return "#ef4444";
 }
@@ -458,7 +458,7 @@ function AdjustedBadge({ override }: { override: { admin_name: string; created_a
   );
 }
 
-function KpiBar({
+function KpiTile({
   label, value, invert = false, sub, metric, canOverride, onOverride, override,
 }: {
   label: string;
@@ -471,30 +471,30 @@ function KpiBar({
   override?: { admin_name: string; created_at: string; previous_value: number; new_value: number; justification: string };
 }) {
   return (
-    <div>
-      <div className="mb-1 flex items-center justify-between gap-2 text-xs">
-        <span className="min-w-0 text-muted-foreground">
-          {label}
-          {sub && <span className="ml-2 text-[10px] text-muted-foreground/70">{sub}</span>}
-          {override && <AdjustedBadge override={override} />}
-        </span>
-        <span className="inline-flex shrink-0 items-center gap-1.5">
-          <span className="font-semibold text-foreground">{value}%</span>
-          {metric && canOverride && onOverride && (
-            <button
-              onClick={() => onOverride(metric, value)}
-              className="rounded-md p-0.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
-              title={`Manually adjust ${label}`}
-              aria-label={`Manually adjust ${label}`}
-            >
-              <Pencil className="h-3 w-3" />
-            </button>
-          )}
-        </span>
+    <div className="rounded-xl border border-border/60 bg-secondary/20 p-2.5">
+      <div className="flex items-start justify-between gap-1.5">
+        <span className="min-w-0 text-[11px] leading-tight text-muted-foreground">{label}</span>
+        {metric && canOverride && onOverride && (
+          <button
+            onClick={() => onOverride(metric, value)}
+            className="shrink-0 rounded-md p-0.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+            title={`Manually adjust ${label}`}
+            aria-label={`Manually adjust ${label}`}
+          >
+            <Pencil className="h-3 w-3" />
+          </button>
+        )}
       </div>
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-        <div className="h-full rounded-full" style={{ width: `${value}%`, backgroundColor: barColor(value, invert) }} />
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        <span
+          className="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-bold text-white"
+          style={{ backgroundColor: barColor(value, invert) }}
+        >
+          {value}%
+        </span>
+        {override && <AdjustedBadge override={override} />}
       </div>
+      {sub && <div className="mt-1 text-[10px] leading-tight text-muted-foreground/70">{sub}</div>}
     </div>
   );
 }
