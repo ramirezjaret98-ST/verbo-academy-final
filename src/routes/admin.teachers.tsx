@@ -579,9 +579,21 @@ function TeacherDetailModal({
           {tab === "kpis" && (
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <BigStat label="Avg. rating" value={avgRating(t) != null ? avgRating(t)!.toFixed(1) : "—"} />
-                <BigStat label="Planning on time" value={`${t.plan_punctuality ?? 0}%`} />
-                <BigStat label="Responsiveness" value={`${computeTeacherKpis(t).responsiveness}%`} />
+                <BigStat
+                  label="Avg. rating"
+                  value={avgRating(t) != null ? avgRating(t)!.toFixed(1) : "—"}
+                  onAdjust={canOverride ? () => setOverrideTarget({ metric: "ratingNormalized", currentValue: computeTeacherKpis(t).ratingNormalized }) : undefined}
+                />
+                <BigStat
+                  label="Planning on time"
+                  value={`${t.plan_punctuality ?? 0}%`}
+                  onAdjust={canOverride ? () => setOverrideTarget({ metric: "planningPunctuality", currentValue: computeTeacherKpis(t).planningPunctuality }) : undefined}
+                />
+                <BigStat
+                  label="Responsiveness"
+                  value={`${computeTeacherKpis(t).responsiveness}%`}
+                  onAdjust={canOverride ? () => setOverrideTarget({ metric: "responsiveness", currentValue: computeTeacherKpis(t).responsiveness }) : undefined}
+                />
                 <BigStat label="Hours this month" value={`${t.hours_month ?? 0}h`} />
               </div>
 
