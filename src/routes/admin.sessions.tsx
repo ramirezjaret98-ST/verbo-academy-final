@@ -128,11 +128,28 @@ function Page() {
             const hired = counts.hired;
             const remaining = counts.remaining;
             const pct = hired ? Math.min(100, (scheduled / hired) * 100) : 0;
+            const urgency =
+              remaining === 0
+                ? "urgent"
+                : remaining <= 2 || (hired > 0 && remaining / hired <= 0.15)
+                ? "warning"
+                : "neutral";
+            const urgencyBorder =
+              urgency === "urgent"
+                ? "border-l-4 border-l-[#b52904]"
+                : urgency === "warning"
+                ? "border-l-4 border-l-[#b45309]"
+                : "border-l-4 border-l-[#01304a]";
+            const urgencyShadow =
+              urgency === "urgent"
+                ? "0 0 0 1px rgba(181,41,4,0.05), 0 8px 22px -6px rgba(181,41,4,0.18)"
+                : undefined;
             return (
               <button
                 key={s.id}
                 onClick={() => setOpenStudent(s.id)}
-                className="group rounded-2xl border border-border bg-card p-5 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-floating"
+                className={`group rounded-2xl border border-border bg-card p-5 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-floating ${urgencyBorder}`}
+                style={urgencyShadow ? { boxShadow: urgencyShadow } : undefined}
               >
                 <div className="flex items-start justify-between">
                   <div>
@@ -149,14 +166,25 @@ function Page() {
                 </div>
 
                 <div className="mt-5 rounded-xl border border-border bg-secondary/30 p-3">
-                  <div className="flex items-baseline justify-between">
-                    <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-col items-start gap-1">
                       <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Scheduled</div>
-                      <div className="text-2xl font-semibold" style={{ color: BRAND }}>{scheduled}<span className="text-sm text-muted-foreground"> / {hired}</span></div>
+                      <div className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-base font-semibold" style={{ backgroundColor: `${BRAND}15`, color: BRAND }}>
+                        {scheduled}
+                        <span className="text-xs opacity-70">/ {hired}</span>
+                      </div>
                     </div>
-                    <div className="text-right">
+                    <div className="flex flex-col items-end gap-1">
                       <div className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Remaining</div>
-                      <div className="text-2xl font-semibold" style={{ color: remaining === 0 ? "#dc2626" : ORANGE }}>{remaining}</div>
+                      <div
+                        className="inline-flex items-center justify-center rounded-lg px-2.5 py-1 text-base font-semibold"
+                        style={{
+                          backgroundColor: remaining === 0 ? "rgba(220,38,38,0.12)" : "rgba(243,137,52,0.14)",
+                          color: remaining === 0 ? "#dc2626" : ORANGE,
+                        }}
+                      >
+                        {remaining}
+                      </div>
                     </div>
                   </div>
                   <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
