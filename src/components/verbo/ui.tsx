@@ -167,7 +167,7 @@ export function AccentModal({
           onClose={onClose}
           textTone={textTone}
         />
-        <div className="report-modal-scroll overflow-y-auto">
+        <div className="report-modal-scroll min-h-0 flex-1 overflow-y-auto">
           {children}
         </div>
       </div>
