@@ -388,6 +388,7 @@ function TopicHistory({ clubs }: { clubs: Club[] }) {
           <tr className="border-b border-border">
             <th className="px-6 py-3 font-medium">Type</th>
             <th className="px-6 py-3 font-medium">Title</th>
+            <th className="px-6 py-3 font-medium">Teacher</th>
             <th className="px-6 py-3 font-medium">Delivered</th>
           </tr>
         </thead>
@@ -395,17 +396,18 @@ function TopicHistory({ clubs }: { clubs: Club[] }) {
           {rows.map((c) => (
             <tr key={c.id} className="border-b border-border last:border-0">
               <td className="px-6 py-4">
-                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${c.type === "insight" ? "bg-accent/15 text-accent" : "bg-primary/10 text-primary"}`}>
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${c.type === "insight" ? "bg-[#f38934] text-white" : "bg-[#01304a] text-white"}`}>
                   {c.type === "insight" ? <Sparkles className="h-3 w-3" /> : <BookOpen className="h-3 w-3" />}
                   {c.type === "insight" ? "Verbo Insight" : "Book Club"}
                 </span>
               </td>
               <td className="px-6 py-4 font-medium text-foreground">{c.title}</td>
+              <td className="px-6 py-4 text-muted-foreground">{teacherName(c.teacher_id) ?? <span className="italic text-muted-foreground/70">Unassigned</span>}</td>
               <td className="px-6 py-4 text-muted-foreground">{formatDay(c.date)}</td>
             </tr>
           ))}
           {rows.length === 0 && (
-            <tr><td colSpan={3} className="px-6 py-12 text-center text-sm text-muted-foreground">No topics match your search.</td></tr>
+            <tr><td colSpan={4} className="px-6 py-12 text-center text-sm text-muted-foreground">No topics match your search.</td></tr>
           )}
         </tbody>
       </table>
