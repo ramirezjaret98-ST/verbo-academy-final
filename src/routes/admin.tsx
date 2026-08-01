@@ -26,7 +26,7 @@ const NAV_GROUPS: NavGroup[] = [
     { to: "/admin/kpis",     label: "KPIs" },
   ]},
   { label: "Content", items: [
-    { to: "/admin/courses",    label: "Performance Sessions" },
+    { to: "/admin/courses",    label: "Courses" },
     { to: "/admin/workshops",  label: "Focus Workshops" },
     { to: "/admin/challenges", label: "Challenges" },
     { to: "/admin/flash",      label: "Verbo Flash" },

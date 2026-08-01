@@ -101,9 +101,9 @@ export function validateBulkActivities(raw: unknown[], unitId: string): { valid:
     const o = item as Record<string, unknown>;
     const name = str(o.name);
     const type = str(o.type) as ExerciseType;
-    if (!name) { errs.push(`${tag}: falta name.`); return; }
-    if (!type) { errs.push(`${tag}: falta type.`); return; }
-    if (!EXERCISE_TYPES.includes(type)) { errs.push(`${tag}: type inválido "${type}".`); return; }
+    if (!name) { errs.push(`${tag}: missing name.`); return; }
+    if (!type) { errs.push(`${tag}: missing type.`); return; }
+    if (!EXERCISE_TYPES.includes(type)) { errs.push(`${tag}: invalid type "${type}".`); return; }
 
     const base: Activity = {
       id: `act-bulk-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 7)}`,
@@ -121,7 +121,7 @@ export function validateBulkActivities(raw: unknown[], unitId: string): { valid:
     if (type === "fill_gaps" || type === "read_complete") {
       const paragraph = str(o.paragraph);
       const answer = str(o.answer);
-      if (!paragraph || !answer) { errs.push(`${tag}: ${type} requiere paragraph y answer.`); return; }
+      if (!paragraph || !answer) { errs.push(`${tag}: ${type} requires paragraph and answer.`); return; }
       base.paragraph = paragraph;
       base.answer = answer;
     } else if (type === "drag_drop" || type === "match") {
@@ -133,17 +133,17 @@ export function validateBulkActivities(raw: unknown[], unitId: string): { valid:
         const k = str((it as Record<string, unknown>).key);
         if (t && k) cleaned.push({ text: t, key: k });
       }
-      if (cleaned.length < 2) { errs.push(`${tag}: ${type} requiere al menos 2 items con text y key.`); return; }
+      if (cleaned.length < 2) { errs.push(`${tag}: ${type} requires at least 2 items with text and key.`); return; }
       base.items = cleaned;
     } else if (type === "read_select" || type === "listen_select") {
       const question = str(o.question);
       const rawOptions = Array.isArray(o.options) ? (o.options as unknown[]) : [];
       const options = rawOptions.map((x) => str(x)).filter(Boolean);
-      if (!question) { errs.push(`${tag}: ${type} requiere question.`); return; }
-      if (options.length < 2) { errs.push(`${tag}: ${type} requiere al menos 2 options.`); return; }
+      if (!question) { errs.push(`${tag}: ${type} requires question.`); return; }
+      if (options.length < 2) { errs.push(`${tag}: ${type} requires at least 2 options.`); return; }
       const ci = o.correctIndex;
       if (typeof ci !== "number" || !Number.isInteger(ci) || ci < 0 || ci >= options.length) {
-        errs.push(`${tag}: correctIndex debe ser un número dentro del rango de options.`);
+        errs.push(`${tag}: correctIndex must be a number within the range of options.`);
         return;
       }
       const prompt = str(o.prompt);

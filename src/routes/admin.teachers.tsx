@@ -475,7 +475,7 @@ function TeacherDetailModal({
 
         {/* Tabs */}
         <div className="flex gap-1 border-b border-border px-6 pt-3">
-          {([["overview", "Overview"], ["kpis", "KPIs & Performance"], ["availability", "Disponibilidad"], ["financial", "Financial"], ["notes", "Admin Notes"]] as [Tab, string][]).map(([id, label]) => (
+          {([["overview", "Overview"], ["kpis", "KPIs & Performance"], ["availability", "Availability"], ["financial", "Financial"], ["notes", "Admin Notes"]] as [Tab, string][]).map(([id, label]) => (
             <button key={id} onClick={() => setTab(id)} className={`relative px-3 py-2 text-sm font-medium transition-colors ${tab === id ? "text-accent" : "text-muted-foreground hover:text-foreground"}`}>
               {label}
               {id === "kpis" && pending > 0 && <span className="ml-1 rounded-full bg-destructive/10 px-1.5 py-0.5 text-[10px] font-semibold text-destructive">{pending}</span>}
@@ -784,7 +784,7 @@ function FinancialTab({ t, onPersist, onAddAdjustment }: { t: User; onPersist: (
       id: `adj-${Date.now()}`,
       date: new Date().toISOString(),
       amount,
-      reason: "Bono por cumplimiento de KPIs",
+      reason: "KPI compliance bonus",
     };
     onPersist({ ...t, adjustments: [...(t.adjustments ?? []), adj] });
     setBonusAmount("");
