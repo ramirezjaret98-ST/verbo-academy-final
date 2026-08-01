@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronRight, Compass, Briefcase, Globe } from "lucide-react";
 import { Pill, GhostButton } from "@/components/verbo/ui";
+import { CurriculumBreadcrumb } from "@/components/verbo/CurriculumBreadcrumb";
 import {
   type ProductId,
   type ProductCourse,
@@ -53,6 +54,12 @@ function Page() {
   const level: CourseLevel | null = product && levelId ? product.levels.find((l) => l.id === levelId) ?? null : null;
   const unit: CourseUnit | null = level && unitId ? level.units.find((u) => u.id === unitId) ?? null : null;
 
+  const crumbs = (extra: { label: string; onClick?: () => void }[]) => [
+    { label: "Dashboard", to: "/teacher" },
+    { label: "Courses", onClick: () => { setProductId(null); setLevelId(null); setUnitId(null); } },
+    ...extra,
+  ];
+
   const header = (
     <div>
       <h1 className="text-3xl font-semibold tracking-tight text-foreground">Performance Sessions</h1>
@@ -62,17 +69,26 @@ function Page() {
     </div>
   );
 
-  if (unit && level) {
+  if (unit && level && product) {
     return (
-      <UnitDetail
+      <div className="space-y-4">
+        <CurriculumBreadcrumb
+          items={crumbs([
+            { label: PRODUCT_META[product.product].label, onClick: () => { setLevelId(null); setUnitId(null); } },
+            { label: level.name, onClick: () => setUnitId(null) },
+            { label: unit.title },
+          ])}
+        />
+        <UnitDetail
         level={level}
         unit={unit}
         studentId={PREVIEW_STUDENT_ID}
         readOnly={false}
         previewMode
         onBack={() => setUnitId(null)}
-        onChange={() => { /* no-op in preview */ }}
-      />
+          onChange={() => { /* no-op in preview */ }}
+        />
+      </div>
     );
   }
 
@@ -83,11 +99,12 @@ function Page() {
           <GhostButton onClick={() => setLevelId(null)}>
             <ArrowLeft className="h-3.5 w-3.5" /> {PRODUCT_META[product.product].label} levels
           </GhostButton>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <button className="hover:text-foreground" onClick={() => { setProductId(null); setLevelId(null); }}>{PRODUCT_META[product.product].label}</button>
-            <ChevronRight className="h-3.5 w-3.5" />
-            <span className="font-medium text-foreground">{level.name}</span>
-          </div>
+          <CurriculumBreadcrumb
+            items={crumbs([
+              { label: PRODUCT_META[product.product].label, onClick: () => { setLevelId(null); setUnitId(null); } },
+              { label: level.name },
+            ])}
+          />
           <h1 className="text-2xl font-semibold tracking-tight text-foreground">{level.name}</h1>
           <p className="text-sm text-muted-foreground">{level.units.length} units · click any unit to preview its content.</p>
         </div>
@@ -119,6 +136,7 @@ function Page() {
           <GhostButton onClick={() => setProductId(null)}>
             <ArrowLeft className="h-3.5 w-3.5" /> All products
           </GhostButton>
+          <CurriculumBreadcrumb items={crumbs([{ label: PRODUCT_META[product.product].label }])} />
           {header}
           <div className="text-sm text-muted-foreground">{PRODUCT_META[product.product].label} · choose a level.</div>
         </div>
@@ -144,6 +162,7 @@ function Page() {
 
   return (
     <div className="space-y-8">
+      <CurriculumBreadcrumb items={[{ label: "Dashboard", to: "/teacher" }, { label: "Courses" }]} />
       {header}
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {PRODUCT_ORDER.map((pid) => {

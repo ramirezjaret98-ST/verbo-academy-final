@@ -42,6 +42,7 @@ import flamaRosaAsset from "@/assets/Flama_Rosa.svg.asset.json";
 import flamaNegraAsset from "@/assets/Flama_Negra.svg.asset.json";
 import smokeAsset from "@/assets/smoke.svg.asset.json";
 import { useAuth } from "@/lib/auth";
+import { CurriculumBreadcrumb } from "@/components/verbo/CurriculumBreadcrumb";
 import type { User } from "@/lib/mock-data";
 import { currentLoginStreak } from "@/lib/login-streak-store";
 import { markUnlockSeen } from "@/lib/unit-unlock-seen-store";
@@ -299,15 +300,25 @@ function Page() {
     const unit = level?.units.find((u) => u.id === view.unitId);
     if (!level || !unit) return null;
     return (
-      <UnitDetail
+      <div className="space-y-4">
+        <CurriculumBreadcrumb
+          items={[
+            { label: "Dashboard", to: "/student" },
+            { label: "Learning Path", onClick: () => setView({ kind: "levels" }) },
+            { label: level.name, onClick: () => setView({ kind: "units", levelId: level.id, readOnly: view.readOnly }) },
+            { label: unit.title },
+          ]}
+        />
+        <UnitDetail
         level={level}
         unit={unit}
         studentId={user?.id ?? ""}
         readOnly={view.readOnly}
         onBack={() => setView({ kind: "units", levelId: level.id, readOnly: view.readOnly })}
         onChange={() => onUnitCompleted(level.id, unit.id)}
-        onOpenUnit={(u) => setView({ kind: "unit", levelId: level.id, unitId: u.id, readOnly: view.readOnly })}
-      />
+          onOpenUnit={(u) => setView({ kind: "unit", levelId: level.id, unitId: u.id, readOnly: view.readOnly })}
+        />
+      </div>
     );
   }
 
@@ -315,14 +326,23 @@ function Page() {
     const level = levels.find((l) => l.id === view.levelId);
     if (!level) { setView({ kind: "levels" }); return null; }
     return (
-      <UnitsView
+      <div className="space-y-4">
+        <CurriculumBreadcrumb
+          items={[
+            { label: "Dashboard", to: "/student" },
+            { label: "Learning Path", onClick: () => setView({ kind: "levels" }) },
+            { label: level.name },
+          ]}
+        />
+        <UnitsView
         key={rev}
         level={level}
         readOnly={view.readOnly}
         studentId={user?.id ?? ""}
         onBack={() => setView({ kind: "levels" })}
-        onOpenUnit={(unit) => setView({ kind: "unit", levelId: level.id, unitId: unit.id, readOnly: view.readOnly })}
-      />
+          onOpenUnit={(unit) => setView({ kind: "unit", levelId: level.id, unitId: unit.id, readOnly: view.readOnly })}
+        />
+      </div>
     );
   }
 
@@ -331,6 +351,10 @@ function Page() {
   const showTailored = user?.access_plan === "Elite" && tailoredUnits.length > 0;
   return (
     <>
+      <CurriculumBreadcrumb
+        className="mb-4"
+        items={[{ label: "Dashboard", to: "/student" }, { label: "Learning Path" }]}
+      />
       <LevelsView
         key={rev}
         studentId={user?.id ?? ""}
