@@ -1701,21 +1701,33 @@ function ChallengeDetail({
           </div>
         </div>
 
-        {/* PLACEHOLDER: contenido real de estos 4 stats pendiente de definir por Jaret */}
-        <div className="vc-rise grid grid-cols-4 border-b border-border bg-secondary/40" style={{ animationDelay: "0.3s" }}>
-          {[
-            { label: "Duration", Icon: Clock },
-            { label: "Format", Icon: Tag },
-            { label: "Reward", Icon: Trophy },
-            { label: "Validity", Icon: Shield },
-          ].map(({ label, Icon }, i) => (
-            <div key={label} className={`flex flex-col items-center gap-1 px-2 py-3 ${i > 0 ? "border-l border-border/70" : ""}`}>
-              <Icon className="h-4 w-4 text-muted-foreground" />
-              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
-              <span className="text-sm font-bold text-foreground">—</span>
+        {/* Stats row — only rendered for the fields the challenge actually has.
+            While the real content is undefined, nothing is shown (no empty "—"). */}
+        {(() => {
+          const meta = challenge as Partial<Record<"duration" | "format" | "reward" | "validity", string>>;
+          const stats = [
+            { label: "Duration", Icon: Clock, value: meta.duration },
+            { label: "Format", Icon: Tag, value: meta.format },
+            { label: "Reward", Icon: Trophy, value: meta.reward },
+            { label: "Validity", Icon: Shield, value: meta.validity },
+          ].filter((s) => !!s.value && String(s.value).trim() !== "");
+          if (stats.length === 0) return null;
+          return (
+            <div
+              className="vc-rise grid border-b border-border bg-secondary/40"
+              style={{ animationDelay: "0.3s", gridTemplateColumns: `repeat(${stats.length}, minmax(0, 1fr))` }}
+            >
+              {stats.map(({ label, Icon, value }, i) => (
+                <div key={label} className={`flex flex-col items-center gap-1 px-2 py-3 ${i > 0 ? "border-l border-border/70" : ""}`}>
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">{label}</span>
+                  <span className="text-sm font-bold text-foreground">{value}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          );
+        })()}
+
 
         <div className="relative p-6">
           <div className={locked ? "pointer-events-none select-none blur-sm" : ""}>
