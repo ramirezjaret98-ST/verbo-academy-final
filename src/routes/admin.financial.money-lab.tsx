@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ChevronLeft, ChevronRight, CreditCard, ExternalLink,
   Wallet, CircleDollarSign, Clock, TrendingUp, type LucideIcon,
+  AlertTriangle,
 } from "lucide-react";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
