@@ -103,7 +103,6 @@ function MyBalancePage() {
   const now = new Date();
   const currentMkey = monthKey(now);
   const mkey = monthKey(viewMonth);
-  const isCurrentMonth = mkey === currentMkey;
 
   const rate = teacher ? effectiveHourlyRate(teacher) : 120;
   const tier = teacher ? teacherTier(teacher) : null;
@@ -153,10 +152,11 @@ function MyBalancePage() {
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [teacher, mkey, rate]);
 
-  // Standard Pay — mirror Money Lab: hours_month * rate for current month, 0 otherwise.
-  const stdHours = isCurrentMonth ? (teacher?.hours_month ?? 0) : 0;
-  const stdPay = Math.round(stdHours * rate);
-  const sessionsCount = sessionRows.filter((r) => r.status === "Completed").length;
+  // Standard Pay — derived from the very same rows the card counts, so the
+  // amount and the session count can never contradict each other.
+  const completedRows = sessionRows.filter((r) => r.status === "Completed");
+  const sessionsCount = completedRows.length;
+  const stdPay = completedRows.reduce((sum, r) => sum + r.amount, 0);
 
   // ----- Adjustments (this month) -----
   const adjustments = (teacher?.adjustments ?? []).filter((a) => sameMonth(a.date, mkey));
