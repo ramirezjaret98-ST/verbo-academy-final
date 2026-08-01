@@ -56,6 +56,7 @@ import {
   challengesFor,
   categoryColor,
 } from "@/lib/challenges-store";
+import { totalCompletedChallenges } from "@/lib/student-model";
 import {
   type ChallengeSubmission,
   type ChallengeSubmissionFormat,
@@ -602,7 +603,7 @@ function Page() {
         gradient={gradient}
         currentStreak={student.current_streak ?? 0}
         longestStreak={student.longest_streak ?? 0}
-        completed={student.completed_challenges?.length ?? 0}
+        completed={totalCompletedChallenges(student)}
       />
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -2293,16 +2294,12 @@ function useLeaderboardRows(): LeaderboardRow[] {
         const id = getLeaderboardIdentity(u.id);
         const useReal = id.mode === "real" || !id.nickname.trim();
         const displayName = useReal ? u.name : id.nickname.trim();
-        const regular = u.completed_challenges?.length ?? 0;
-        const lightning = u.lightning_completions ?? 0;
-        const seasons = Object.values(u.season_completions ?? {})
-          .reduce((sum, n) => sum + (n ?? 0), 0);
         return {
           userId: u.id,
           displayName,
           useRealAvatar: useReal,
           avatarSeed: useReal ? u.name : id.nickname.trim(),
-          completed: regular + lightning + seasons,
+          completed: totalCompletedChallenges(u),
         };
       })
       .sort((a, b) =>
@@ -2756,7 +2753,7 @@ function PlayerProfileCard({ student }: { student: (typeof USERS)[number] }) {
                 </button>
               </div>
               <div className="text-xs text-muted-foreground">
-                {student.completed_challenges?.length ?? 0} challenges completed
+                {totalCompletedChallenges(student)} challenges completed
               </div>
             </div>
           </div>
