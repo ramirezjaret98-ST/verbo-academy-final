@@ -204,7 +204,7 @@ export function accessPlanPillStyle(id?: string | null): CSSProperties {
 // (hero, player card and leaderboard): regular + lightning + season completions.
 // ----------------------------------------------------------------------------
 export function totalCompletedChallenges(student: {
-  completed_challenges?: string[];
+  completed_challenges?: unknown[];
   lightning_completions?: number;
   season_completions?: Record<string, number>;
 }): number {
