@@ -590,7 +590,7 @@ function TeacherDetailModal({
                 />
                 <KpiHeroStat
                   label="Planning on time"
-                  value={`${t.plan_punctuality ?? 0}%`}
+                  value={`${computeTeacherKpis(t).planningPunctuality}%`}
                   icon={CalendarClock}
                   color="#01304a"
                   onAdjust={canOverride ? () => setOverrideTarget({ metric: "planningPunctuality", currentValue: computeTeacherKpis(t).planningPunctuality }) : undefined}
