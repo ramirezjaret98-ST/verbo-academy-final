@@ -1,7 +1,7 @@
 import { createFileRoute, useSearch, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { SESSIONS, ASSIGNMENTS, USERS, studentsOfTeacher, userById, type Session, type SessionStatus } from "@/lib/mock-data";
+import { ASSIGNMENTS, USERS, studentsOfTeacher, userById, type Session, type SessionStatus } from "@/lib/mock-data";
 import { Gauge } from "lucide-react";
 import { AccentModal, AccentModalHeader, AccentModalFooter, AnimatedNumber, Card, GhostButton, HeroStatCard, Pill, PrimaryButton, SectionTitle } from "@/components/verbo/ui";
 import { rankLabel } from "@/lib/staff-profile-store";
@@ -69,17 +69,21 @@ const YELLOW = "#eab308";
 type DashboardPanel = "attention" | "plan" | "complete";
 
 
-type LocalSession = Session & { _noReport?: boolean };
+type LocalSession = ExtSession & { _noReport?: boolean };
 
 function TeacherDashboard() {
   const { user } = useAuth();
   const { report: reportId } = useSearch({ from: "/teacher/" });
   const navigate = useNavigate();
   const [now, setNow] = useState(Date.now());
-  const [sessions, setSessions] = useState<LocalSession[]>(() => SESSIONS.map((s) => ({ ...s })));
-  const [evaluating, setEvaluating] = useState<Session | null>(null);
-  const [editing, setEditing] = useState<{ session: Session; perf: PerformanceRating; subskills: Record<string, number> } | null>(null);
-  const [planning, setPlanning] = useState<Session | null>(null);
+  // Sessions come straight from the persisted store (never from a stale local
+  // copy of the seed) so completed/rescheduled sessions stay that way on reload.
+  const [sessions, setSessions] = useState<LocalSession[]>(() =>
+    typeof window === "undefined" ? [] : loadSessions().map((s) => ({ ...s })),
+  );
+  const [evaluating, setEvaluating] = useState<ExtSession | null>(null);
+  const [editing, setEditing] = useState<{ session: ExtSession; perf: PerformanceRating; subskills: Record<string, number> } | null>(null);
+  const [planning, setPlanning] = useState<ExtSession | null>(null);
   
   const [plans, setPlans] = useState<Record<string, LessonPlan>>({});
   // Live-synced canonical sessions (used by summary cards, Needs Your
@@ -107,9 +111,13 @@ function TeacherDashboard() {
   useEffect(() => {
     setPlans(loadLessonPlans());
     const u2 = subscribeLessonPlans(() => setPlans(loadLessonPlans()));
+    setSessions(loadSessions().map((s) => ({ ...s })));
     setLiveSessions(loadSessions());
     setClubs(loadClubs());
-    const u3 = subscribeSessions(() => setLiveSessions(loadSessions()));
+    const u3 = subscribeSessions(() => {
+      setLiveSessions(loadSessions());
+      setSessions(loadSessions().map((s) => ({ ...s })));
+    });
     const u4 = subscribeClubs(() => setClubs(loadClubs()));
     const u5 = subscribeAvailability(() => setAvailTick((n) => n + 1));
     setClubReports(loadClubReports());
@@ -149,7 +157,11 @@ function TeacherDashboard() {
   const mySessions = sessions.filter((s) => s.teacher_id === user.id);
   const upcoming = mySessions.filter((s) => s.status === "scheduled").sort((a, b) => +new Date(a.date_time) - +new Date(b.date_time));
   const recent = mySessions.filter((s) => s.status !== "scheduled").slice(0, 5);
-  const toPlan = upcoming.filter((s) => !plans[s.id]).slice(0, 3);
+  // Real count of unplanned sessions (no cap) vs. the 3 items shown in the modal.
+  const toPlanAll = upcoming.filter((s) => !plans[s.id]);
+  const toPlan = toPlanAll.slice(0, 3);
+  // Only sessions whose start time has already passed can be reported/completed.
+  const awaitingCompletion = upcoming.filter((s) => now >= +new Date(s.date_time));
 
   // ---- Real-data derivations (cards, Needs Attention, Recent Activity) ----
   const teacherUser = USERS.find((u) => u.id === user.id && u.role === "teacher") ?? null;
@@ -635,7 +647,7 @@ function TeacherDashboard() {
                 </div>
                 <div className="mt-1 text-xl font-semibold leading-tight text-white">Plan Your Upcoming Sessions</div>
                 <div className="mt-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>
-                  {toPlan.length} session{toPlan.length === 1 ? "" : "s"} to plan
+                  {toPlanAll.length} session{toPlanAll.length === 1 ? "" : "s"} to plan
                 </div>
               </div>
               <img src={planIconAsset.url} alt="" aria-hidden className="h-[31px] w-[31px] shrink-0" />
@@ -658,7 +670,7 @@ function TeacherDashboard() {
                 </div>
                 <div className="mt-1 text-xl font-semibold leading-tight text-white">Complete Your Sessions</div>
                 <div className="mt-1 text-xs font-medium" style={{ color: "rgba(255,255,255,0.8)" }}>
-                  {upcoming.length + pendingClubEvents.length} session{upcoming.length + pendingClubEvents.length === 1 ? "" : "s"} awaiting completion
+                  {awaitingCompletion.length + pendingClubEvents.length} session{awaitingCompletion.length + pendingClubEvents.length === 1 ? "" : "s"} awaiting completion
                 </div>
               </div>
               <img src={completeIconAsset.url} alt="" aria-hidden className="h-[31px] w-[31px] shrink-0" />
@@ -798,10 +810,10 @@ function TeacherDashboard() {
         >
           <div className="max-h-[65vh] space-y-3 overflow-y-auto p-4">
 
-            {upcoming.length === 0 && pendingClubEvents.length === 0 && (
+            {awaitingCompletion.length === 0 && pendingClubEvents.length === 0 && (
               <Card><p className="text-sm text-muted-foreground">No sessions awaiting completion.</p></Card>
             )}
-            {upcoming.map((s) => {
+            {awaitingCompletion.map((s) => {
               const student = userById(s.student_id);
               const start = +new Date(s.date_time);
               const end = start + s.duration_minutes * 60_000;
@@ -1066,7 +1078,7 @@ function TeacherDashboard() {
       {evaluating && (
 
         <PerformanceEvaluationModal
-          session={evaluating}
+          session={evaluating as unknown as Session}
           onClose={() => setEvaluating(null)}
           onContinue={(perf, subskills) => {
             setEditing({ session: evaluating, perf, subskills });
@@ -1076,7 +1088,7 @@ function TeacherDashboard() {
       )}
       {editing && (
         <ReportModal
-          session={editing.session}
+          session={editing.session as unknown as Session}
           perf={editing.perf}
           subskills={editing.subskills}
           onClose={() => setEditing(null)}
