@@ -1812,9 +1812,17 @@ function LevelCompletionModal({ level, studentName, product, onClose }: { level:
           </div>
         </div>
       </div>
+      {showShare && (
+        <CertificateShareModal
+          levelName={level.name}
+          productLabel={productDisplayName(product)}
+          onClose={() => setShowShare(false)}
+        />
+      )}
     </div>
   );
 }
+
 
 
 /* dev-only: ensure imports pretend-used, avoids unused-var churn for TS */
