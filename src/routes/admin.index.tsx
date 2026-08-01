@@ -456,12 +456,12 @@ function Overview() {
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Avg composite score</div>
             <div className="mt-2 text-5xl font-bold leading-none text-foreground">
               <AnimatedNumber value={avgComposite} suffix="%" />
-      </div>
-      )}
-
+            </div>
           </div>
         </HeroStatCard>
       </div>
+      )}
+
 
 
       {/* 3 — Urgency modals */}
