@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { generateLevelCertificate, productDisplayName } from "@/lib/certificate";
+import { CertificateShareModal } from "@/components/verbo/CertificateShareModal";
+
 import {
   ArrowLeft,
   Check,
