@@ -582,8 +582,13 @@ function RatingChartModal({ teacher: t, onClose }: { teacher: User; onClose: () 
             </ResponsiveContainer>
           </div>
           <p className="mt-3 text-center text-xs text-muted-foreground">
-            Current average: <span className="font-semibold" style={{ color: band.fg }}>{avgRating(t)?.toFixed(1) ?? "—"}★ · {band.label}</span>
+            Current average: <span className="font-semibold" style={{ color: band.fg }}>{displayRating?.toFixed(1) ?? "—"}★ · {band.label}</span>
           </p>
+          {monthOverrides.ratingNormalized && (
+            <p className="mt-1 text-center text-[11px] text-muted-foreground">
+              Raw avg: {rawRating?.toFixed(1) ?? "—"}★ · before manual adjustment
+            </p>
+          )}
         </div>
       </div>
     </div>
