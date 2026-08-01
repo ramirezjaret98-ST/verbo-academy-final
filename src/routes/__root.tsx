@@ -12,40 +12,12 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider, useAuth as useAuthCtx } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
-
-function NotFoundComponent() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <div className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">Verbo Language Solutions</div>
-        <h1 className="mt-4 text-6xl font-semibold tracking-tight text-foreground">404</h1>
-        <p className="mt-3 text-sm text-muted-foreground">The page you're looking for doesn't exist.</p>
-        <Link to="/" className="mt-6 inline-flex rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground shadow-soft">
-          Back home
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
-  const router = useRouter();
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold text-foreground">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Please try again.</p>
-        <button
-          onClick={() => { router.invalidate(); reset(); }}
-          className="mt-6 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-accent-foreground shadow-soft"
-        >
-          Try again
-        </button>
-      </div>
-    </div>
-  );
-}
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  NotFoundScreen,
+  GeneralErrorScreen,
+  UnsupportedDeviceScreen,
+} from "@/components/verbo/error-screens";
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   head: () => ({
@@ -65,8 +37,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   }),
   shellComponent: RootShell,
   component: RootComponent,
-  notFoundComponent: NotFoundComponent,
-  errorComponent: ErrorComponent,
+  notFoundComponent: NotFoundScreen,
+  errorComponent: RootErrorBoundary,
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
@@ -88,9 +60,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <PasswordChangeGate>
-          <Outlet />
-        </PasswordChangeGate>
+        <DeviceGate>
+          <PasswordChangeGate>
+            <Outlet />
+          </PasswordChangeGate>
+        </DeviceGate>
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
@@ -114,4 +88,18 @@ function RedirectToChangePassword() {
     router.navigate({ to: "/change-password" });
   }, [router]);
   return null;
+}
+
+/** Global error boundary for the whole app. */
+function RootErrorBoundary({ error, reset }: { error: Error; reset: () => void }) {
+  console.error(error);
+  const router = useRouter();
+  return <GeneralErrorScreen onRefresh={() => { router.invalidate(); reset(); }} />;
+}
+
+/** Blocks phone-sized viewports (<768px) for every role, login included. */
+function DeviceGate({ children }: { children: React.ReactNode }) {
+  const isMobile = useIsMobile();
+  if (isMobile) return <UnsupportedDeviceScreen />;
+  return <>{children}</>;
 }
