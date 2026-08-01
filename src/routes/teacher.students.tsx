@@ -782,8 +782,8 @@ function ReportModal({
     >
       <div className="p-6">
         <p className="text-xs text-muted-foreground">
-          Describe a situation observed about this student. The report will be stored
-          in the database linked to you as the primary teacher.
+          Describe a situation observed about this student. The report will be saved
+          linked to you as the primary teacher.
         </p>
 
         <textarea

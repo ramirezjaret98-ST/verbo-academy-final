@@ -1076,7 +1076,7 @@ function StudentDashboard() {
             </div>
             {recentFeedback.length === 0 ? (
               <p className="text-xs text-muted-foreground">
-                Your teacher's notes and vocabulary tips will appear here after your first rated session.
+                Notes from your teacher will show up here after your next session.
               </p>
             ) : (
               <ul className="space-y-3">

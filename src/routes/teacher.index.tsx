@@ -1446,7 +1446,7 @@ function ReportPreview({ studentName, dateLabel, status, notes, entries, onClose
     <div className="mt-6 space-y-5">
       <div className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
         <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
-        <span>Report successfully compiled and dispatched to the student's registered email!</span>
+        <span>Report successfully compiled and shared with the student in their dashboard.</span>
       </div>
 
       <div className="rounded-xl border border-border bg-background p-6">
