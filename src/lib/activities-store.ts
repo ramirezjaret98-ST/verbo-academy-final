@@ -208,6 +208,15 @@ export function addActivity(a: Activity) {
   saveActivities(list);
 }
 
+/** Updates an existing activity in place. `id` and `unit_id` are never
+ *  overwritten, so an edit (e.g. attaching audio to a bulk-imported
+ *  listen_select) keeps the rest of its saved configuration. */
+export function updateActivity(id: string, patch: Partial<Omit<Activity, "id" | "unit_id">>) {
+  saveActivities(
+    loadActivities().map((a) => (a.id === id ? { ...a, ...patch, id: a.id, unit_id: a.unit_id } : a)),
+  );
+}
+
 export function removeActivity(id: string) {
   saveActivities(loadActivities().filter((a) => a.id !== id));
 }

@@ -311,6 +311,8 @@ Nombres de nivel confirmados por producto:
 | audioDurationSec | number | opcional | `listen_select` únicamente |
 | feedback | string | opcional | shown to the student when the answer is incorrect; explains WHY, not just that it's wrong |
 
+**Edición:** `updateActivity(id, patch)` (activities-store) actualiza una actividad existente sin tocar `id` ni `unit_id`. En el modal "Activities" cada item de la lista tiene acción de editar (lápiz) que recarga la actividad en el formulario — así una `listen_select` importada por Bulk Upload (que nunca trae audio) puede recibir su archivo sin recrearse; los items sin `audioName` se marcan "No audio".
+
 ⚠️ **`audioName` es metadata interna de Admin y NUNCA debe renderizarse en ninguna vista de alumno.** Contiene el nombre real del archivo subido (incluye referencias a nuestro proveedor de voz). Se muestra solo en el modal de Admin al cargar el archivo; el reproductor del alumno (`VerboAudioPlayer`) rotula siempre con el texto fijo "Audio · Verbo Academy".
 
 **`audioDurationSec`**: duración del clip en segundos, **auto-detectada** al subir el archivo en Admin (elemento `Audio` temporal + `loadedmetadata`, redondeada al segundo). El admin nunca la escribe a mano. Se usa para mostrar `mm:ss` en el reproductor del alumno; si falta, el reproductor muestra `--:--`.

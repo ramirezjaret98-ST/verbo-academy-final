@@ -5,7 +5,7 @@
 import { useMemo, useState } from "react";
 import {
   Plus, Trash2, X, Info, Headphones, GripVertical, Mic, AlignLeft,
-  Shuffle, BookOpen, ListChecks, Upload,
+  Shuffle, BookOpen, ListChecks, Upload, Pencil,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { GhostButton, PrimaryButton, Pill, AccentModal } from "./ui";
@@ -21,6 +21,7 @@ import {
   isMandatoryCategory,
   activitiesForUnit,
   addActivity,
+  updateActivity,
   removeActivity,
   phaseOf,
   saveActivities,
@@ -111,6 +112,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctIndex, setCorrectIndex] = useState(0);
   const [feedback, setFeedback] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [rev, setRev] = useState(0);
 
   const existing = useMemo(() => activitiesForUnit(unitId), [unitId, rev]);
@@ -125,6 +127,33 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
     setItems([{ text: "", key: "" }, { text: "", key: "" }]);
     setPrompt(""); setAudioName(""); setAudioDurationSec(undefined); setQuestion("");
     setOptions(["", "", "", ""]); setCorrectIndex(0); setFeedback("");
+    setEditingId(null);
+  };
+
+  /** Loads a saved activity into the form so it can be edited (e.g. attaching
+   *  audio to a bulk-imported listen_select) without recreating it. */
+  const startEdit = (a: Activity) => {
+    setEditingId(a.id);
+    setPhase(phaseOf(a));
+    setName(a.name);
+    setType(a.type);
+    const cat = a.category ?? "vocabulary";
+    if (DEFAULT_CATEGORIES.includes(cat)) {
+      setUseCustomCategory(false); setCategory(cat); setCustomCategory("");
+    } else {
+      setUseCustomCategory(true); setCustomCategory(cat);
+    }
+    setParagraph(a.paragraph ?? "");
+    setAnswer(a.answer ?? "");
+    setItems(a.items?.length ? a.items.map((i) => ({ text: i.text, key: i.key })) : [{ text: "", key: "" }, { text: "", key: "" }]);
+    setPrompt(a.prompt ?? "");
+    setAudioName(a.audioName ?? "");
+    setAudioDurationSec(a.audioDurationSec);
+    setQuestion(a.question ?? "");
+    const opts = a.options ?? [];
+    setOptions([0, 1, 2, 3].map((i) => opts[i] ?? ""));
+    setCorrectIndex(a.correctIndex ?? 0);
+    setFeedback(a.feedback ?? "");
   };
 
   /** Reads the audio duration straight from the file — admins never type it. */
@@ -145,7 +174,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
   const save = () => {
     if (!name.trim()) { alert("Please give the activity a name."); return; }
     const finalCategory = (useCustomCategory ? customCategory.trim().toLowerCase() : category) || "vocabulary";
-    const base: Activity = { id: `act-${Date.now()}`, unit_id: unitId, name: name.trim(), type, category: finalCategory, session_phase: phase, feedback: feedback.trim() || undefined };
+    const base: Activity = { id: editingId ?? `act-${Date.now()}`, unit_id: unitId, name: name.trim(), type, category: finalCategory, session_phase: phase, feedback: feedback.trim() || undefined };
     let payload: Activity = base;
     if (type === "fill_gaps" || type === "read_complete") {
       if (!paragraph.trim() || !answer.trim()) { alert("Provide a paragraph and the correct answer."); return; }
@@ -161,7 +190,12 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
       if (!answer.trim()) { alert("Type the sentence the student must speak."); return; }
       payload = { ...base, answer: answer.trim() };
     }
-    addActivity(payload);
+    if (editingId) {
+      const { id: _id, unit_id: _u, ...patch } = payload;
+      updateActivity(editingId, patch);
+    } else {
+      addActivity(payload);
+    }
     resetDraft();
     setRev((r) => r + 1);
   };
@@ -320,8 +354,14 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
 
 
           <div className="flex items-center justify-end gap-3 pt-2">
-            <GhostButton onClick={onClose}>Done</GhostButton>
-            <PrimaryButton onClick={save}><Plus className="h-3.5 w-3.5" /> Save {phase === "post" ? "Post-Session" : "Pre-Session"} Activity</PrimaryButton>
+            {editingId ? (
+              <GhostButton onClick={resetDraft}>Cancel edit</GhostButton>
+            ) : (
+              <GhostButton onClick={onClose}>Done</GhostButton>
+            )}
+            <PrimaryButton onClick={save}>
+              {editingId ? <><Pencil className="h-3.5 w-3.5" /> Save Changes</> : <><Plus className="h-3.5 w-3.5" /> Save {phase === "post" ? "Post-Session" : "Pre-Session"} Activity</>}
+            </PrimaryButton>
           </div>
         </div>
 
@@ -332,8 +372,21 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
               <Upload className="h-3.5 w-3.5" /> Bulk Upload
             </GhostButton>
           </div>
-          <PhaseGroup label="Pre-Session" list={preList} onRemove={(id) => { removeActivity(id); setRev((r) => r + 1); }} />
-          <PhaseGroup label="Post-Session" list={postList} onRemove={(id) => { removeActivity(id); setRev((r) => r + 1); }} showTag />
+          <PhaseGroup
+            label="Pre-Session"
+            list={preList}
+            editingId={editingId}
+            onEdit={startEdit}
+            onRemove={(id) => { removeActivity(id); if (editingId === id) resetDraft(); setRev((r) => r + 1); }}
+          />
+          <PhaseGroup
+            label="Post-Session"
+            list={postList}
+            editingId={editingId}
+            onEdit={startEdit}
+            onRemove={(id) => { removeActivity(id); if (editingId === id) resetDraft(); setRev((r) => r + 1); }}
+            showTag
+          />
         </aside>
       </div>
     </ModalShell>
@@ -350,10 +403,12 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
   );
 }
 
-function PhaseGroup({ label, list, onRemove, showTag }: {
+function PhaseGroup({ label, list, onRemove, onEdit, editingId, showTag }: {
   label: string;
   list: Activity[];
   onRemove: (id: string) => void;
+  onEdit: (a: Activity) => void;
+  editingId: string | null;
   showTag?: boolean;
 }) {
   return (
@@ -364,7 +419,7 @@ function PhaseGroup({ label, list, onRemove, showTag }: {
       ) : (
         <ul className="space-y-2">
           {list.map((a) => (
-            <li key={a.id} className="group flex items-center justify-between gap-2 rounded-lg border border-border bg-background px-3 py-2">
+            <li key={a.id} className={`group flex items-center justify-between gap-2 rounded-lg border bg-background px-3 py-2 ${editingId === a.id ? "border-accent ring-2 ring-accent/30" : "border-border"}`}>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <span className="truncate text-xs font-semibold text-foreground">{a.name}</span>
@@ -378,9 +433,18 @@ function PhaseGroup({ label, list, onRemove, showTag }: {
                       <span className={isMandatoryCategory(a.category) ? "font-semibold text-accent" : ""}>{categoryLabel(a.category)}</span>
                     </>
                   )}
+                  {a.type === "listen_select" && !a.audioName && (
+                    <>
+                      <span>·</span>
+                      <span className="font-semibold text-[#b45309]">No audio</span>
+                    </>
+                  )}
                 </div>
               </div>
-              <button onClick={() => onRemove(a.id)} className="text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"><Trash2 className="h-3.5 w-3.5" /></button>
+              <div className="flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
+                <button onClick={() => onEdit(a)} aria-label={`Edit ${a.name}`} className="text-muted-foreground hover:text-accent"><Pencil className="h-3.5 w-3.5" /></button>
+                <button onClick={() => onRemove(a.id)} aria-label={`Delete ${a.name}`} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+              </div>
             </li>
           ))}
         </ul>
