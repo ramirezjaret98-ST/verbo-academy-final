@@ -626,6 +626,8 @@ function StudentDashboard() {
 
 
       </section>
+      )}
+
 
       {/* Linguistic Asset Performance — replaces Performance Metrics + Quote of the Week */}
       <section className="verbo-fade-up motion-reduce:animate-none" style={{ animationDelay: "120ms" }}>
