@@ -29,6 +29,8 @@ import { tailoredUnitsForStudent } from "@/lib/tailored-content-store";
 import { subscribeVipUnits, subscribeVipUnitCompletion } from "@/lib/vip-courses-store";
 import { useComputedMacros } from "@/components/verbo/PerformanceAnalytics";
 import { AccentModalHeader, AnimatedNumber, GhostButton, HeroStatCard, InfoStatRow, Pill, PhotoPlaceholder, PrimaryButton, SectionTitle, StatRing, SuccessButton } from "@/components/verbo/ui";
+import { SkeletonStatCards, useHydrated } from "@/components/verbo/skeletons";
+
 import {
   ArrowDown,
   ArrowRight,
