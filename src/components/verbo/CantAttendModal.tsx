@@ -15,8 +15,14 @@ import {
 } from "@/lib/strikes-store";
 import { getCoverageNote, setCoverageNote } from "@/lib/coverage-notes-store";
 
-// Admin is pinged on WhatsApp as part of the confirmation click itself.
+// Admin is pinged on WhatsApp as part of the confirmation click itself. The
+// message is pre-filled with the session details so the teacher only has to
+// hit send.
 const ADMIN_WA_LINK = "https://wa.link/pqrkgz";
+
+function adminWhatsAppLink(text: string) {
+  return `${ADMIN_WA_LINK}?text=${encodeURIComponent(text)}`;
+}
 
 
 export function CantAttendModal({
@@ -32,8 +38,10 @@ export function CantAttendModal({
   const [note, setNote] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
+  // Exact (un-rounded) hours until the session starts — 23.6h must stay below
+  // the 24h threshold, so never round this value.
   const hoursUntil = useMemo(
-    () => Math.round((+new Date(session.date_time) - Date.now()) / (60 * 60 * 1000)),
+    () => (+new Date(session.date_time) - Date.now()) / (60 * 60 * 1000),
     [session.date_time],
   );
 
@@ -70,7 +78,19 @@ export function CantAttendModal({
       note: note.trim() || undefined,
       medicalNoteName: file?.name,
     });
-    window.open(ADMIN_WA_LINK, "_blank", "noopener,noreferrer");
+    const when = new Date(session.date_time).toLocaleString(undefined, {
+      weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit",
+    });
+    const message =
+      `Hi Admin — I can't attend a Performance Session.\n` +
+      `Teacher: ${teacherName}\n` +
+      `Session: ${session.id}\n` +
+      `Student: ${studentName}\n` +
+      `Date: ${when}\n` +
+      `Reason: ${CANCEL_REASON_LABEL[reason as CancelReason]}` +
+      (note.trim() ? `\nNote: ${note.trim()}` : "") +
+      `\n${needsSubstitute ? "Starts in less than 24h — a substitute is needed." : "Starts in more than 24h — I'd like to propose a reschedule."}`;
+    window.open(adminWhatsAppLink(message), "_blank", "noopener,noreferrer");
     onDone({ needsSubstitute });
   };
 

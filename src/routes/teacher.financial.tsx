@@ -103,7 +103,6 @@ function MyBalancePage() {
   const now = new Date();
   const currentMkey = monthKey(now);
   const mkey = monthKey(viewMonth);
-  const isCurrentMonth = mkey === currentMkey;
 
   const rate = teacher ? effectiveHourlyRate(teacher) : 120;
   const tier = teacher ? teacherTier(teacher) : null;
