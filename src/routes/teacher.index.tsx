@@ -520,7 +520,11 @@ function TeacherDashboard() {
 
       </header>
 
+      {!hydrated ? (
+        <SkeletonStatCards count={4} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" />
+      ) : (
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+
         <Link to="/teacher/students" className="block cursor-pointer">
           <HeroStatCard className="!items-start border border-border bg-card">
             <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-xl bg-transparent">
