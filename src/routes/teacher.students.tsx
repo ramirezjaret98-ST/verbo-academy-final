@@ -110,7 +110,7 @@ function Page() {
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">My Students</h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              Read-only view of the students assigned to you.
+              Students assigned to you — view progress, manage unit access and coverage notes.
             </p>
           </div>
         </div>
