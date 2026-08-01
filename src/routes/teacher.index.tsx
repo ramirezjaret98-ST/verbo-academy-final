@@ -1078,7 +1078,7 @@ function TeacherDashboard() {
       {evaluating && (
 
         <PerformanceEvaluationModal
-          session={evaluating}
+          session={evaluating as unknown as Session}
           onClose={() => setEvaluating(null)}
           onContinue={(perf, subskills) => {
             setEditing({ session: evaluating, perf, subskills });
@@ -1088,7 +1088,7 @@ function TeacherDashboard() {
       )}
       {editing && (
         <ReportModal
-          session={editing.session}
+          session={editing.session as unknown as Session}
           perf={editing.perf}
           subskills={editing.subskills}
           onClose={() => setEditing(null)}
