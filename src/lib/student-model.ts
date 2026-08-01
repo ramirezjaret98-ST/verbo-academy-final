@@ -175,6 +175,28 @@ export function nextPaymentDate(paymentDay: number, from: Date = new Date()): Da
   return candidate;
 }
 
+// Next payment date strictly AFTER today (used when marking a cycle as paid so
+// the indicator clears immediately). Shared by individual and group flows.
+export function nextPaymentDateAfterToday(paymentDay: number): Date {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return nextPaymentDate(paymentDay, tomorrow);
+}
+
+// Visual urgency of a payment cycle:
+//   "overdue"  → the date already passed without being marked as paid
+//   "due_soon" → within the next 3 days
+//   null       → nothing to flag
+export type PaymentUrgency = "overdue" | "due_soon" | null;
+
+export function paymentUrgency(nextPay: Date | null | undefined): PaymentUrgency {
+  if (!nextPay) return null;
+  const d = daysUntil(nextPay);
+  if (d < 0) return "overdue";
+  if (d <= 3) return "due_soon";
+  return null;
+}
+
 export function daysUntil(date: Date, from: Date = new Date()): number {
   const a = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
   const b = new Date(from.getFullYear(), from.getMonth(), from.getDate()).getTime();

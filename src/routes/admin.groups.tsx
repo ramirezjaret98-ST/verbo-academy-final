@@ -11,7 +11,7 @@ import { USERS, ASSIGNMENTS, userById, type User } from "@/lib/mock-data";
 import {
   PRODUCTS, ACCESS_PLAN_IDS, RESCHEDULE_PRESETS, SESSIONS_PER_LEVEL,
   MAX_INSIGHT_STRIKES, MAX_BOOKCLUB_STRIKES, getProduct, getAccessPlan,
-  nextPaymentDate, daysUntil,
+  nextPaymentDate, daysUntil, paymentUrgency,
   type ProductId, type AccessPlanId,
   accessPlanPillStyle,
 } from "@/lib/student-model";
@@ -113,7 +113,9 @@ function GroupCard({ group, onOpen }: { group: Group; onOpen: () => void }) {
   const nextPay = group.next_payment
     ? new Date(group.next_payment)
     : group.payment_day ? nextPaymentDate(group.payment_day, new Date()) : null;
-  const payDue = nextPay ? daysUntil(nextPay) <= 3 && daysUntil(nextPay) >= 0 : false;
+  const payState = paymentUrgency(nextPay);
+  const payDue = payState !== null;
+  const overdue = payState === "overdue";
 
   const mark = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -124,11 +126,14 @@ function GroupCard({ group, onOpen }: { group: Group; onOpen: () => void }) {
   return (
     <button
       onClick={onOpen}
-      className={`group relative flex flex-col rounded-2xl border border-border bg-card p-5 text-left shadow-soft transition-all hover:-translate-y-1 hover:shadow-elevated ${payDue ? "verbo-pay-glow" : ""}`}
+      className={`group relative flex flex-col rounded-2xl border border-border bg-card p-5 text-left shadow-soft transition-all hover:-translate-y-1 hover:shadow-elevated ${overdue ? "verbo-pay-overdue-glow" : payDue ? "verbo-pay-glow" : ""}`}
     >
       {payDue && (
-        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive">
-          <CreditCard className="h-3 w-3" /> Payment due
+        <span
+          className={`absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${overdue ? "text-white" : "bg-destructive/10 text-destructive"}`}
+          style={overdue ? { background: "#b52904" } : undefined}
+        >
+          <CreditCard className="h-3 w-3" /> {overdue ? "Overdue" : "Payment due"}
         </span>
       )}
       <div className="flex items-center gap-3">
