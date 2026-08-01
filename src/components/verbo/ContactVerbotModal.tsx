@@ -62,7 +62,7 @@ export function ContactVerbotModal() {
       icon={MessageCircle}
       eyebrow="Contact VERBOT"
       title="Need help or want to say hi?"
-      watermark={{ text: "HELLO" }}
+      watermark={{ type: "text", value: "HELLO" }}
       onClose={closeContactModal}
       maxWidth="max-w-lg"
       zClass="z-[70]"
