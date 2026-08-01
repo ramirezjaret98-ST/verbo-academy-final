@@ -9,6 +9,7 @@ import {
   getProduct, focusesForProduct, getFocus, getAccessPlan,
   suggestDuration, nextPaymentDate, daysUntil,
   type ProductId, type AccessPlanId,
+  accessPlanPillStyle,
 } from "@/lib/student-model";
 import { teachersForProduct, teachersForProductSorted } from "@/lib/teacher-model";
 import { teacherTier } from "@/lib/teacher-tiers";

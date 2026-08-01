@@ -13,6 +13,7 @@ import {
   MAX_INSIGHT_STRIKES, MAX_BOOKCLUB_STRIKES, getProduct, getAccessPlan,
   nextPaymentDate, daysUntil,
   type ProductId, type AccessPlanId,
+  accessPlanPillStyle,
 } from "@/lib/student-model";
 import { teachersForProduct } from "@/lib/teacher-model";
 import {
@@ -174,7 +175,7 @@ function GroupCard({ group, onOpen }: { group: Group; onOpen: () => void }) {
 
 function Tag({ children, className = "", style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${className}`}>
+    <span style={style} className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${className}`}>
       {children}
     </span>
   );
