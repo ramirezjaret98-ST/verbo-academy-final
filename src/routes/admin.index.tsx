@@ -81,7 +81,9 @@ function computeNextPayment(u: User): Date | null {
 
 function Overview() {
   const navigate = useNavigate();
+  const hydrated = useHydrated();
   const [, forceTick] = useState(0);
+
   const [metricsOpen, setMetricsOpen] = useState(false);
   const [panel, setPanel] = useState<null | "urgent" | "watch">(null);
 
