@@ -7,7 +7,7 @@ import {
   PRODUCTS, FOCUSES, ACCESS_PLANS, ACCESS_PLAN_IDS, RESCHEDULE_PRESETS,
   SESSIONS_PER_LEVEL, MAX_INSIGHT_STRIKES, MAX_BOOKCLUB_STRIKES,
   getProduct, focusesForProduct, getFocus, getAccessPlan,
-  suggestDuration, nextPaymentDate, daysUntil,
+  suggestDuration, nextPaymentDate, nextPaymentDateAfterToday, daysUntil, paymentUrgency,
   type ProductId, type AccessPlanId,
   accessPlanPillStyle,
 } from "@/lib/student-model";
@@ -390,7 +390,9 @@ function StudentCard({ student: s, onOpen }: { student: User; onOpen: () => void
   const { pct } = sessionProgressFor(hired, remaining);
 
   const nextPay = computeNextPayment(s);
-  const payDue = nextPay ? daysUntil(nextPay) <= 3 && daysUntil(nextPay) >= 0 : false;
+  const payState = paymentUrgency(nextPay);
+  const payDue = payState !== null;
+  const overdue = payState === "overdue";
 
   const statusBadge =
     s.status === "suspended" ? { cls: "bg-destructive/10 text-destructive", label: "Suspended" }
@@ -439,11 +441,14 @@ function StudentCard({ student: s, onOpen }: { student: User; onOpen: () => void
   return (
     <button
       onClick={onOpen}
-      className={`group relative flex flex-col rounded-2xl border border-border bg-card p-5 text-left shadow-soft transition-all hover:-translate-y-1 hover:shadow-elevated ${payDue ? "verbo-pay-glow" : ""}`}
+      className={`group relative flex flex-col rounded-2xl border border-border bg-card p-5 text-left shadow-soft transition-all hover:-translate-y-1 hover:shadow-elevated ${overdue ? "verbo-pay-overdue-glow" : payDue ? "verbo-pay-glow" : ""}`}
     >
       {payDue && (
-        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-semibold text-destructive">
-          <CreditCard className="h-3 w-3" /> Payment due
+        <span
+          className={`absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${overdue ? "text-white" : "bg-destructive/10 text-destructive"}`}
+          style={overdue ? { background: "#b52904" } : undefined}
+        >
+          <CreditCard className="h-3 w-3" /> {overdue ? "Overdue" : "Payment due"}
         </span>
       )}
 
@@ -1204,9 +1209,7 @@ function StudentDetailModal({
     // Advance to the next real occurrence of the payment day so the "next
     // payment" is always in the future and the glow disappears immediately.
     const day = student.payment_day ?? (nextPay ? nextPay.getDate() : 1);
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const after = nextPaymentDate(day, tomorrow);
+    const after = nextPaymentDateAfterToday(day);
     // Record the payment event so The Money Lab can consolidate it.
     logPayment({
       entity_type: "individual",

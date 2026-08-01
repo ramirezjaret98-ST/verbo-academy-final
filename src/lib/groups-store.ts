@@ -8,7 +8,7 @@
 // sessions-store / clubs-store convention. Swap for Lovable Cloud later.
 
 import { USERS, ASSIGNMENTS, type User } from "./mock-data";
-import type { ProductId, AccessPlanId } from "./student-model";
+import { nextPaymentDateAfterToday, type ProductId, type AccessPlanId } from "./student-model";
 import { logPayment, expectedAmountForGroup } from "./payments-log";
 
 export type GroupMemberStatus = "active" | "pending_removal" | "archived";
@@ -271,10 +271,10 @@ export function markGroupAsPaid(id: string) {
     amount: expectedAmountForGroup(g),
     paid_at: new Date().toISOString(),
   });
-  // Simplistic: bump next_payment forward by ~1 month.
-  const now = new Date();
-  const next = new Date(now.getFullYear(), now.getMonth() + 1, g.payment_day ?? now.getDate());
-  updateGroup(id, { next_payment: next.toISOString() });
+  // Advance to the next real occurrence of the payment day (same calculation
+  // used by the individual student flow) so the indicator clears immediately.
+  const day = g.payment_day ?? (g.next_payment ? new Date(g.next_payment).getDate() : new Date().getDate());
+  updateGroup(id, { next_payment: nextPaymentDateAfterToday(day).toISOString() });
 }
 
 export function addMember(groupId: string, member: {
