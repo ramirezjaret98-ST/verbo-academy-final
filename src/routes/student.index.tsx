@@ -29,6 +29,8 @@ import { tailoredUnitsForStudent } from "@/lib/tailored-content-store";
 import { subscribeVipUnits, subscribeVipUnitCompletion } from "@/lib/vip-courses-store";
 import { useComputedMacros } from "@/components/verbo/PerformanceAnalytics";
 import { AccentModalHeader, AnimatedNumber, GhostButton, HeroStatCard, InfoStatRow, Pill, PhotoPlaceholder, PrimaryButton, SectionTitle, StatRing, SuccessButton } from "@/components/verbo/ui";
+import { SkeletonStatCards, useHydrated } from "@/components/verbo/skeletons";
+
 import {
   ArrowDown,
   ArrowRight,
@@ -248,7 +250,9 @@ function StudentDashboard() {
   // Real macro-skill scoring, scoped to this student (single source of
   // truth shared with Student > Performance and Teacher > Mis Alumnos).
   const macros = useComputedMacros(user?.id ?? "");
+  const hydrated = useHydrated();
   const [classDetail, setClassDetail] = useState<ExtSession | null>(null);
+
   const [clubCardModal, setClubCardModal] = useState<Club | null>(null);
 
   const [plansRev, setPlansRev] = useState(0);
@@ -494,10 +498,14 @@ function StudentDashboard() {
       </header>
 
       {/* KPI Metrics with circular SVG progress — Level Progress is the hero */}
+      {!hydrated ? (
+        <SkeletonStatCards count={3} className="grid gap-4 md:grid-cols-[1fr_1.6fr_1fr]" />
+      ) : (
       <section
         className="verbo-fade-up motion-reduce:animate-none grid gap-4 md:grid-cols-[1fr_1.6fr_1fr]"
         style={{ animationDelay: "60ms" }}
       >
+
         {/* Current Level */}
         <div
           className="relative cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
@@ -622,6 +630,8 @@ function StudentDashboard() {
 
 
       </section>
+      )}
+
 
       {/* Linguistic Asset Performance — replaces Performance Metrics + Quote of the Week */}
       <section className="verbo-fade-up motion-reduce:animate-none" style={{ animationDelay: "120ms" }}>

@@ -6,6 +6,8 @@ import {
 } from "recharts";
 import { USERS, SESSIONS, type User, type Session } from "@/lib/mock-data";
 import { Card, PrimaryButton, GhostButton, HeroStatCard, AnimatedNumber, AccentModal } from "@/components/verbo/ui";
+import { SkeletonStatCards, useHydrated } from "@/components/verbo/skeletons";
+
 import { hydrateStudents } from "@/lib/students-store";
 import { nextPaymentDate, daysUntil, MAX_INSIGHT_STRIKES, getProduct } from "@/lib/student-model";
 import { computeTeacherKpis } from "@/lib/teacher-kpis";
@@ -79,7 +81,9 @@ function computeNextPayment(u: User): Date | null {
 
 function Overview() {
   const navigate = useNavigate();
+  const hydrated = useHydrated();
   const [, forceTick] = useState(0);
+
   const [metricsOpen, setMetricsOpen] = useState(false);
   const [panel, setPanel] = useState<null | "urgent" | "watch">(null);
 
@@ -400,7 +404,11 @@ function Overview() {
 
       {/* 3 — Summary cards */}
 
+      {!hydrated ? (
+        <SkeletonStatCards count={5} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5" />
+      ) : (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+
         {([
           { label: "Students", value: students.length, icon: Users2, color: "#3ebbad" },
           { label: "Teachers", value: teachers.length, icon: GraduationCap, color: "#a34ac0" },
@@ -456,6 +464,8 @@ function Overview() {
           </div>
         </HeroStatCard>
       </div>
+      )}
+
 
 
       {/* 3 — Urgency modals */}

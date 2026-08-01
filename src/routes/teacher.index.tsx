@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth";
 import { ASSIGNMENTS, USERS, studentsOfTeacher, userById, type Session, type SessionStatus } from "@/lib/mock-data";
 import { Gauge } from "lucide-react";
 import { AccentModal, AccentModalHeader, AccentModalFooter, AnimatedNumber, Card, GhostButton, HeroStatCard, Pill, PrimaryButton, SectionTitle } from "@/components/verbo/ui";
+import { SkeletonStatCards, useHydrated } from "@/components/verbo/skeletons";
+
 import { rankLabel } from "@/lib/staff-profile-store";
 import alertIconAsset from "@/assets/Alert.svg.asset.json";
 import planIconAsset from "@/assets/plan.svg.asset.json";
@@ -72,7 +74,9 @@ type DashboardPanel = "attention" | "plan" | "complete";
 type LocalSession = ExtSession & { _noReport?: boolean };
 
 function TeacherDashboard() {
+  const hydrated = useHydrated();
   const { user } = useAuth();
+
   const { report: reportId } = useSearch({ from: "/teacher/" });
   const navigate = useNavigate();
   const [now, setNow] = useState(Date.now());
@@ -520,7 +524,11 @@ function TeacherDashboard() {
 
       </header>
 
+      {!hydrated ? (
+        <SkeletonStatCards count={4} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" />
+      ) : (
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+
         <Link to="/teacher/students" className="block cursor-pointer">
           <HeroStatCard className="!items-start border border-border bg-card">
             <div className="absolute right-6 top-6 flex h-11 w-11 items-center justify-center rounded-xl bg-transparent">
@@ -602,6 +610,8 @@ function TeacherDashboard() {
         </Link>
 
       </section>
+      )}
+
 
 
       {/* Compressed action cards */}
