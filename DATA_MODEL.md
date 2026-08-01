@@ -898,6 +898,19 @@ Reglas:
 - `updateProfile()` escribe en el storage donde vive la sesión activa y preserva
   el `expiresAt` original (no lo recalcula).
 - Se tolera la forma legacy (user plano) tratándola como `expiresAt: null`.
+- `ready: boolean` en el contexto — `false` hasta que termina la hidratación del
+  cliente. `RoleGuard` no juzga la sesión mientras `ready === false` (evita
+  mostrar la pantalla de "sesión expirada" en el primer render).
+
+### Pantallas de estado (`ErrorScreen`, solo UI — sin datos nuevos)
+`src/components/verbo/error-screens.tsx` deriva estado existente, no lo crea:
+- `isAccountFrozen(user)` — `teacher_status === "frozen"` para teachers,
+  `status === "frozen"` para alumnos/admin. Solo lee el flag que Admin ya setea
+  manualmente; no hay detección automática de freeze.
+- `RoleGuard` muestra `SessionExpiredScreen` si no hay sesión y
+  `FrozenAccountScreen` si `isAccountFrozen`. El root muestra `NotFoundScreen`
+  (404), `GeneralErrorScreen` (error boundary global) y `UnsupportedDeviceScreen`
+  (viewport < 768px).
 
 ## Profile Badges — nuevas métricas de racha y misiones (`src/lib/profile-badges-store.ts`)
 
