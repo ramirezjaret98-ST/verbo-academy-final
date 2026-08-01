@@ -6,6 +6,8 @@ import {
 } from "recharts";
 import { USERS, SESSIONS, type User, type Session } from "@/lib/mock-data";
 import { Card, PrimaryButton, GhostButton, HeroStatCard, AnimatedNumber, AccentModal } from "@/components/verbo/ui";
+import { SkeletonStatCards, useHydrated } from "@/components/verbo/skeletons";
+
 import { hydrateStudents } from "@/lib/students-store";
 import { nextPaymentDate, daysUntil, MAX_INSIGHT_STRIKES, getProduct } from "@/lib/student-model";
 import { computeTeacherKpis } from "@/lib/teacher-kpis";
