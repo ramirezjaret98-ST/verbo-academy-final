@@ -494,10 +494,14 @@ function StudentDashboard() {
       </header>
 
       {/* KPI Metrics with circular SVG progress — Level Progress is the hero */}
+      {!hydrated ? (
+        <SkeletonStatCards count={3} className="grid gap-4 md:grid-cols-[1fr_1.6fr_1fr]" />
+      ) : (
       <section
         className="verbo-fade-up motion-reduce:animate-none grid gap-4 md:grid-cols-[1fr_1.6fr_1fr]"
         style={{ animationDelay: "60ms" }}
       >
+
         {/* Current Level */}
         <div
           className="relative cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
