@@ -111,7 +111,8 @@ export function validateBulkActivities(raw: unknown[], unitId: string): { valid:
       name,
       type,
     };
-    const category = str(o.category);
+    // Same normalization as the manual form: categories are stored lowercase.
+    const category = str(o.category).toLowerCase();
     if (category) base.category = category;
     if (o.session_phase !== undefined) base.session_phase = o.session_phase === "post" ? "post" : "pre";
     const feedback = str(o.feedback);
