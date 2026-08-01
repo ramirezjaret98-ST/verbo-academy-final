@@ -4,6 +4,8 @@ import { useAuth } from "@/lib/auth";
 import { ASSIGNMENTS, USERS, studentsOfTeacher, userById, type Session, type SessionStatus } from "@/lib/mock-data";
 import { Gauge } from "lucide-react";
 import { AccentModal, AccentModalHeader, AccentModalFooter, AnimatedNumber, Card, GhostButton, HeroStatCard, Pill, PrimaryButton, SectionTitle } from "@/components/verbo/ui";
+import { SkeletonStatCards, useHydrated } from "@/components/verbo/skeletons";
+
 import { rankLabel } from "@/lib/staff-profile-store";
 import alertIconAsset from "@/assets/Alert.svg.asset.json";
 import planIconAsset from "@/assets/plan.svg.asset.json";
