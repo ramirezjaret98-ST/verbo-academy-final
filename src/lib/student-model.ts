@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 // ============================================================================
 // Student commercial model — single source of truth for the Admin > Students UI.
 // Three independent axes: Product · Focus (Enfoque) · Access Plan.
@@ -177,4 +179,22 @@ export function daysUntil(date: Date, from: Date = new Date()): number {
   const a = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
   const b = new Date(from.getFullYear(), from.getMonth(), from.getDate()).getTime();
   return Math.round((a - b) / 86_400_000);
+}
+
+// ----------------------------------------------------------------------------
+// Access plan pill styling — one solid identity color per plan.
+// Core = orange · Advance = navy · Elite/Signature = black with gold detail.
+// ----------------------------------------------------------------------------
+export function accessPlanPillStyle(id?: string | null): CSSProperties {
+  switch (id) {
+    case "Core":
+      return { background: "#f38934", color: "#ffffff" };
+    case "Advance":
+      return { background: "#01304a", color: "#ffffff" };
+    case "Elite":
+    case "Signature":
+      return { background: "#0b0b0c", color: "#d4af37", border: "1px solid #d4af37" };
+    default:
+      return { background: "var(--secondary)", color: "var(--secondary-foreground)" };
+  }
 }
