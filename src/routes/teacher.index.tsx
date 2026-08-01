@@ -72,7 +72,9 @@ type DashboardPanel = "attention" | "plan" | "complete";
 type LocalSession = ExtSession & { _noReport?: boolean };
 
 function TeacherDashboard() {
+  const hydrated = useHydrated();
   const { user } = useAuth();
+
   const { report: reportId } = useSearch({ from: "/teacher/" });
   const navigate = useNavigate();
   const [now, setNow] = useState(Date.now());
