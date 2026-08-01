@@ -1,6 +1,8 @@
 import { useRouter } from "@tanstack/react-router";
 import { ErrorScreen } from "@/components/verbo/ErrorScreen";
 import { useAuth } from "@/lib/auth";
+import { openContactModal } from "@/lib/contact-modal";
+import { ContactVerbotModal } from "@/components/verbo/ContactVerbotModal";
 import type { User } from "@/lib/mock-data";
 
 /** Home route of the currently logged-in role (login when signed out). */
@@ -46,13 +48,17 @@ export function SessionExpiredScreen() {
 /* 3 — Generic failure ------------------------------------------------------ */
 export function GeneralErrorScreen({ onRefresh }: { onRefresh?: () => void }) {
   return (
-    <ErrorScreen
+    <>
+      {/* The root error boundary replaces the root render, so the modal is
+          mounted here as well for this screen. */}
+      <ContactVerbotModal />
+      <ErrorScreen
       title="Something didn't load right"
       body="That's on us, not you. Try refreshing the page — if it keeps happening, let us know."
       action={{ label: "Refresh", onClick: onRefresh ?? (() => window.location.reload()) }}
-      // TODO: wire to the contact modal once it exists.
-      secondaryAction={{ label: "Contact VERBOT" }}
-    />
+        secondaryAction={{ label: "Contact VERBOT", onClick: openContactModal }}
+      />
+    </>
   );
 }
 
@@ -62,8 +68,7 @@ export function FrozenAccountScreen() {
     <ErrorScreen
       title="Your account is temporarily locked"
       body="This happens automatically when we detect unusual activity, to keep your account safe. Reach out and we'll help you sort it out."
-      // TODO: wire to the contact modal once it exists.
-      action={{ label: "Contact VERBOT" }}
+      action={{ label: "Contact VERBOT", onClick: openContactModal }}
     />
   );
 }

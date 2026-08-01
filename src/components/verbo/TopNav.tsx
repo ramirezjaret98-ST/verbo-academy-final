@@ -7,6 +7,7 @@ import { createPortal } from "react-dom";
 import { StaffProfileModal } from "./StaffProfileModal";
 import { useAvatar } from "@/lib/avatar-store";
 import { NotificationsBell } from "./NotificationsBell";
+import { ContactVerbotButton } from "./ContactVerbotModal";
 import type { User } from "@/lib/mock-data";
 
 
@@ -388,6 +389,7 @@ export function TopNav({ items, variant = "light" }: { items: NavEntry[]; varian
               className="flex items-center gap-3 rounded-full px-2 py-1"
               style={{ backgroundColor: "rgba(255,255,255,0.04)" }}
             >
+              <ContactVerbotButton variant="dark" />
               {user && <NotificationsBell variant={variant} />}
               <span
                 aria-hidden="true"
@@ -412,6 +414,7 @@ export function TopNav({ items, variant = "light" }: { items: NavEntry[]; varian
             </div>
           ) : (
             <>
+              <ContactVerbotButton />
               {user && <NotificationsBell variant={variant} />}
               <button
                 type="button"
