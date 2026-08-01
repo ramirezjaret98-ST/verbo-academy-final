@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Breadcrumb,
@@ -30,26 +31,24 @@ export function CurriculumBreadcrumb({ items, className }: { items: CrumbItem[];
         {visible.map((item, i) => {
           const isLast = i === visible.length - 1;
           return (
-            <BreadcrumbItem key={`${item.label}-${i}`}>
-              {isLast ? (
-                <BreadcrumbPage className="font-semibold">{item.label}</BreadcrumbPage>
-              ) : (
-                <>
-                  {item.to ? (
-                    <BreadcrumbLink asChild>
-                      <Link to={item.to} className="cursor-pointer">{item.label}</Link>
-                    </BreadcrumbLink>
-                  ) : (
-                    <BreadcrumbLink asChild>
-                      <button type="button" onClick={item.onClick} className="cursor-pointer">
-                        {item.label}
-                      </button>
-                    </BreadcrumbLink>
-                  )}
-                  <BreadcrumbSeparator />
-                </>
-              )}
-            </BreadcrumbItem>
+            <Fragment key={`${item.label}-${i}`}>
+              <BreadcrumbItem>
+                {isLast ? (
+                  <BreadcrumbPage className="font-semibold">{item.label}</BreadcrumbPage>
+                ) : item.to ? (
+                  <BreadcrumbLink asChild>
+                    <Link to={item.to} className="cursor-pointer">{item.label}</Link>
+                  </BreadcrumbLink>
+                ) : (
+                  <BreadcrumbLink asChild>
+                    <button type="button" onClick={item.onClick} className="cursor-pointer">
+                      {item.label}
+                    </button>
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+              {!isLast && <BreadcrumbSeparator />}
+            </Fragment>
           );
         })}
       </BreadcrumbList>
