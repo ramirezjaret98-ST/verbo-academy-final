@@ -5,6 +5,8 @@ import { hydrateAdminRoles, isUserDeactivated } from "./admin-roles";
 
 interface AuthCtx {
   user: User | null;
+  /** False until the stored session has been restored on the client. */
+  ready: boolean;
   login: (email: string, password: string, remember: boolean) => { ok: true; role: Role } | { ok: false; error: string };
   logout: () => void;
   updateProfile: (
@@ -54,6 +56,7 @@ function safeWrite(store: Storage | undefined, session: StoredSession) {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     hydrateAdminRoles();
@@ -83,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const restored = restore(localStorage) ?? restore(sessionStorage);
     if (restored) setUser(restored);
+    setReady(true);
   }, []);
 
   const login: AuthCtx["login"] = (email, password, remember) => {
@@ -149,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
 
-  return <Ctx.Provider value={{ user, login, logout, updateProfile }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ user, ready, login, logout, updateProfile }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {
