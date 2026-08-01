@@ -84,7 +84,7 @@
 | availability | `{ day: string; slots: string[] }[]` | opcional | |
 | availability_request | `{ note: string; requested_on: string } \| null` | opcional | |
 | payment_frequency | `"weekly" \| "biweekly" \| "monthly"` | opcional | |
-| payment_records | `{ id; date; status: "pending"\|"paid" }[]` | opcional | |
+| payment_records | `{ id; date; status: "pending"\|"paid" }[]` | opcional | `pending → paid` al cerrar ciclo (Generate PDF report). Reversible: en Admin > Teachers > Financial, un registro `paid` ofrece "Revert to Pending" con confirmación (`paid → pending`); no restaura horas ni adjustments ya reseteados |
 | adjustments | `{ id; date; amount: number; reason: string }[]` | opcional | |
 
 **Relaciones:** casi todas las demás entidades del sistema referencian `User.id` vía `student_id`/`teacher_id`/`actorId`/etc. Ver `ASSIGNMENTS` abajo para la relación maestro↔alumno.

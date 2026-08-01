@@ -308,6 +308,10 @@ function BulkScheduler({
   const assign = () => {
     if (!studentId || !teacherId || generated.length === 0 || overLimit) return;
 
+    // Respect the student's contracted session length (same rule the group
+    // bulk scheduler follows); fall back to 60 min when it isn't set.
+    const duration = student?.session_duration ?? 60;
+
     const isBlocking = (st: ExtSessionStatus) =>
       !["completed", "absent", "cancelled", "no_show"].includes(st);
     const conflicts: Date[] = [];
@@ -320,7 +324,7 @@ function BulkScheduler({
           student_id: studentId,
           teacher_id: teacherId,
           date_time: slot.date.toISOString(),
-          duration_minutes: 60,
+          duration_minutes: duration,
           teams_link: teamsLink,
           status: "cancelled",
           attendance_sub_status: "cancelled_holiday",
@@ -340,7 +344,7 @@ function BulkScheduler({
         student_id: studentId,
         teacher_id: teacherId,
         date_time: slot.date.toISOString(),
-        duration_minutes: 60,
+        duration_minutes: duration,
         teams_link: teamsLink,
         status: "scheduled",
         ...(slot.makeup ? { holiday_makeup: true } : {}),
