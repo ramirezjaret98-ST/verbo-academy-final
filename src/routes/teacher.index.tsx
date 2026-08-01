@@ -606,6 +606,8 @@ function TeacherDashboard() {
         </Link>
 
       </section>
+      )}
+
 
 
       {/* Compressed action cards */}
