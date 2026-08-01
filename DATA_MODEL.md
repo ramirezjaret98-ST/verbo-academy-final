@@ -591,6 +591,10 @@ Al reclamarse, crea una **nueva sesión** en `sessions-store` (`rs-${req.id}`/`s
 ### `PaymentLogEntry` (`src/lib/payments-log.ts`)
 `id, entity_type: "individual"|"group", entity_id` (**FK polimórfica** → `User.id` o `Group.id`), `name, company?, amount, paid_at, month` (`YYYY-MM`).
 
+**Estado de pago (derivado, no persistido):** `paymentUrgency(nextPay)` en `src/lib/student-model.ts` deriva `"overdue"` (la fecha ya pasó sin marcarse pagado), `"due_soon"` (≤3 días) o `null`. Se usa igual en las tarjetas de alumno y de grupo; el dato guardado sigue siendo solo `next_payment`.
+
+**Marcar como pagado (unificado):** tanto el flujo individual (`StudentDetailModal.markPaid`) como el de grupo (`markGroupAsPaid`) avanzan `next_payment` con `nextPaymentDateAfterToday(payment_day)` — la siguiente ocurrencia real del día de pago, no "+1 mes".
+
 El propio comentario del archivo aclara: **no es una tabla de pagos paralela**, es un log de eventos "se cobró"; la fuente de verdad de "próximo pago" sigue viviendo en `User.next_payment`/`Group.next_payment`.
 
 ⚠️ **Hallazgo más relevante de esta sección:** `amount` no se guarda por cliente — se deriva de una tabla de tarifas hardcodeada (`PLAN_RATE`: Core=4000, Advance=6000, Elite=9000, Signature=15000 MXN, ×1.6 si es grupo). No existe ningún campo `monthly_amount`/`price` explícito en `User` ni `Group` — un cliente con precio negociado no tiene dónde guardarse.
