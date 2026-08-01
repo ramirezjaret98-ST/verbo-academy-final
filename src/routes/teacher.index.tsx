@@ -1,7 +1,7 @@
 import { createFileRoute, useSearch, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { SESSIONS, ASSIGNMENTS, USERS, studentsOfTeacher, userById, type Session, type SessionStatus } from "@/lib/mock-data";
+import { ASSIGNMENTS, USERS, studentsOfTeacher, userById, type Session, type SessionStatus } from "@/lib/mock-data";
 import { Gauge } from "lucide-react";
 import { AccentModal, AccentModalHeader, AccentModalFooter, AnimatedNumber, Card, GhostButton, HeroStatCard, Pill, PrimaryButton, SectionTitle } from "@/components/verbo/ui";
 import { rankLabel } from "@/lib/staff-profile-store";
