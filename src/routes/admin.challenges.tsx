@@ -264,7 +264,7 @@ function Page() {
       {missing > 0 && (
         <div className="flex items-start gap-2 rounded-lg border border-dashed border-border bg-secondary/30 px-4 py-3 text-xs text-muted-foreground">
           <Info className="mt-0.5 h-4 w-4 shrink-0" />
-          This difficulty has {missing} of {target} challenges missing. Use “Generate Difficulty Skeleton” to create the remaining empty challenges at once — they’re filled in and released gradually, week by week.
+          This difficulty has {missing} of {target} challenges missing. Use “Generate Difficulty Skeleton” to create the remaining empty challenges at once — they become available to students immediately.
         </div>
       )}
 

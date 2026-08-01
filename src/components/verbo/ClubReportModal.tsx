@@ -72,9 +72,7 @@ export function ClubReportModal({
     } else if (event.type === "spotlight") {
       updateSession(event.id, { status: "completed" });
     }
-    // Same delivery stub the Session Report currently uses — real email
-    // hookup lands with the Supabase migration for both flows.
-    toast.success("Club Report submitted. PDF will be shared with attendees once email is enabled.");
+    toast.success("Club Report submitted. It will be saved to the club history and visible to attendees.");
     onSubmitted?.();
     onClose();
   };
@@ -146,7 +144,7 @@ export function ClubReportModal({
 
         <div className="flex items-center justify-between gap-2 border-t border-border bg-secondary/30 px-6 py-4">
           <div className="hidden items-center gap-1.5 text-[11px] text-muted-foreground sm:flex">
-            <Download className="h-3.5 w-3.5" /> A PDF summary is generated on submit.
+            <Download className="h-3.5 w-3.5" /> Saved to the club history for attendees to review.
           </div>
           <div className="flex justify-end gap-2">
             <GhostButton onClick={onClose}>Cancel</GhostButton>
