@@ -558,11 +558,19 @@ export interface StudentAttendanceSummary {
   pct: number;
 }
 
+export const ATTENDANCE_WINDOW_DAYS = 90;
+
 export function studentAttendance(
-  sessions: Array<{ student_id: string; status: string }>,
+  sessions: Array<{ student_id: string; status: string; date_time?: string }>,
   student: { id: string; attendance_percentage?: number },
 ): StudentAttendanceSummary {
-  const rows = sessions.filter((s) => s.student_id === student.id);
+  // Only sessions within the trailing 90-day window count, as the label promises.
+  const cutoff = Date.now() - ATTENDANCE_WINDOW_DAYS * 86_400_000;
+  const rows = sessions.filter((s) => {
+    if (s.student_id !== student.id) return false;
+    const t = s.date_time ? new Date(s.date_time).getTime() : NaN;
+    return Number.isFinite(t) ? t >= cutoff && t <= Date.now() : false;
+  });
   const completed = rows.filter((s) => s.status === "completed").length;
   const absent = rows.filter((s) => s.status === "absent").length;
   const total = completed + absent;

@@ -198,3 +198,21 @@ export function accessPlanPillStyle(id?: string | null): CSSProperties {
       return { background: "var(--secondary)", color: "var(--secondary-foreground)" };
   }
 }
+
+// ----------------------------------------------------------------------------
+// Total challenges completed by a student — single criterion used everywhere
+// (hero, player card and leaderboard): regular + lightning + season completions.
+// ----------------------------------------------------------------------------
+export function totalCompletedChallenges(student: {
+  completed_challenges?: unknown[];
+  lightning_completions?: number;
+  season_completions?: Record<string, number>;
+}): number {
+  const regular = student.completed_challenges?.length ?? 0;
+  const lightning = student.lightning_completions ?? 0;
+  const seasons = Object.values(student.season_completions ?? {}).reduce(
+    (sum, n) => sum + (n ?? 0),
+    0,
+  );
+  return regular + lightning + seasons;
+}

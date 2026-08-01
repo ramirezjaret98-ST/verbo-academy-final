@@ -236,11 +236,19 @@ function Page() {
   });
   const [courses, setCourses] = useState<ProductCourse[]>(() => loadCourses());
   const [completionModal, setCompletionModal] = useState<CourseLevel | null>(null);
+  // Snapshot of whether the currently opened unit was already passed BEFORE the
+  // student opened it — guards the level-completion celebration.
+  const unitWasPassedOnOpenRef = useRef<Record<string, boolean>>({});
 
   useEffect(() => {
     setCourses(loadCourses());
     return subscribeCourses(() => { setCourses(loadCourses()); setRev((r) => r + 1); });
   }, []);
+  useEffect(() => {
+    if (view.kind !== "unit" || !user) return;
+    unitWasPassedOnOpenRef.current[view.unitId] = unitPassed(user.id, view.unitId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view.kind === "unit" ? view.unitId : null, user?.id]);
   useEffect(() => subscribeEvents(() => setRev((r) => r + 1)), []);
   useEffect(() => subscribeTailoredUnits(() => setRev((r) => r + 1)), []);
   useEffect(() => subscribeTailoredUnitCompletion(() => setRev((r) => r + 1)), []);
@@ -272,7 +280,10 @@ function Page() {
   const onUnitCompleted = (levelId: string, unitId: string) => {
     // Record milestone events + potential level completion when unit passes.
     if (!user) return;
-    if (unitPassed(user.id, unitId)) {
+    // Only celebrate the first transition "not completed" -> "completed".
+    // Reopening/closing an already-passed unit must not re-fire confetti.
+    const wasPassed = unitWasPassedOnOpenRef.current[unitId] === true;
+    if (!wasPassed && unitPassed(user.id, unitId)) {
       pushEvent(user.id, { kind: "unit_completed", ref: unitId, label: `Completed Unit ${unitNumberOf(unitId)}` });
       const level = levels.find((l) => l.id === levelId);
       if (level && levelIsComplete(level, user.id)) {
