@@ -14,6 +14,7 @@ import {
   cancelSessionByTeacher, CANCEL_REASON_LABEL, type CancelReason,
 } from "@/lib/strikes-store";
 import { getCoverageNote, setCoverageNote } from "@/lib/coverage-notes-store";
+import { userById } from "@/lib/mock-data";
 
 // Admin is pinged on WhatsApp as part of the confirmation click itself. The
 // message is pre-filled with the session details so the teacher only has to
@@ -65,6 +66,9 @@ export function CantAttendModal({
   // Alert tone reuses the same red the app already paints "absent" /
   // cancellation states with in status-palette.ts (#dc0000).
   const ALERT_BG = "linear-gradient(135deg, #dc0000 0%, #f38934 100%)";
+
+  const teacherName = userById(teacherId)?.name ?? teacherId;
+  const studentName = userById(studentId)?.name ?? studentId;
 
   const confirmCancel = () => {
     if (!reason) return;

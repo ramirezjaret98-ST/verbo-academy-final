@@ -300,8 +300,8 @@ function Page() {
           onDone={({ needsSubstitute }) => {
             setCancelling(null);
             toast.success(needsSubstitute
-              ? "Cancellation submitted. Admin has been notified to find a substitute."
-              : "Cancellation submitted. You can propose a reschedule with Admin.");
+              ? "Cancellation submitted. WhatsApp message ready — send it to notify Admin (substitute needed)."
+              : "Cancellation submitted. WhatsApp message ready — send it to notify Admin.");
           }}
         />
       )}
