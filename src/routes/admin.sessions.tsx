@@ -909,7 +909,7 @@ function UnclaimedRequestsBanner() {
   if (escalated.length === 0) return null;
   return (
     <Card
-      className="card-gradient-crimson verbo-focus-pulse [--verbo-focus-pulse-color:#b52904]"
+      className="card-gradient-crimson verbo-focus-pulse [--verbo-focus-pulse-color:#b52904] !border-transparent"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">

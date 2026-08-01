@@ -144,7 +144,7 @@ function GroupCard({ group, onOpen }: { group: Group; onOpen: () => void }) {
 
       <div className="mt-3 flex flex-wrap gap-1.5">
         {product && <Tag className="bg-primary/10 text-primary">{product.name}</Tag>}
-        {group.access_plan && <Tag className="bg-accent/10 text-accent">{group.access_plan}</Tag>}
+        {group.access_plan && <Tag style={accessPlanPillStyle(group.access_plan)}>{group.access_plan}</Tag>}
         {group.current_roadmap_level && <Tag className="bg-muted text-muted-foreground">{group.current_roadmap_level}</Tag>}
       </div>
 
@@ -172,7 +172,7 @@ function GroupCard({ group, onOpen }: { group: Group; onOpen: () => void }) {
   );
 }
 
-function Tag({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Tag({ children, className = "", style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${className}`}>
       {children}

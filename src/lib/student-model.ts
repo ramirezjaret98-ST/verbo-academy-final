@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 // ============================================================================
 // Student commercial model — single source of truth for the Admin > Students UI.
 // Three independent axes: Product · Focus (Enfoque) · Access Plan.
@@ -183,7 +185,7 @@ export function daysUntil(date: Date, from: Date = new Date()): number {
 // Access plan pill styling — one solid identity color per plan.
 // Core = orange · Advance = navy · Elite/Signature = black with gold detail.
 // ----------------------------------------------------------------------------
-export function accessPlanPillStyle(id?: string | null): React.CSSProperties {
+export function accessPlanPillStyle(id?: string | null): CSSProperties {
   switch (id) {
     case "Core":
       return { background: "#f38934", color: "#ffffff" };

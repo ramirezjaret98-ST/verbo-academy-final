@@ -464,7 +464,7 @@ function StudentCard({ student: s, onOpen }: { student: User; onOpen: () => void
 
       <div className="mt-3 flex flex-wrap gap-1.5">
         {product && <Tag className="bg-primary/10 text-primary">{product.name}</Tag>}
-        {s.access_plan && <Tag className="bg-accent/10 text-accent">{s.access_plan}</Tag>}
+        {s.access_plan && <Tag style={accessPlanPillStyle(s.access_plan)}>{s.access_plan}</Tag>}
         {s.focus && <Tag className="bg-secondary text-secondary-foreground">{s.focus}</Tag>}
         {groupInfo && (
           <Tag className="bg-blue-500/10 text-blue-600">Group: {groupInfo.group.name}</Tag>
@@ -497,9 +497,9 @@ function StudentCard({ student: s, onOpen }: { student: User; onOpen: () => void
   );
 }
 
-function Tag({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+function Tag({ children, className = "", style }: { children: React.ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${className}`}>
+    <span style={style} className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${className}`}>
       {children}
     </span>
   );
@@ -1260,7 +1260,16 @@ function StudentDetailModal({
                 <Info label="CEFR Level" value={student.current_level ?? "—"} />
                 <Info label="Product" value={product?.name ?? "—"} />
                 <Info label="Focus" value={student.focus ?? "—"} />
-                <Info label="Access Plan" value={student.access_plan ?? "—"} />
+                <div>
+                  <div className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">Access Plan</div>
+                  <div className="mt-0.5">
+                    {student.access_plan ? (
+                      <Tag style={accessPlanPillStyle(student.access_plan)}>{student.access_plan}</Tag>
+                    ) : (
+                      <span className="text-sm text-foreground">—</span>
+                    )}
+                  </div>
+                </div>
                 <Info label="Current roadmap level" value={student.current_roadmap_level ?? "—"} />
                 {(() => {
                   const c = effectiveSessionCounts(student.id, { hired: student.hired_sessions, remaining: student.remaining_sessions });
