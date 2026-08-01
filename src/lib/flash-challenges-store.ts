@@ -468,6 +468,31 @@ export function upsertSeason(s: FlashSeason) {
   persistSeasons(next);
 }
 
+/** Only one Season may be active at a time (students would otherwise see two
+ *  banners). Returns the other active Season that blocks activating `id`. */
+export function conflictingActiveSeason(id: string, list: FlashSeason[] = loadSeasons()): FlashSeason | null {
+  return list.find((s) => s.active && s.id !== id) ?? null;
+}
+
 export function deleteSeason(id: string) {
   persistSeasons(loadSeasons().filter((s) => s.id !== id));
+}
+
+/* -------------------- Delete with sync cleanup -------------------- */
+
+/** Removes a challenge and, when it belonged to a synced group that is left
+ *  with a single copy (or none), clears `synced_group_id` from the remaining
+ *  copies so they stop showing the "Synced" mark. */
+export function removeChallengeAndUnsync(list: FlashChallenge[], id: string): FlashChallenge[] {
+  const target = list.find((c) => c.id === id);
+  const next = list.filter((c) => c.id !== id);
+  const gid = target?.synced_group_id;
+  if (!gid) return next;
+  const siblings = next.filter((c) => c.synced_group_id === gid);
+  if (siblings.length > 1) return next;
+  return next.map((c) => {
+    if (c.synced_group_id !== gid) return c;
+    const { synced_group_id: _drop, ...rest } = c;
+    return rest as FlashChallenge;
+  });
 }

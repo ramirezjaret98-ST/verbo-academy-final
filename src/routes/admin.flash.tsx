@@ -37,6 +37,8 @@ import {
   loadSeasons,
   subscribeSeasons,
   upsertSeason,
+  conflictingActiveSeason,
+  removeChallengeAndUnsync,
   deleteSeason,
   seasonGradientCss,
 } from "@/lib/flash-challenges-store";
@@ -142,7 +144,7 @@ function MysteryBoxTab() {
   const del = (id: string) => {
     if (!confirm("Delete this challenge?")) return;
     setList((prev) => {
-      const next = prev.filter((c) => c.id !== id);
+      const next = removeChallengeAndUnsync(prev, id);
       persistFlashChallenges(next);
       return next;
     });
@@ -664,7 +666,7 @@ function LightningTab() {
   const del = (id: string) => {
     if (!confirm("Delete this challenge?")) return;
     setList((prev) => {
-      const next = prev.filter((c) => c.id !== id);
+      const next = removeChallengeAndUnsync(prev, id);
       persistFlashChallenges(next);
       return next;
     });
@@ -1025,7 +1027,7 @@ function SeasonChallengesModal({ season, onClose }: { season: FlashSeason; onClo
   const del = (id: string) => {
     if (!confirm("Delete this challenge?")) return;
     setList((prev) => {
-      const next = prev.filter((c) => c.id !== id);
+      const next = removeChallengeAndUnsync(prev, id);
       persistFlashChallenges(next);
       return next;
     });
@@ -1171,6 +1173,7 @@ function SeasonModal({
   const [fontPreset, setFontPreset] = useState<FontPreset>(editing?.font_preset ?? "Festive");
   const [customFont, setCustomFont] = useState(editing?.custom_font_name ?? "");
   const [active, setActive] = useState<boolean>(editing?.active ?? false);
+  const [activationError, setActivationError] = useState<string | null>(null);
   const [fillMode, setFillMode] = useState<SeasonFillMode>(editing?.fill_mode ?? "solid");
   const [stops, setStops] = useState<GradientStop[]>(
     editing?.gradient_stops && editing.gradient_stops.length >= 2
@@ -1204,6 +1207,14 @@ function SeasonModal({
   const handleSave = () => {
     const name = displayName.trim();
     if (!name) return;
+    const conflict = active ? conflictingActiveSeason(editing?.id ?? "") : null;
+    if (conflict) {
+      setActivationError(
+        `"${conflict.display_name}" is still active. Only one Season can run at a time — deactivate it first, then activate this one.`,
+      );
+      return;
+    }
+    setActivationError(null);
     const id = editing?.id ?? `season-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}-${Date.now().toString(36)}`;
     onSave({
       id,
@@ -1405,6 +1416,12 @@ function SeasonModal({
               </span>
             </span>
           </label>
+
+          {activationError && (
+            <p className="rounded-lg border border-[#b52904]/30 bg-[#b52904]/10 px-3 py-2 text-[11px] font-medium text-[#b52904]">
+              {activationError}
+            </p>
+          )}
       </div>
       <AccentModalFooter accent="#5fca16">
         <GhostButton onClick={onClose}>Cancel</GhostButton>
