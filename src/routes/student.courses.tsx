@@ -1777,33 +1777,14 @@ function evaluate(activity: Activity, value: string): boolean {
 /* -------------------------------------------------------------------------- */
 /* Level completion modal (confetti + certificate download)                    */
 /* -------------------------------------------------------------------------- */
-function LevelCompletionModal({ level, studentName, onClose }: { level: CourseLevel; studentName: string; onClose: () => void }) {
+function LevelCompletionModal({ level, studentName, product, onClose }: { level: CourseLevel; studentName: string; product: string; onClose: () => void }) {
+  const [showShare, setShowShare] = useState(false);
+
   const downloadCertificate = () => {
-    const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#01304a"/>
-      <stop offset="100%" stop-color="#024366"/>
-    </linearGradient>
-  </defs>
-  <rect width="1200" height="800" fill="url(#bg)"/>
-  <rect x="60" y="60" width="1080" height="680" fill="none" stroke="#f38934" stroke-width="4"/>
-  <text x="600" y="220" text-anchor="middle" font-family="Georgia, serif" font-size="42" fill="#ffffff" letter-spacing="6">CERTIFICATE OF COMPLETION</text>
-  <text x="600" y="330" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#f8fafc">This certifies that</text>
-  <text x="600" y="410" text-anchor="middle" font-family="Georgia, serif" font-size="56" fill="#ffffff" font-weight="bold">${studentName}</text>
-  <text x="600" y="480" text-anchor="middle" font-family="Georgia, serif" font-size="26" fill="#f8fafc">has successfully completed the level</text>
-  <text x="600" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="40" fill="#f38934">${level.name}</text>
-  <text x="600" y="680" text-anchor="middle" font-family="Georgia, serif" font-size="18" fill="#cbd5e1">${new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</text>
-</svg>`;
-    const blob = new Blob([svg], { type: "image/svg+xml" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `certificate-${level.name.replace(/\s+/g, "-").toLowerCase()}.svg`;
-    a.click();
-    URL.revokeObjectURL(url);
+    generateLevelCertificate({ studentName, levelName: level.name, product });
+    setShowShare(true);
   };
+
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
