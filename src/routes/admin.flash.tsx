@@ -1279,7 +1279,7 @@ function SeasonModal({
               value={watermarkImageUrl}
               onChange={(e) => setWatermarkImageUrl(e.target.value)}
               className={inputCls}
-              placeholder="https://... (imagen con fondo transparente recomendada, ej. PNG)"
+              placeholder="https://... (transparent background recommended, e.g. PNG)"
             />
             <div className="mt-1 text-[11px] text-muted-foreground">
               Reemplaza el watermark de texto del banner. Se muestra del lado derecho, detrás de los
@@ -1516,7 +1516,7 @@ function BannerThemeCard({
             value={watermarkImageUrl}
             onChange={(e) => setWatermarkImageUrl(e.target.value)}
             className={inputCls}
-            placeholder="https://... (imagen con fondo transparente recomendada, ej. PNG)"
+            placeholder="https://... (transparent background recommended, e.g. PNG)"
           />
           <div className="mt-1 text-[11px] text-muted-foreground">
             Reemplaza el watermark de texto del banner. Se muestra del lado derecho, con opacidad

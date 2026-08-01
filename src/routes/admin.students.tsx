@@ -1010,7 +1010,7 @@ function StudentFormModal({
                       <option value="">Select a teacher (optional)</option>
                       {teachersForProductSorted(teachers, f.product || null).map((t) => <option key={t.id} value={t.id}>{t.name} · {teacherTier(t).name}</option>)}
                     </select>
-                    {f.product && <p className="mt-1 text-[10.5px] text-muted-foreground">Solo se muestran teachers calificados para {getProduct(f.product)?.name}.</p>}
+                    {f.product && <p className="mt-1 text-[10.5px] text-muted-foreground">Only showing teachers qualified for {getProduct(f.product)?.name}.</p>}
                   </Field>
                 </div>
               </>

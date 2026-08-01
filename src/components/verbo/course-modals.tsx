@@ -306,7 +306,7 @@ export function ActivityModal({ unitId, unitTitle, onClose, accent }: { unitId: 
           {(type === "read_select" || type === "listen_select") && (
             <div className="space-y-4">
               {type === "listen_select" ? (
-                <Field label="Audio file (mock)">
+                <Field label="Audio file">
                   <label className="flex h-24 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-secondary/40 text-sm text-muted-foreground transition-colors hover:bg-secondary">
                     <Headphones className="h-4 w-4" />
                     {audioName || "Click to upload audio"}
@@ -477,7 +477,7 @@ export function BulkUploadModal({ unitId, unitTitle, onClose, onImported, zClass
         setErrors(errs);
       } catch {
         setParsed([]);
-        setErrors(["El archivo no es JSON válido, debe ser un arreglo de actividades."]);
+        setErrors(["The file is not valid JSON — it must be an array of activities."]);
       }
     };
     reader.readAsText(file);
