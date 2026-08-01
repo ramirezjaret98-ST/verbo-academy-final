@@ -81,9 +81,9 @@ function TeacherDashboard() {
   const [sessions, setSessions] = useState<LocalSession[]>(() =>
     typeof window === "undefined" ? [] : loadSessions().map((s) => ({ ...s })),
   );
-  const [evaluating, setEvaluating] = useState<Session | null>(null);
-  const [editing, setEditing] = useState<{ session: Session; perf: PerformanceRating; subskills: Record<string, number> } | null>(null);
-  const [planning, setPlanning] = useState<Session | null>(null);
+  const [evaluating, setEvaluating] = useState<ExtSession | null>(null);
+  const [editing, setEditing] = useState<{ session: ExtSession; perf: PerformanceRating; subskills: Record<string, number> } | null>(null);
+  const [planning, setPlanning] = useState<ExtSession | null>(null);
   
   const [plans, setPlans] = useState<Record<string, LessonPlan>>({});
   // Live-synced canonical sessions (used by summary cards, Needs Your
