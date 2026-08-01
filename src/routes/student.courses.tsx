@@ -374,7 +374,7 @@ function Page() {
         }}
       />
       {completionModal && (
-        <LevelCompletionModal level={completionModal} studentName={user?.name ?? "Student"} onClose={() => setCompletionModal(null)} />
+        <LevelCompletionModal level={completionModal} studentName={user?.name ?? "Student"} product={user?.product ?? ""} onClose={() => setCompletionModal(null)} />
       )}
     </>
   );
