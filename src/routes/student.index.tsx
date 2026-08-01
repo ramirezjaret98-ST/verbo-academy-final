@@ -248,7 +248,9 @@ function StudentDashboard() {
   // Real macro-skill scoring, scoped to this student (single source of
   // truth shared with Student > Performance and Teacher > Mis Alumnos).
   const macros = useComputedMacros(user?.id ?? "");
+  const hydrated = useHydrated();
   const [classDetail, setClassDetail] = useState<ExtSession | null>(null);
+
   const [clubCardModal, setClubCardModal] = useState<Club | null>(null);
 
   const [plansRev, setPlansRev] = useState(0);
