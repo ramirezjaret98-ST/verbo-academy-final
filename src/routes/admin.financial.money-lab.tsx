@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ChevronLeft, ChevronRight, CreditCard, ExternalLink,
   Wallet, CircleDollarSign, Clock, TrendingUp, type LucideIcon,
+  AlertTriangle,
 } from "lucide-react";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell,
@@ -197,6 +198,10 @@ function MoneyLabPage() {
 
   const expensesTotal = expenseRows.reduce((s, r) => s + r.total, 0);
   const net = receivedIncome - expensesTotal;
+  // Standard teacher pay is only tracked live for the current month, so past
+  // and future months can look artificially profitable. Flag it next to Net.
+  const stdPayTotal = expenseRows.reduce((s, r) => s + r.stdPay, 0);
+  const missingStdPay = !isCurrentMonth && stdPayTotal === 0;
 
   // -------------------- Trend (last 6 months) --------------------
   const trend = useMemo(() => {
@@ -292,8 +297,8 @@ function MoneyLabPage() {
           { label: "Received Income", value: money(receivedIncome), sub: `${incomeRows.filter((r) => r.status === "Paid").length} paid`, icon: CircleDollarSign, color: "#5fca16" },
           { label: "Outstanding", value: money(outstanding), sub: `${incomeRows.filter((r) => r.status !== "Paid").length} unpaid`, icon: Clock, color: "#b45309" },
           { label: "Expenses", value: money(expensesTotal), sub: `${expenseRows.length} teachers`, icon: CreditCard, color: "#d97706" },
-          { label: "Net", value: money(net), sub: net >= 0 ? "Profit" : "Loss", icon: TrendingUp, color: net >= 0 ? "#5fca16" : "#b52904" },
-        ] as { label: string; value: string; sub: string; icon: LucideIcon; color: string }[]).map((m) => {
+          { label: "Net", value: money(net), sub: net >= 0 ? "Profit" : "Loss", icon: TrendingUp, color: net >= 0 ? "#5fca16" : "#b52904", note: missingStdPay ? "Standard teacher pay is $0 for this month — only manual adjustments are counted, so this Net is incomplete." : undefined },
+        ] as { label: string; value: string; sub: string; icon: LucideIcon; color: string; note?: string }[]).map((m) => {
           const Icon = m.icon;
           return (
             <HeroStatCard
@@ -308,6 +313,11 @@ function MoneyLabPage() {
                 <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{m.label}</div>
                 <div className="mt-2 text-3xl font-bold leading-none text-foreground">{m.value}</div>
                 <div className="mt-2 text-[11px] text-muted-foreground">{m.sub}</div>
+                {m.note && (
+                  <div className="mt-2 flex items-start gap-1.5 rounded-md bg-[#b45309]/10 px-2 py-1.5 text-[10px] font-medium leading-snug text-[#b45309]">
+                    <AlertTriangle className="mt-px h-3 w-3 shrink-0" /> {m.note}
+                  </div>
+                )}
               </div>
             </HeroStatCard>
           );
