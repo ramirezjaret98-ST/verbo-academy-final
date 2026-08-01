@@ -400,7 +400,11 @@ function Overview() {
 
       {/* 3 — Summary cards */}
 
+      {!hydrated ? (
+        <SkeletonStatCards count={5} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5" />
+      ) : (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+
         {([
           { label: "Students", value: students.length, icon: Users2, color: "#3ebbad" },
           { label: "Teachers", value: teachers.length, icon: GraduationCap, color: "#a34ac0" },
